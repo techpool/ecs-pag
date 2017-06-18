@@ -1,0 +1,20 @@
+{
+    "family": "$APP_NAME",
+    "networkMode": "bridge",
+    "containerDefinitions": [
+        {
+            "name": "$APP_NAME",
+            "image": "$DOCKER_REPO/$APP_NAME:$APP_VERSION",
+            "cpu": 100,
+            "memory": 128,
+            "portMappings": [
+                {
+                    "hostPort": 0,
+                    "containerPort": 80,
+                    "protocol": "tcp"
+                }
+            ],
+            "essential": true
+        }
+    ]
+}
