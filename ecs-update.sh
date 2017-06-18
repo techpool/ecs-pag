@@ -1,4 +1,6 @@
 STAGE=$1
+APP_NAME="pag"
+
 if [ "$STAGE" == "" ]
 then
   STAGE="devo"
@@ -26,4 +28,4 @@ else
   cd .. && git clone https://github.com/Pratilipi/ecs.git && cd $WORK_DIR
 fi
 
-bash ../ecs/app.sh update $STAGE pag 0.0.1
+bash ../ecs/app.sh update $STAGE $APP_NAME 0.0.1
