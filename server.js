@@ -25,7 +25,7 @@ const latencyMetric = new Metric('int64', 'Latency');
 
 const app = express();
 
-//for initializing log object
+// for initializing log object
 app.use((request, response, next) => {
   var log = request.log = new Logging( request );
   request.startTimestamp = Date.now();
@@ -49,100 +49,82 @@ app.get("/health", function(request, response, next){
   response.send('Healthy');
 });
 
+//auth middleware
+app.get(['/*'], (request, response, next) => {
 
-var getRoutesObject = extractGetRoutes();
-
-app.get(getRoutesObject.getRoutesArrayWithAuth, (request, response, next) => {
-
-  response.header('Content-Type','application/json');
-  var authOptions = {
-    uri: 'http://' + process.env.API_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT, // TODO: test it as well that api is getting subs here
-    agent : agent,
-    headers: {
-    // because auth service requires it
-    'AccessToken': request.headers.accesstoken 
-    },
-    resolveWithFullResponse: true
-  };
-
-  // first send request to auth service with httpPromise and accessToken Header
-  // on its reject forward same response to client with 403
-  var authPromise = httpPromise(authOptions)
-  .then(authResponse => {
-    res.locals['user-id'] = authResponse.headers['user-id'];
-    next();
-  })
-  .catch((err) => {
-    response.status(err.statusCode).send(err.error);
-    request.log.error(JSON.stringify(err.error));
-    request.log.submit(err.statusCode || 500, err.error.length);
-    latencyMetric.write(Date.now() - request.startTimestamp);
-  });
-
-});
-
-app.get(getRoutesObject.getRoutesArray, (request, response) => {
-
-  var genericReqOptions = {
-    uri: 'http://' + process.env.API_END_POINT + request.url,
-    agent : agent,
-    resolveWithFullResponse: true
-  };
-
-  
-  //on its then ie resolve, send req to ILB endpoint with actual request
-  //on its then send same response to client
-  //on its catch send same error to client  
-  
-  //if auth is req, pass user Id
-  if(getRoutesObject.getRoutesArrayWithAuth.includes(request.path)) {
-    genericReqOptions.headers = {
-      'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
+  if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
+    response.header('Content-Type','application/json');
+    var authOptions = {
+      uri: 'http://' + process.env.API_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT, // TODO: test it as well that api is getting subs here
+      agent : agent,
+      headers: {
+      // because auth service requires it
+      'AccessToken': request.headers.accesstoken 
+      },
+      resolveWithFullResponse: true
     };
+
+    // first send request to auth service with httpPromise and accessToken Header
+    // on its reject forward same response to client with 403
+    var authPromise = httpPromise(authOptions)
+    .then(authResponse => {
+      response.locals['user-id'] = authResponse.headers['user-id'];
+      next();
+    })
+    .catch((err) => {
+      response.status(err.statusCode).send(err.error);
+      request.log.error(JSON.stringify(err.error));
+      request.log.submit(err.statusCode || 500, err.error.length);
+      latencyMetric.write(Date.now() - request.startTimestamp);
+    });
+  } else {
+    next();
   }
 
 
-  var servicePromise = httpPromise(genericReqOptions);
+});
 
-  servicePromise
-  .then((serviceResponse) => {
-    response.status(serviceResponse.statusCode).send(serviceResponse.body);
-    return serviceResponse;
-  })
-  .then((serviceResponse) => {
-    request.log.submit( serviceResponse.statusCode, JSON.stringify(serviceResponse.body).length);
-    latencyMetric.write(Date.now() - request.startTimestamp);
-  })
-  .catch((err) => {
-    response.status(err.statusCode).send(err.error);
-    request.log.error(JSON.stringify(err.error));
-    request.log.submit(err.statusCode || 500, err.error.length);
-    latencyMetric.write(Date.now() - request.startTimestamp);
-  })
-  ;
+app.get(['/*'], (request, response, next) => {
+  if(routeConfig[request.path] && routeConfig[request.path].GET) {
+    var genericReqOptions = {
+      uri: 'http://' + process.env.API_END_POINT + routeConfig[request.path].GET.path,
+      agent : agent,
+      resolveWithFullResponse: true
+    };
 
+    //on its then ie resolve, send req to ILB endpoint with actual request
+    //on its then send same response to client
+    //on its catch send same error to client  
+    
+    //if auth is req, pass user Id
+    if(routeConfig[request.path].GET.auth) {
+      genericReqOptions.headers = {
+        'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
+      };
+    }
+
+
+    var servicePromise = httpPromise(genericReqOptions);
+
+    servicePromise
+    .then((serviceResponse) => {
+      response.status(serviceResponse.statusCode).send(serviceResponse.body);
+      return serviceResponse;
+    })
+    .then((serviceResponse) => {
+      request.log.submit( serviceResponse.statusCode, JSON.stringify(serviceResponse.body).length);
+      latencyMetric.write(Date.now() - request.startTimestamp);
+    })
+    .catch((err) => {
+      response.status(err.statusCode).send(err.error);
+      request.log.error(JSON.stringify(err.error));
+      request.log.submit(err.statusCode || 500, err.error.length);
+      latencyMetric.write(Date.now() - request.startTimestamp);
+    })
+    ;
+  } else {
+    next();
+  }
 });
 
 app.listen(80);
-
-
-//helper function
-function extractGetRoutes() {
-  var keys = Object.keys(routeConfig);
-  var getRoutesArray = [];
-  var getRoutesArrayWithAuth = [];
-
-  for(var i = 0; i < keys.length; i++) {
-    var key = keys[i];
-    if(routeConfig[key].GET) {
-      getRoutesArray.push(routeConfig[key].GET.path);
-      if(routeConfig[key].GET.auth) {
-        getRoutesArrayWithAuth.push(routeConfig[key].GET.path);
-      }
-    }
-  }
-  return {
-    getRoutesArray: getRoutesArray,
-    getRoutesArrayWithAuth: getRoutesArrayWithAuth
-  };
-}
