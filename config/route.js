@@ -15,9 +15,13 @@ module.exports = {
   '/search/search':{
     'GET':{'path':'/search/search','auth':true}
   },
+  
+  '/search/trending_search':{
+    'GET':{'path':'/search/trending_search','auth':true}
+  },
 
-  '/recommendation':{
-    'GET':{'path':'/recommendation','auth':true}
+  '/recommendation/v1.0.0/pratilipis':{
+    'GET':{'path':'/recommendation/v1.0.0/pratilipis','auth':true}
   }
 
 }
