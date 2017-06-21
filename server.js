@@ -52,6 +52,8 @@ app.get("/health", function(request, response, next){
 //auth middleware
 app.get(['/*'], (request, response, next) => {
 
+  request.log.info('Sending authentication request');
+
   if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
     response.header('Content-Type','application/json');
     var authOptions = {
@@ -86,11 +88,16 @@ app.get(['/*'], (request, response, next) => {
 
 app.get(['/*'], (request, response, next) => {
   if(routeConfig[request.path] && routeConfig[request.path].GET) {
+    var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : ''; 
+    var uriNew = routeConfig[request.path].GET.path + urlSuffix;
+
     var genericReqOptions = {
-      uri: 'http://' + process.env.API_END_POINT + routeConfig[request.path].GET.path,
+      uri: 'http://' + process.env.API_END_POINT + uriNew,
       agent : agent,
       resolveWithFullResponse: true
     };
+
+    request.log.info('Sending request on ' + genericReqOptions.uri);
 
     //on its then ie resolve, send req to ILB endpoint with actual request
     //on its then send same response to client
