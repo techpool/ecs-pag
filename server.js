@@ -52,9 +52,8 @@ app.get("/health", function(request, response, next){
 //auth middleware
 app.get(['/*'], (request, response, next) => {
 
-  request.log.info('Sending authentication request');
-
   if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
+    request.log.info('Sending authentication request');
     response.header('Content-Type','application/json');
     var authOptions = {
       uri: 'http://' + process.env.API_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT, // TODO: test it as well that api is getting subs here
@@ -71,6 +70,7 @@ app.get(['/*'], (request, response, next) => {
     var authPromise = httpPromise(authOptions)
     .then(authResponse => {
       response.locals['user-id'] = authResponse.headers['user-id'];
+      request.log.info('Authenticated');
       next();
     })
     .catch((err) => {
