@@ -12,8 +12,8 @@ module.exports = {
     'GET':{'path':'/image/author/cover','auth':false}
   },
 
-  '/search':{
-    'GET':{'path':'/search','auth':true}
+  '/search/search':{
+    'GET':{'path':'/search/search','auth':true}
   }
 
 }
