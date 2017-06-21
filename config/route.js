@@ -14,7 +14,7 @@ module.exports = {
 
   '/search/search':{
     'GET':{'path':'/search/search','auth':true}
-  }
+  },
 
   '/recommendation':{
     'GET':{'path':'/recommendation','auth':true}
