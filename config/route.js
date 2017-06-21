@@ -1,6 +1,6 @@
-{
+module.exports = {
 
-  '/pratilipi/cover':{
+  '/pratilipi/cover': {
     'GET':{'path':'/image/pratilipi/cover','auth':false}
   },
 
