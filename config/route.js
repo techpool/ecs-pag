@@ -22,6 +22,10 @@ module.exports = {
 
   '/recommendation/v1.0.0/pratilipis':{
     'GET':{'path':'/recommendation/v1.0.0/pratilipis','auth':true}
+  },
+
+  '/cont-dep':{
+    'GET':{'path':'/cont-dep','auth':false}
   }
 
 }
