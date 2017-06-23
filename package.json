@@ -9,7 +9,8 @@
   "dependencies": {
     "@google-cloud/trace-agent": "1.0.3",
     "express": "4.15.2",
-    "request-promise": "4.2.0"
+    "request-promise": "4.2.0",
+    "lodash": "4.17.4"
   },
   "author": "Radhika",
   "license": "ISC"
