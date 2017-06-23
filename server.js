@@ -108,7 +108,7 @@ app.get(['/*'], (request, response, next) => {
   //on its catch send same error to client  
     
   //if auth is req, pass user Id
-  if(routeConfig[request.path].GET.auth) {
+  if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
     genericReqOptions.headers = {
       'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
     };
