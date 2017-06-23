@@ -1,4 +1,3 @@
-// require( '@google-cloud/trace-agent' ).start();
 var http = require('http');
 var httpPromise = require('request-promise');
 var Promise = require('bluebird');
@@ -88,52 +87,52 @@ app.get(['/*'], (request, response, next) => {
 });
 
 app.get(['/*'], (request, response, next) => {
+
+  var uriNew = request.url;
+  
   if(routeConfig[request.path] && routeConfig[request.path].GET) {
     var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : ''; 
     var uriNew = routeConfig[request.path].GET.path + urlSuffix;
-
-    var genericReqOptions = {
-      uri: 'http://' + process.env.API_END_POINT + uriNew,
-      agent : agent,
-      resolveWithFullResponse: true
-    };
-
-    request.log.info('Sending request on ' + genericReqOptions.uri);
-
-    //on its then ie resolve, send req to ILB endpoint with actual request
-    //on its then send same response to client
-    //on its catch send same error to client  
-    
-    //if auth is req, pass user Id
-    if(routeConfig[request.path].GET.auth) {
-      genericReqOptions.headers = {
-        'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
-      };
-    }
-
-
-    var servicePromise = httpPromise(genericReqOptions);
-
-    servicePromise
-    .then((serviceResponse) => {
-      addRespectiveServiceHeaders(response, serviceResponse.headers);
-      response.status(serviceResponse.statusCode).send(serviceResponse.body);
-      return serviceResponse;
-    })
-    .then((serviceResponse) => {
-      request.log.submit( serviceResponse.statusCode, JSON.stringify(serviceResponse.body).length);
-      latencyMetric.write(Date.now() - request.startTimestamp);
-    })
-    .catch((err) => {
-      response.status(err.statusCode).send(err.error);
-      request.log.error(JSON.stringify(err.error));
-      request.log.submit(err.statusCode || 500, err.error.length);
-      latencyMetric.write(Date.now() - request.startTimestamp);
-    })
-    ;
-  } else {
-    next();
   }
+  
+  var genericReqOptions = {
+    uri: 'http://' + process.env.API_END_POINT + uriNew,
+    agent : agent,
+    resolveWithFullResponse: true
+  };
+
+  request.log.info('Sending request on ' + genericReqOptions.uri);
+
+  //on its then ie resolve, send req to ILB endpoint with actual request
+  //on its then send same response to client
+  //on its catch send same error to client  
+    
+  //if auth is req, pass user Id
+  if(routeConfig[request.path].GET.auth) {
+    genericReqOptions.headers = {
+      'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
+    };
+  }
+
+  var servicePromise = httpPromise(genericReqOptions);
+  servicePromise
+  .then((serviceResponse) => {
+    addRespectiveServiceHeaders(response, serviceResponse.headers);
+    response.status(serviceResponse.statusCode).send(serviceResponse.body);
+    return serviceResponse;
+  })
+  .then((serviceResponse) => {
+    request.log.submit( serviceResponse.statusCode, JSON.stringify(serviceResponse.body).length);
+    latencyMetric.write(Date.now() - request.startTimestamp);
+  })
+  .catch((err) => {
+    response.status(err.statusCode).send(err.error);
+    request.log.error(JSON.stringify(err.error));
+    request.log.submit(err.statusCode || 500, err.error.length);
+    latencyMetric.write(Date.now() - request.startTimestamp);
+  })
+  ;
+  
 });
 
 app.listen(80);
