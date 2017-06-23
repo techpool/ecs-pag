@@ -29,6 +29,10 @@ module.exports = {
     'GET':{'path':'/cont-dep/pag','auth':false}
   },
 
+  '/cont-dep/pwa':{
+    'GET':{'path':'/cont-dep/pwa','auth':false}
+  },
+
   '/cont-dep/auth':{
     'GET':{'path':'/cont-dep/auth','auth':false}
   },
