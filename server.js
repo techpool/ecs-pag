@@ -1,5 +1,6 @@
 var http = require('http');
 var httpPromise = require('request-promise');
+var requestModule = require('request');
 var Promise = require('bluebird');
 var express = require('express');
 var _ = require('lodash');
@@ -51,8 +52,15 @@ app.get("/health", function(request, response, next){
 
 //auth middleware
 app.get(['/*'], (request, response, next) => {
-
-  if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
+  
+  if(routeConfig[request.path] && routeConfig[request.path].GET.bypassPag) {
+    
+    var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : ''; 
+    var uriNew = routeConfig[request.path].GET.path + urlSuffix;
+    var url = 'http://' + process.env.API_END_POINT + uriNew;
+    request.pipe(requestModule(url)).pipe(response);
+        
+  } else if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
     request.log.info('Sending authentication request');
     response.header('Content-Type','application/json');
     var authOptions = {

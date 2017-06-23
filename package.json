@@ -10,7 +10,8 @@
     "@google-cloud/trace-agent": "1.0.3",
     "express": "4.15.2",
     "request-promise": "4.2.0",
-    "lodash": "4.17.4"
+    "lodash": "4.17.4",
+    "request": "2.81.0"
   },
   "author": "Radhika",
   "license": "ISC"
