@@ -3,6 +3,7 @@ var http = require('http');
 var httpPromise = require('request-promise');
 var Promise = require('bluebird');
 var express = require('express');
+var _ = require('lodash');
 
 var agent = new http.Agent({
   keepAlive : true
@@ -115,6 +116,7 @@ app.get(['/*'], (request, response, next) => {
 
     servicePromise
     .then((serviceResponse) => {
+      addRespectiveServiceHeaders(response, serviceResponse.headers);
       response.status(serviceResponse.statusCode).send(serviceResponse.body);
       return serviceResponse;
     })
@@ -135,3 +137,9 @@ app.get(['/*'], (request, response, next) => {
 });
 
 app.listen(80);
+
+function addRespectiveServiceHeaders(response, serviceReturnedHeaders) {
+  var pagHeaders = ['Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers'];
+  var serviceHeaders = _.omit(serviceReturnedHeaders, pagHeaders);
+  response.set(serviceHeaders);
+}
