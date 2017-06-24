@@ -6,6 +6,7 @@
             "name": "$APP_NAME",
             "image": "$DOCKER_REPO/$APP_NAME:$APP_VERSION",
             "cpu": 64,
+            "memoryReservation": 128,
             "memory": 256,
             "portMappings": [
                 {
@@ -18,7 +19,7 @@
             "logConfiguration": {
                 "logDriver": "awslogs",
                 "options": {
-                    "awslogs-group": "$STAGE-pag",
+                    "awslogs-group": "$STAGE-$APP_NAME",
                     "awslogs-region": "ap-southeast-1"
                 }
             }
