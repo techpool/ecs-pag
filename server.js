@@ -52,15 +52,19 @@ app.get("/health", function(request, response, next){
 
 //auth middleware
 app.get(['/*'], (request, response, next) => {
-  
-  if(routeConfig[request.path] && routeConfig[request.path].GET.bypassPag) {
+
+  var api = request.path.startsWith('/api/')
+    ? request.path.substr(4)
+    : request.path;
+
+  if(routeConfig[api] && routeConfig[api].GET.bypassPag) {
     
     var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : ''; 
-    var uriNew = routeConfig[request.path].GET.path + urlSuffix;
+    var uriNew = routeConfig[api].GET.path + urlSuffix;
     var url = 'http://' + process.env.API_END_POINT + uriNew;
     request.pipe(requestModule(url)).pipe(response);
         
-  } else if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
+  } else if(routeConfig[api] && routeConfig[api].GET.auth) {
     request.log.info('Sending authentication request');
     response.header('Content-Type','application/json');
     var authOptions = {
@@ -96,51 +100,54 @@ app.get(['/*'], (request, response, next) => {
 
 app.get(['/*'], (request, response, next) => {
 
-  var uriNew = request.url;
+  var api = request.path.startsWith('/api/')
+    ? request.path.substr(4)
+    : request.path;
   
-  if(routeConfig[request.path] && routeConfig[request.path].GET) {
+  if(routeConfig[api] && routeConfig[api].GET) {
     var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : ''; 
-    var uriNew = routeConfig[request.path].GET.path + urlSuffix;
-  }
-  
-  var genericReqOptions = {
-    uri: 'http://' + process.env.API_END_POINT + uriNew,
-    agent : agent,
-    resolveWithFullResponse: true
-  };
-
-  request.log.info('Sending request on ' + genericReqOptions.uri);
-
-  //on its then ie resolve, send req to ILB endpoint with actual request
-  //on its then send same response to client
-  //on its catch send same error to client  
-    
-  //if auth is req, pass user Id
-  if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
-    genericReqOptions.headers = {
-      'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
+    var uriNew = routeConfig[api].GET.path + urlSuffix;
+    var genericReqOptions = {
+      uri: 'http://' + process.env.API_END_POINT + uriNew,
+      agent : agent,
+      resolveWithFullResponse: true
     };
+
+    request.log.info('Sending request on ' + genericReqOptions.uri);
+
+    //on its then ie resolve, send req to ILB endpoint with actual request
+    //on its then send same response to client
+    //on its catch send same error to client  
+    
+    //if auth is req, pass user Id
+    if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
+      genericReqOptions.headers = {
+        'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
+      };
+    }
+
+    var servicePromise = httpPromise(genericReqOptions);
+    servicePromise
+    .then((serviceResponse) => {
+      addRespectiveServiceHeaders(response, serviceResponse.headers);
+      response.status(serviceResponse.statusCode).send(serviceResponse.body);
+      return serviceResponse;
+    })
+    .then((serviceResponse) => {
+      request.log.submit( serviceResponse.statusCode, JSON.stringify(serviceResponse.body).length);
+      latencyMetric.write(Date.now() - request.startTimestamp);
+    })
+    .catch((err) => {
+      response.status(err.statusCode).send(err.error);
+      request.log.error(JSON.stringify(err.error));
+      request.log.submit(err.statusCode || 500, err.error.length);
+      latencyMetric.write(Date.now() - request.startTimestamp);
+    })
+    ;
+  } else {
+    next();
   }
 
-  var servicePromise = httpPromise(genericReqOptions);
-  servicePromise
-  .then((serviceResponse) => {
-    addRespectiveServiceHeaders(response, serviceResponse.headers);
-    response.status(serviceResponse.statusCode).send(serviceResponse.body);
-    return serviceResponse;
-  })
-  .then((serviceResponse) => {
-    request.log.submit( serviceResponse.statusCode, JSON.stringify(serviceResponse.body).length);
-    latencyMetric.write(Date.now() - request.startTimestamp);
-  })
-  .catch((err) => {
-    response.status(err.statusCode).send(err.error);
-    request.log.error(JSON.stringify(err.error));
-    request.log.submit(err.statusCode || 500, err.error.length);
-    latencyMetric.write(Date.now() - request.startTimestamp);
-  })
-  ;
-  
 });
 
 app.listen(80);

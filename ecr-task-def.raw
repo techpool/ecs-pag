@@ -14,7 +14,14 @@
                     "protocol": "tcp"
                 }
             ],
-            "essential": true
+            "essential": true,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "$STAGE-pag",
+                    "awslogs-region": "ap-southeast-1"
+                }
+            }
         }
     ]
 }
