@@ -66,7 +66,7 @@ app.get(['/*'], (request, response, next) => {
     var url = 'http://' + process.env.API_END_POINT + uriNew;
     request.pipe(requestModule(url), function(error, res, body){
       console.log(JSON.stringify(error));
-      response..status(error.statusCode || 500).send(error.message || 'Something went wrong!!'); 
+      response.status(error.statusCode || 500).send(error.message || 'Something went wrong!!'); 
     }).pipe(response);
         
   } else if(routeConfig[api] && routeConfig[api].GET.auth) {
