@@ -4,7 +4,7 @@ var requestModule = require('request');
 var Promise = require('bluebird');
 var express = require('express');
 var _ = require('lodash');
-const morgan = require('short');
+const morgan = require('morgan');
 
 var agent = new http.Agent({
   keepAlive : true
@@ -27,7 +27,7 @@ const latencyMetric = new Metric('int64', 'Latency');
 
 const app = express();
 
-app.use(morgan('dev'));
+app.use(morgan('short'));
 // for initializing log object
 app.use((request, response, next) => {
   var log = request.log = new Logging( request );
