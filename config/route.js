@@ -20,10 +20,9 @@ module.exports = {
     'GET':{'path':'/search/trending_search', 'auth':true}
   },
 
-  '/recommendation/v1.0.0/pratilipis':{
-    'GET':{'path':'/recommendation/v1.0.0/pratilipis', 'auth':true}
+  '/recommendation/pratilipis':{
+    'GET':{'path':'/recommendation/pratilipis', 'auth':true}
   },
-
 
   '/cont-dep/pag':{
     'GET':{'path':'/cont-dep/pag', 'auth':false}
