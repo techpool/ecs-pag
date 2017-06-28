@@ -49,7 +49,7 @@ app.options("/*", function(request, response, next){
 });
 
 app.get("/health", function(request, response, next){
-  response.send('Healthy from stage' + process.env.STAGE || 'nil' );
+  response.send('Pag ' + process.env.STAGE + ' is healthy !' );
 });
 
 //auth middleware
