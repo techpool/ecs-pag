@@ -64,10 +64,17 @@ app.get(['/*'], (request, response, next) => {
     var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : ''; 
     var uriNew = routeConfig[api].GET.path + urlSuffix;
     var url = 'http://' + process.env.API_END_POINT + uriNew;
-    request.pipe(requestModule(url), function(error, res, body){
-      console.log(JSON.stringify(error));
-      response.status(error.statusCode || 500).send(error.message || 'Something went wrong!!'); 
-    }).pipe(response);
+    request.pipe(requestModule(url))
+      .on('error', function(error){
+        console.log(JSON.stringify(error));
+        response.status(error.statusCode || 500).send(error.message || 'There was an error forwarding the request!');
+      })
+      .pipe(response)
+      .on('error', function(error){
+        console.log(JSON.stringify(error));
+        response.status(error.statusCode || 500).send(error.message || 'There was an error forwarding the response!');
+      })
+      ;
         
   } else if(routeConfig[api] && routeConfig[api].GET.auth) {
     request.log.info('Sending authentication request');
