@@ -22,38 +22,6 @@ module.exports = {
 
   '/recommendation/pratilipis':{
     'GET':{'path':'/recommendation/pratilipis', 'auth':true}
-  },
-
-  '/cont-dep/pag':{
-    'GET':{'path':'/cont-dep/pag', 'auth':false}
-  },
-
-  '/cont-dep/pwa':{
-    'GET':{'path':'/cont-dep/pwa', 'auth':false}
-  },
-
-  '/cont-dep/auth':{
-    'GET':{'path':'/cont-dep/auth', 'auth':false}
-  },
-
-  '/cont-dep/pratilipi':{
-    'GET':{'path':'/cont-dep/pratilipi', 'auth':false}
-  },
-
-  '/cont-dep/author':{
-    'GET':{'path':'/cont-dep/author', 'auth':false}
-  },
-
-  '/cont-dep/image':{
-    'GET':{'path':'/cont-dep/image', 'auth':false}
-  },
-
-  '/cont-dep/search':{
-    'GET':{'path':'/cont-dep/search', 'auth':false}
-  },
-
-  '/cont-dep/recommendation':{
-    'GET':{'path':'/cont-dep/recommendation', 'auth':false}
   }
 
 }
