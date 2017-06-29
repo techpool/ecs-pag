@@ -110,7 +110,7 @@ function resolveGET( request, response ) {
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.then( function() {
-				return getAuth();
+				return getAuth( request, response );
 			})
 			.then( userId => {
 				console.log( "userId: " + userId );
