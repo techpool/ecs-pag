@@ -34,6 +34,10 @@ module.exports = {
 
   '/auth/verify':{
 	    'GET':{'path':'/auth/verify', 'auth':false}
+  },
+
+  '/pages':{
+    'GET':{'path':'/pages', 'auth':true}
   }
 
 };
