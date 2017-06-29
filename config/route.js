@@ -37,7 +37,7 @@ module.exports = {
   },
 
   '/pages':{
-    'GET':{'path':'/pages', 'auth':true}
+    'GET':{'path':'/pages', 'auth':false}
   }
 
 };
