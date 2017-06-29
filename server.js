@@ -27,7 +27,7 @@ var httpAgent = new http.Agent({ keepAlive : true });
 function getAuth( request, response ) {
 
 	if( response.locals && response.locals[ 'user-id' ] )
-    		return new Promise( function( resolve, reject ) { resolve( response.locals[ 'user-id' ] ); });
+			return new Promise( function( resolve, reject ) { resolve( response.locals[ 'user-id' ] ); });
 
 	request.log.info( 'Sending authentication request...' );
 	response.setHeader( 'Content-Type','application/json' );
@@ -40,18 +40,18 @@ function getAuth( request, response ) {
 	};
 
 	return httpPromise( authOptions )
-    		.then( authResponse => {
-    			request.log.info( 'Authenticated!' );
-    			response.locals[ 'user-id' ] = authResponse.headers['user-id'];
-    			return response.locals[ 'user-id' ];
-    		 })
-    		.catch( (authError) => {
+			.then( authResponse => {
+				request.log.info( 'Authenticated!' );
+				response.locals[ 'user-id' ] = authResponse.headers['user-id'];
+				return response.locals[ 'user-id' ];
+			 })
+			.catch( (authError) => {
 			response.status( authError.statusCode ).send( authError.error );
 			console.log( JSON.stringify( authError.error ) );
 			request.log.submit( authError.statusCode || 500, authError.error.length );
 			latencyMetric.write( Date.now() - request.startTimestamp );
-    		})
-    	;
+			})
+		;
 
 }
 
@@ -132,6 +132,66 @@ function resolveGET( request, response ) {
 
 function resolveGETBatch( request, response ) {
 
+	if( ! request.url.startsWith( "/api?requests=" ) )
+		response.status( 400 ).send( "Bad Request !" );
+
+	var requests = JSON.parse( decodeURIComponent( request.url.substring( "/api?requests=".length ) ) );
+	var requestArray = [];
+	for( var req in requests )
+		if( requests.hasOwnProperty(req) )
+			requestArray.push( { "name": req, "url": requests[req], "api": requests[req].split( "?" )[0] } );
+
+	var forwardAllToGAE = true;
+	for( var i = 0; i < requestArray.length; i++ ) {
+		var api = requestArray[i]["api"];
+		if( routeConfig[api] && routeConfig[api].GET ) {
+			forwardAllToGAE = false;
+			break;
+		}
+	}
+
+	var isAllSupported = true;
+	for( var i = 0; i < requestArray.length; i++ ) {
+		var api = requestArray[i]["api"];
+		if( ! routeConfig[api] || ! routeConfig[api].GET ) {
+			isAllSupported = false;
+			break;
+		}
+	}
+
+	if( forwardAllToGAE && ( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) ) {
+		request.pipe( requestModule( "https://api.pratilipi.com" + request.url ) )
+			.on( 'error', function(error) {
+				console.log( JSON.stringify(error) );
+				response.status( error.statusCode || 500 ).send( error.message || 'There was an error forwarding the request!' );
+			})
+			.pipe( response )
+			.on( 'error', function(error) {
+				console.log( JSON.stringify(error) );
+				response.status(error.statusCode || 500).send(error.message || 'There was an error forwarding the response!');
+			})
+		;
+
+	} else if( process.env.STAGE === 'devo' && ! isAllSupported ) {
+		response.send( "Api Not supported yet!" );
+		return;
+
+	} else {
+
+		var isParallel = true;
+		for( var i = 0; i < requestArray.length; i++ ) {
+			if( requestArray[i]["url"].indexOf( "$" ) !== -1 ) {
+				isParallel = false;
+				break;
+			}
+			}
+
+		if( isParallel ) {
+			// TODO: Promise.all
+		} else {
+			// TODO: Sequential Calls
+		}
+	}
 }
 
 function resolvePOST( request, response ) {
@@ -170,7 +230,7 @@ app.get( "/health", (request, response, next) => {
 
 // get
 app.get( ['/*'], (request, response, next) => {
-	if( request.path.startsWith( '/api?' ) ) {
+	if( request.path === '/api' ) {
 		resolveGETBatch( request, response );
 	} else if( request.path.startsWith( '/api/' ) ) {
 		resolveGET( request, response );
