@@ -51,7 +51,7 @@ function resolveGET( request, response ) {
 
 	var api = request.path.substr(4);
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
-	var isAuthRequired = isApiSupported && routeConfig[api].auth;
+	var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
 
 	request.log.info( "api = " + api );
 	request.log.info( "routeConfig = " + JSON.parse( routeConfig ) );
