@@ -52,7 +52,7 @@ function resolveGET( request, response ) {
 	if( isApiSupported ) {
 
 		var urlSuffix = request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
-		var url = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + urlSuffix;
+		var uriNew = routeConfig[api].GET.path + urlSuffix;
 
 		var genericReqOptions = {
 			uri: 'http://' + process.env.API_END_POINT + uriNew,
