@@ -38,6 +38,14 @@ module.exports = {
 
   '/pages':{
     'GET':{'path':'/pages', 'auth':false}
+  },
+
+  '/pratilipis':{
+    'GET':{'path':'/pratilipis', 'auth':false}
+  },
+
+  '/authors':{
+    'GET':{'path':'/authors', 'auth':false}
   }
 
 };
