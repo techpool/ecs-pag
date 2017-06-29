@@ -23,6 +23,10 @@ module.exports = {
   '/recommendation/pratilipis':{
     'GET':{'path':'/recommendation/pratilipis', 'auth':true}
   },
+  
+  '/auth/verify':{
+	    'GET':{'path':'/auth/verify', 'auth':false}
+  },
 
   '/cont-dep/pag':{
     'GET':{'path':'/cont-dep/pag', 'auth':false}
