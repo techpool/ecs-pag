@@ -27,8 +27,6 @@ var httpAgent = new http.Agent({ keepAlive : true });
 var authPromise;
 function getAuth( request, response ) {
 
-	request.log.info( "getAuth()" );
-
 	if( authPromise )
 		return authPromise;
 
@@ -53,12 +51,16 @@ function resolveGET( request, response ) {
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
 
-	request.log.info( "isAuthRequired = " + isAuthRequired );
-
 	if( isAuthRequired && ! request.headers.accesstoken ) {
+		// TODO: Set 400 - Bad Request
 		response.send( "AccessToken is missing in header!" );
 		return;
 	}
+
+	// TODO: Remove these lines
+	getAuth( request, response ).then( function( authResponse ) { console.log( authResponse.headers['user-id'] ); } );
+	getAuth( request, response ).then( function( authResponse ) { console.log( authResponse.headers['user-id'] ); } );
+	getAuth( request, response ).then( function( authResponse ) { console.log( authResponse.headers['user-id'] ); } );
 
 	// Implemented in ecs
 	if( isApiSupported ) {
