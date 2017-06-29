@@ -24,13 +24,12 @@ const latencyMetric = new Metric( 'int64', 'Latency' );
 var httpAgent = new http.Agent({ keepAlive : true });
 
 
-var authPromise;
 function getAuth( request, response ) {
 
-	if( authPromise )
-		return authPromise;
+	if( response.locals && response.locals[ 'user-id' ] )
+    		return new Promise( function( resolve, reject ) { resolve( response.locals[ 'user-id' ] ); });
 
-	request.log.info( 'Sending authentication request' );
+	request.log.info( 'Sending authentication request...' );
 	response.setHeader( 'Content-Type','application/json' );
 
 	var authOptions = {
@@ -40,8 +39,19 @@ function getAuth( request, response ) {
 		resolveWithFullResponse: true
 	};
 
-	authPromise = httpPromise( authOptions );
-	return authPromise;
+	return httpPromise( authOptions )
+    		.then( authResponse => {
+    			request.log.info( 'Authenticated!' );
+    			response.locals[ 'user-id' ] = authResponse.headers['user-id'];
+    			return response.locals[ 'user-id' ];
+    		 })
+    		.catch( (authError) => {
+			response.status( authError.statusCode ).send( authError.error );
+			console.log( JSON.stringify( authError.error ) );
+			request.log.submit( authError.statusCode || 500, authError.error.length );
+			latencyMetric.write( Date.now() - request.startTimestamp );
+    		})
+    	;
 
 }
 
@@ -52,15 +62,9 @@ function resolveGET( request, response ) {
 	var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
 
 	if( isAuthRequired && ! request.headers.accesstoken ) {
-		// TODO: Set 400 - Bad Request
-		response.send( "AccessToken is missing in header!" );
+		response.status(400).send( "AccessToken is missing in header!" );
 		return;
 	}
-
-	// TODO: Remove these lines
-	getAuth( request, response ).then( function( authResponse ) { console.log( authResponse.headers['user-id'] ); } );
-	getAuth( request, response ).then( function( authResponse ) { console.log( authResponse.headers['user-id'] ); } );
-	getAuth( request, response ).then( function( authResponse ) { console.log( authResponse.headers['user-id'] ); } );
 
 	// Implemented in ecs
 	if( isApiSupported ) {
@@ -81,21 +85,14 @@ function resolveGET( request, response ) {
 		//on its then send same response to client
 		//on its catch send same error to client
 		servicePromise
-			.then( authResponse => {
-				if( authResponse != -1 ) {
+			.then( userId => {
+				if( userId != -1 ) {
 					genericReqOptions.headers = {
-						'User-Id': authResponse.headers['user-id']
+						'User-Id': userId
 					};
-					request.log.info( 'Authenticated' );
 				}
 				request.log.info( 'Sending request on ' + genericReqOptions.uri );
 				return httpPromise( genericReqOptions );
-			})
-			.catch( (err) => {
-				response.status( err.statusCode ).send( err.error );
-				request.log.error( JSON.stringify(err.error) );
-				request.log.submit( err.statusCode || 500, err.error.length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.then( (serviceResponse) => {
 				addRespectiveServiceHeaders( response, serviceResponse.headers );
