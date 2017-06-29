@@ -24,21 +24,26 @@ const latencyMetric = new Metric( 'int64', 'Latency' );
 var httpAgent = new http.Agent({ keepAlive : true });
 
 
+var authPromise;
 function getAuth( request, response ) {
+
+	request.log.info( "getAuth()" );
+
+	if( authPromise )
+		return authPromise;
 
 	request.log.info( 'Sending authentication request' );
 	response.setHeader( 'Content-Type','application/json' );
 
 	var authOptions = {
-		uri: 'http://' + process.env.API_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT, // TODO: test it as well that api is getting subs here
+		uri: 'http://' + process.env.API_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT,
 		agent : httpAgent,
 		headers: { 'AccessToken': request.headers.accesstoken },
 		resolveWithFullResponse: true
 	};
 
-	// first send request to auth service with httpPromise and accessToken Header
-	// on its reject forward same response to client with 403
-	return httpPromise( authOptions );
+	authPromise = httpPromise( authOptions );
+	return authPromise;
 
 }
 
@@ -48,14 +53,18 @@ function resolveGET( request, response ) {
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	var isAuthRequired = isApiSupported && routeConfig[api].auth;
 
+	if( isAuthRequired && ! request.headers.accesstoken ) {
+		response.send( "AccessToken is missing in header!" );
+		return;
+	}
+
 	// Implemented in ecs
 	if( isApiSupported ) {
 
 		var urlSuffix = request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
-		var uriNew = routeConfig[api].GET.path + urlSuffix;
 
 		var genericReqOptions = {
-			uri: 'http://' + process.env.API_END_POINT + uriNew,
+			uri: 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + urlSuffix,
 			agent : httpAgent,
 			resolveWithFullResponse: true
 		};
@@ -91,7 +100,7 @@ function resolveGET( request, response ) {
 			})
 			.then( (serviceResponse) => {
 				request.log.submit( serviceResponse.statusCode, JSON.stringify(serviceResponse.body).length );
-				latencyMetric.write(Date.now() - request.startTimestamp);
+				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.catch( (err) => {
 				response.status( err.statusCode ).send( err.error );
@@ -101,7 +110,8 @@ function resolveGET( request, response ) {
 			})
 		;
 
-	} else { // Forward to appengine
+	// Forward to appengine -> Supported only on gamma and prod
+	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
 		request.pipe( requestModule( "https://api.pratilipi.com" + request.url ) )
 			.on( 'error', function(error) {
 				console.log( JSON.stringify(error) );
@@ -113,6 +123,8 @@ function resolveGET( request, response ) {
 				response.status(error.statusCode || 500).send(error.message || 'There was an error forwarding the response!');
 			})
 		;
+	} else {
+		response.send( "Api Not supported yet!" );
 	}
 
 }
