@@ -53,6 +53,10 @@ function resolveGET( request, response ) {
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	var isAuthRequired = isApiSupported && routeConfig[api].auth;
 
+	request.log.info( "isApiSupported = " + isApiSupported );
+	request.log.info( "routeConfig[api].auth = " + routeConfig[api].auth );
+	request.log.info( "isAuthRequired = " + isAuthRequired );
+
 	if( isAuthRequired && ! request.headers.accesstoken ) {
 		response.send( "AccessToken is missing in header!" );
 		return;
