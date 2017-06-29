@@ -53,12 +53,6 @@ function resolveGET( request, response ) {
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
 
-	request.log.info( "api = " + api );
-	request.log.info( "routeConfig = " + JSON.parse( routeConfig ) );
-	request.log.info( "routeConfig[api] = " + JSON.parse( routeConfig[api] ) );
-	request.log.info( "routeConfig[api].GET = " + routeConfig[api].GET );
-	request.log.info( "isApiSupported = " + isApiSupported );
-	request.log.info( "routeConfig[api].auth = " + JSON.parse( routeConfig[api].auth ) );
 	request.log.info( "isAuthRequired = " + isAuthRequired );
 
 	if( isAuthRequired && ! request.headers.accesstoken ) {
