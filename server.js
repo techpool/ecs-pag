@@ -109,6 +109,12 @@ function resolveGET( request, response ) {
 				request.log.submit( err.statusCode || 500, err.error.length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
+			.then( function() {
+				return getAuth();
+			})
+			.then( userId => {
+				console.log( "userId: " + userId );
+			})
 		;
 
 	// Forward to appengine -> Supported only on gamma and prod
