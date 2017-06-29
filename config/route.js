@@ -12,6 +12,14 @@ module.exports = {
     'GET':{'path':'/image/author/cover', 'auth':false, 'bypassPag': true}
   },
 
+  '/image/author/cover':{
+    'GET':{'path':'/image/author/cover', 'auth':false, 'bypassPag': true}
+  },
+
+  '/search':{
+    'GET':{'path':'/search/search', 'auth':true}
+  },
+  
   '/search/search':{
     'GET':{'path':'/search/search', 'auth':true}
   },
