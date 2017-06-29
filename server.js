@@ -46,7 +46,7 @@ function resolveGET( request, response ) {
 
 	var api = request.path.substr(4);
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
-	var isAuthRequired = apiSupported && routeConfig[api].auth;
+	var isAuthRequired = isApiSupported && routeConfig[api].auth;
 
 	// Implemented in ecs
 	if( isApiSupported ) {
