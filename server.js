@@ -49,14 +49,14 @@ function resolveGET( request, response ) {
 	var isAuthRequired = isApiSupported && routeConfig[api].auth;
 
 	// Implemented in ecs
-	if( isApiSupported ) { 
+	if( isApiSupported ) {
 
 		var urlSuffix = request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
 		var uriNew = routeConfig[api].GET.path + urlSuffix;
 
 		var genericReqOptions = {
 			uri: 'http://' + process.env.API_END_POINT + uriNew,
-			agent : agent,
+			agent : httpAgent,
 			resolveWithFullResponse: true
 		};
 
