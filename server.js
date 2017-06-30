@@ -145,14 +145,16 @@ function resolveGET( request, response ) {
 	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
 		request.pipe( requestModule( "https://api.pratilipi.com" + request.url ) )
 			.on( 'error', (error) => {
-				request.log.error( JSON.stringify( error ) );
 				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the request!' );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.pipe( response )
 			.on( 'error', (error) => {
+				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the response!' );
 				request.log.error( JSON.stringify( error ) );
-				response.status( _getResponseCode( error.statusCode ) ).send(error.message || 'There was an error forwarding the response!');
+				request.log.submit( error.statusCode || 500, error.message );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 		;
@@ -167,10 +169,32 @@ function resolveGET( request, response ) {
 
 function resolveGETBatch( request, response ) {
 
+	/*
+		Sample batch call request:
+		/api?requests={"req1":"/page?uri=/k-billa-ramesh/en-kanmani","req2":"/pratilipi?_apiVer=2&pratilipiId=$req1.primaryContentId"}
+
+		Cases - Environment:
+		1. Devo Environment -> If all requests are not supported, just say NO.
+		2. Gamma or prod -> Forward Request to appengine
+
+		Cases - Serial / Parallel :
+		1. If all requests are independent -> Use promise.all
+		2. Else use sequential promises
+	*/
+
+	// Just another bad request
 	if( ! request.url.startsWith( "/api?requests=" ) )
 		response.status( 400 ).send( "Bad Request !" );
 
 	var requests = JSON.parse( decodeURIComponent( request.url.substring( "/api?requests=".length ) ) );
+
+	/* requestArray -> Contains all necessary fields for processing in next steps
+		name -> name of the request (req1)
+		url -> complete url of the request (/page?uri=/k-billa-ramesh/en-kanmani)
+		api -> api to hit (/page)
+		isSupported -> Implemented in ecs or not
+		isAuthRequired -> no need to explain
+	*/
 	var requestArray = [];
 	for( var req in requests ) {
 		if( requests.hasOwnProperty(req) ) {
@@ -202,34 +226,42 @@ function resolveGETBatch( request, response ) {
 		}
 	}
 
+	// Only on gamma and prod environments
 	if( forwardAllToGAE && ( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) ) {
+
 		request.pipe( requestModule( "https://api.pratilipi.com" + request.url ) )
 			.on( 'error', function(error) {
-				console.log( JSON.stringify(error) );
-				response.status( error.statusCode || 500 ).send( error.message || 'There was an error forwarding the request!' );
+				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the request!' );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message );
+				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.pipe( response )
 			.on( 'error', function(error) {
-				console.log( JSON.stringify(error) );
-				response.status( error.statusCode || 500).send(error.message || 'There was an error forwarding the response!' );
+				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the response!' );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message );
+				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 		;
 
+	// Devo environment
 	} else if( process.env.STAGE === 'devo' && ! isAllSupported ) {
 		response.send( "Api Not supported yet!" );
-		return;
 
+	// Sequential or batch calls
 	} else {
 
 		var isParallel = true;
 		for( var i = 0; i < requestArray.length; i++ ) {
-			if( requestArray[i]["url"].indexOf( "$" ) !== -1 ) {
+			if( requestArray[i]["url"].indexOf("$") !== -1 ) {
 				isParallel = false;
 				break;
 			}
 		}
 
 		if( isParallel ) {
+
 			var promiseArray = [];
 			requestArray.forEach( (req) => {
 				var url = req.isSupported
@@ -237,26 +269,40 @@ function resolveGETBatch( request, response ) {
 					: 'http://api.pratilipi.com' + req.url;
 				promiseArray.push( _apiGET( url, request, response, req.isAuthRequired ) );
 			});
+
+			// Pretty simple with Promise.all, isn't it?
 			Promise.all( promiseArray )
 				.then( (responseArray) => { // responseArray will be in order
-					var returnResponse = {};
+					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
-						returnResponse[requestArray[i].name] = responseArray[i].body;
-					request.log.info( "Success making Batch call!" );
+						returnResponse[ requestArray[i].name ] = responseArray[i].body;
 					response.send( returnResponse );
+					request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
+					latencyMetric.write( Date.now() - request.startTimestamp );
 				}).catch( (error) => {
-					request.log.info( "Error in Making Batch call!" );
-					response.status( 500 ).send( "Some exception occurred at the server! Please try again!" );
+					response.status( _getResponseCode( error.statusCode ) ).send(error.message || 'Some exception occurred at the server! Please try again!');
+					request.log.error( JSON.stringify( error ) );
+					request.log.submit( error.statusCode, JSON.stringify( error.message ).length );
+					latencyMetric.write( Date.now() - request.startTimestamp );
 				})
 			;
 		} else {
 
-			var responseObject = {};
+			/*
+				Approach:
+				1. GET the first call
+				2. Replace other GET calls with the data
+				3. GET the next call
+				4. Repeat
+			*/
+			var responseObject = {}; // To be sent to Client
+
 			function recursiveGET( reqArray ) {
 
 				if( reqArray.length === 0 )
 					return new Promise( function( resolve, reject ) { resolve( responseObject ) } );
 
+				// Current request Object
 				var req = reqArray[0];
 				var url = req.isSupported
 					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : ''
@@ -265,7 +311,7 @@ function resolveGETBatch( request, response ) {
 				return _apiGET( url, request, response, req.isAuthRequired )
 					.then( (res) => {
 						var responseJson = JSON.parse( res.body );
-						// Modifying reqArray
+						// Modifying other requests of the reqArray
 						reqArray.forEach( (aReq) => {
 							for( var key in responseJson ) {
 								var find = "$" + req.name + "." + key;
@@ -274,25 +320,28 @@ function resolveGETBatch( request, response ) {
 								}
 							}
 						});
+						// Populating the responseObject
 						responseObject[ req.name ] = responseJson;
 						reqArray.shift();
 						return recursiveGET( reqArray );
 					})
-					.catch( (err) => {
-						// TODO: Implementation
+					.catch( (error) => {
+						response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'Some exception occurred at the server! Please try again!' );
+						request.log.error( JSON.stringify( error ) );
+						request.log.submit( error.statusCode, JSON.stringify( error.message ).length );
+						latencyMetric.write( Date.now() - request.startTimestamp );
 					})
 				;
 			}
 
 			recursiveGET( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
 				.then( (res) => {
-					// TODO: Headers and Response codes
+					response.send( res );
 					request.log.submit( 200, JSON.stringify( res ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
-					response.status(200).send( serviceResponse.body );
 				});
 				.catch( (err) => {
-					response.status( err.statusCode ).send( err.error );
+					response.status( _getResponseCode( err.statusCode ) ).send( err.error );
 					request.log.error( JSON.stringify( err.error ) );
 					request.log.submit( err.statusCode || 500, err.error.length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
