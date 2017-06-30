@@ -24,10 +24,15 @@ const latencyMetric = new Metric( 'int64', 'Latency' );
 var httpAgent = new http.Agent({ keepAlive : true });
 
 
-function getAuth( request, response ) {
+function _getUserAuth( request, response ) {
 
 	if( response.locals && response.locals[ 'user-id' ] )
-			return new Promise( function( resolve, reject ) { resolve( response.locals[ 'user-id' ] ); });
+		return new Promise( function( resolve, reject ) { resolve( response.locals[ 'user-id' ] ); });
+
+	if( ! request.headers.accesstoken ) {
+		response.status(400).send( "AccessToken is missing in header!" );
+		return;
+	}
 
 	request.log.info( 'Sending authentication request...' );
 	response.setHeader( 'Content-Type','application/json' );
@@ -40,19 +45,44 @@ function getAuth( request, response ) {
 	};
 
 	return httpPromise( authOptions )
-			.then( authResponse => {
-				request.log.info( 'Authenticated!' );
-				response.locals[ 'user-id' ] = authResponse.headers['user-id'];
-				return response.locals[ 'user-id' ];
-			 })
-			.catch( (authError) => {
-			response.status( authError.statusCode ).send( authError.error );
-			console.log( JSON.stringify( authError.error ) );
+		.then( authResponse => {
+			request.log.info( 'Authenticated!' );
+			response.locals[ 'user-id' ] = authResponse.headers['user-id'];
+			return response.locals[ 'user-id' ];
+		 })
+		.catch( (authError) => {
+			request.log.info( JSON.stringify( authError.error ) );
 			request.log.submit( authError.statusCode || 500, authError.error.length );
 			latencyMetric.write( Date.now() - request.startTimestamp );
-			})
-		;
+			response.status( authError.statusCode ).send( authError.error );
+		})
+	;
 
+}
+
+function _apiGET( request, response, isAuthRequired ) {
+
+	var servicePromise = isAuthRequired
+		? _getUserAuth( request, response )
+		: new Promise( function( resolve, reject ) { resolve(-1); });
+
+	var urlSuffix = request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
+	var genericReqOptions = {
+		uri: 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + urlSuffix,
+		agent : httpAgent,
+		resolveWithFullResponse: true
+	};
+	return servicePromise
+		.then( userId => {
+			if( userId != -1 ) {
+				genericReqOptions.headers = {
+					'User-Id': userId
+				};
+			}
+			request.log.info( 'Sending request on ' + genericReqOptions.uri );
+			return httpPromise( genericReqOptions );
+		})
+	;
 }
 
 function resolveGET( request, response ) {
@@ -61,51 +91,24 @@ function resolveGET( request, response ) {
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
 
-	if( isAuthRequired && ! request.headers.accesstoken ) {
-		response.status(400).send( "AccessToken is missing in header!" );
-		return;
-	}
-
 	// Implemented in ecs
 	if( isApiSupported ) {
-
-		var urlSuffix = request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
-
-		var genericReqOptions = {
-			uri: 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + urlSuffix,
-			agent : httpAgent,
-			resolveWithFullResponse: true
-		};
-
-		var servicePromise = isAuthRequired
-					? getAuth( request, response )
-					: new Promise( function( resolve, reject ) { resolve(-1); });
-
 		//on its then ie resolve, send req to ILB endpoint with actual request
 		//on its then send same response to client
 		//on its catch send same error to client
-		servicePromise
-			.then( userId => {
-				if( userId != -1 ) {
-					genericReqOptions.headers = {
-						'User-Id': userId
-					};
-				}
-				request.log.info( 'Sending request on ' + genericReqOptions.uri );
-				return httpPromise( genericReqOptions );
-			})
+		_apiGET( request, response, isAuthRequired )
 			.then( (serviceResponse) => {
 				addRespectiveServiceHeaders( response, serviceResponse.headers );
 				response.status( serviceResponse.statusCode ).send( serviceResponse.body );
 				return serviceResponse;
 			})
 			.then( (serviceResponse) => {
-				request.log.submit( serviceResponse.statusCode, JSON.stringify(serviceResponse.body).length );
+				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.catch( (err) => {
 				response.status( err.statusCode ).send( err.error );
-				request.log.error( JSON.stringify(err.error) );
+				request.log.error( JSON.stringify( err.error ) );
 				request.log.submit( err.statusCode || 500, err.error.length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
@@ -184,7 +187,7 @@ function resolveGETBatch( request, response ) {
 				isParallel = false;
 				break;
 			}
-			}
+		}
 
 		if( isParallel ) {
 			// TODO: Promise.all
