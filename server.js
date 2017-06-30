@@ -97,7 +97,8 @@ function _apiGET( uri, request, response, isAuthRequired ) {
 		.then( userId => {
 			if( userId != -1 ) {
 				genericReqOptions.headers = {
-					'User-Id': userId
+					'User-Id': userId,
+					'AccessToken': request.headers.accesstoken
 				};
 			}
 			request.log.info( 'Sending request on ' + genericReqOptions.uri );
