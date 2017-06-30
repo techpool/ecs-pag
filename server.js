@@ -339,7 +339,7 @@ function resolveGETBatch( request, response ) {
 					response.send( res );
 					request.log.submit( 200, JSON.stringify( res ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
-				});
+				})
 				.catch( (err) => {
 					response.status( _getResponseCode( err.statusCode ) ).send( err.error );
 					request.log.error( JSON.stringify( err.error ) );
