@@ -118,13 +118,13 @@ function resolveGET( request, response ) {
 	*/
 
 	// request.path will be /api/xxx
-		var api = request.path.substr(4);
-		var isApiSupported = routeConfig[api] && routeConfig[api].GET;
-		var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
+	var api = request.path.substr(4);
+	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
+	var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
 
 	// Supported in ecs
 	if( isApiSupported ) {
-		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
+		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
 		_apiGET( uri, request, response, isAuthRequired )
 			.then( (serviceResponse) => {
 				// TODO: Check addRespectiveServiceHeaders
@@ -265,7 +265,7 @@ function resolveGETBatch( request, response ) {
 			var promiseArray = [];
 			requestArray.forEach( (req) => {
 				var url = req.isSupported
-					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : ''
+					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
 					: 'http://api.pratilipi.com' + req.url;
 				promiseArray.push( _apiGET( url, request, response, req.isAuthRequired ) );
 			});
@@ -305,7 +305,7 @@ function resolveGETBatch( request, response ) {
 				// Current request Object
 				var req = reqArray[0];
 				var url = req.isSupported
-					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : ''
+					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
 					: 'http://api.pratilipi.com' + req.url;
 
 				return _apiGET( url, request, response, req.isAuthRequired )
