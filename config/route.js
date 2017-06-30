@@ -42,6 +42,14 @@ module.exports = {
 
   '/authors':{
     'GET':{'path':'/authors', 'auth':false}
+  },
+
+  '/user-activity/is_add_to_lib': {
+    'GET':{'path':'/user-activity/is_add_to_lib', 'auth':false}
+  },
+
+  '/user-activity/is_following_author': {
+    'GET':{'path':'/user-activity/is_following_author', 'auth':false}
   }
 
 };
