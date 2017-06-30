@@ -276,11 +276,11 @@ function resolveGETBatch( request, response ) {
 					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = responseArray[i].body;
-					response.send( returnResponse );
-					request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
+					response.send( JSON.stringify( returnResponse ) );
+					request.log.submit( 200, JSON.stringify( returnResponse ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				}).catch( (error) => {
-					response.status( _getResponseCode( error.statusCode ) ).send(error.message || 'Some exception occurred at the server! Please try again!');
+					response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'Some exception occurred at the server! Please try again!' );
 					request.log.error( JSON.stringify( error ) );
 					request.log.submit( error.statusCode, JSON.stringify( error.message ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
