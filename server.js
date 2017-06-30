@@ -221,7 +221,51 @@ function resolveGETBatch( request, response ) {
 				})
 			;
 		} else {
-			// TODO: Sequential Calls
+
+			var responseObject = {};
+			function recursiveGET( reqArray ) {
+
+				if( reqArray.length === 0 )
+					return new Promise( function( resolve, reject ) { resolve( responseObject ) } );
+
+				var req = reqArray[0];
+				var url = req.isSupported
+                    ? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : ''
+                    : 'http://api.pratilipi.com' + req.url;
+
+				return _apiGET( url, request, response, false )
+					.then( (res) => {
+						var responseJson = JSON.parse( res.body );
+						// Modifying reqArray
+						reqArray.forEach( (aReq) => {
+							for( var key in responseJson ) {
+								var find = "$" + req.name + "." + key;
+								if( aReq.url.indexOf( find ) !== -1 ) {
+									aReq.url = aReq.url.replace( find, responseJson[key] );
+								}
+							}
+						});
+						responseObject[ req.name ] = responseJson;
+						reqArray.shift();
+						return recursiveGET( reqArray );
+					})
+				;
+			}
+
+			recursiveGET( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
+				.then( (res) => {
+					// TODO: Headers and Response codes
+					request.log.submit( 200, JSON.stringify( res ).length );
+					latencyMetric.write( Date.now() - request.startTimestamp );
+					response.status(200).send( serviceResponse.body );
+				});
+				.catch( (err) => {
+	                response.status( err.statusCode ).send( err.error );
+	                request.log.error( JSON.stringify( err.error ) );
+	                request.log.submit( err.statusCode || 500, err.error.length );
+	                latencyMetric.write( Date.now() - request.startTimestamp );
+	            })
+			;
 		}
 	}
 }
