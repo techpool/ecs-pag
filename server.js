@@ -24,17 +24,33 @@ const latencyMetric = new Metric( 'int64', 'Latency' );
 var httpAgent = new http.Agent({ keepAlive : true });
 
 
+function _getResponseCode( code ) {
+	if( ! code )
+		return 500;
+	var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
+	if( supportedCodesOnFrontend[ code ] )
+		return code;
+	else if( code === 403 ) // From Auth Service
+		return 401;
+	else
+		return 500; // Internal Server Exception
+}
+
 function _getUserAuth( request, response ) {
 
+	// Calling Auth service for 2 to nth iteration
 	if( response.locals && response.locals[ 'user-id' ] )
 		return new Promise( function( resolve, reject ) { resolve( response.locals[ 'user-id' ] ); });
 
+	// Bad Request
 	if( ! request.headers.accesstoken ) {
-		response.status(400).send( "AccessToken is missing in header!" );
+		response.status( 400 ).send( "AccessToken is missing in header!" );
 		return;
 	}
 
 	request.log.info( 'Sending authentication request...' );
+
+	// Services that needed Auth -> Considering it to be in application/json format
 	response.setHeader( 'Content-Type','application/json' );
 
 	var authOptions = {
@@ -46,26 +62,28 @@ function _getUserAuth( request, response ) {
 
 	return httpPromise( authOptions )
 		.then( authResponse => {
-			request.log.info( 'Authenticated!' );
+			request.log.info( 'Authenticated !' );
 			response.locals[ 'user-id' ] = authResponse.headers['user-id'];
 			return response.locals[ 'user-id' ];
 		 })
 		.catch( (authError) => {
+			request.log.info( "Authentication Failed! Message Printed Below:" );
 			request.log.info( JSON.stringify( authError.error ) );
 			request.log.submit( authError.statusCode || 500, authError.error.length );
 			latencyMetric.write( Date.now() - request.startTimestamp );
-			response.status( authError.statusCode ).send( authError.error );
+			response.status( _getResponseCode( authError.statusCode ) ).send( authError.error );
 		})
 	;
 
 }
 
+// 3 parameters
 // uri -> which uri to hit
 // request and response -> for auth
 // isAuthRequired -> for auth
 function _apiGET( uri, request, response, isAuthRequired ) {
 
-	var servicePromise = isAuthRequired
+	var authPromise = isAuthRequired
 		? _getUserAuth( request, response )
 		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
@@ -74,7 +92,8 @@ function _apiGET( uri, request, response, isAuthRequired ) {
 		agent : httpAgent,
 		resolveWithFullResponse: true
 	};
-	return servicePromise
+
+	return authPromise
 		.then( userId => {
 			if( userId != -1 ) {
 				genericReqOptions.headers = {
@@ -87,30 +106,35 @@ function _apiGET( uri, request, response, isAuthRequired ) {
 	;
 }
 
+
 function resolveGET( request, response ) {
 
-	var api = request.path.substr(4);
-	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
-	var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
+	/*
+	*   4 cases:
+	*	1. ecs -> without auth (images)
+	*   2. ecs -> with auth (other services)
+	*   3. not supported in ecs && devo environment -> Send 'not supported'
+	*   4. not supported in ecs && ( gamma || prod ) -> Forward request for appengine
+	*/
 
-	// Implemented in ecs
+	// request.path will be /api/xxx
+		var api = request.path.substr(4);
+		var isApiSupported = routeConfig[api] && routeConfig[api].GET;
+		var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
+
+	// Supported in ecs
 	if( isApiSupported ) {
-		//on its then ie resolve, send req to ILB endpoint with actual request
-		//on its then send same response to client
-		//on its catch send same error to client
 		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
 		_apiGET( uri, request, response, isAuthRequired )
 			.then( (serviceResponse) => {
+				// TODO: Check addRespectiveServiceHeaders
 				addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( serviceResponse.statusCode ).send( serviceResponse.body );
-				return serviceResponse;
-			})
-			.then( (serviceResponse) => {
+				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+                	latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.catch( (err) => {
-				response.status( err.statusCode ).send( err.error );
+				response.status( _getResponseCode( err.statusCode ) ).send( err.error );
 				request.log.error( JSON.stringify( err.error ) );
 				request.log.submit( err.statusCode || 500, err.error.length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
@@ -120,21 +144,26 @@ function resolveGET( request, response ) {
 	// Forward to appengine -> Supported only on gamma and prod
 	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
 		request.pipe( requestModule( "https://api.pratilipi.com" + request.url ) )
-			.on( 'error', function(error) {
-				console.log( JSON.stringify(error) );
-				response.status( error.statusCode || 500 ).send( error.message || 'There was an error forwarding the request!' );
+			.on( 'error', (error) => {
+				request.log.error( JSON.stringify( error ) );
+				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the request!' );
+				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.pipe( response )
-			.on( 'error', function(error) {
-				console.log( JSON.stringify(error) );
-				response.status(error.statusCode || 500).send(error.message || 'There was an error forwarding the response!');
+			.on( 'error', (error) => {
+				request.log.error( JSON.stringify( error ) );
+				response.status( _getResponseCode( error.statusCode ) ).send(error.message || 'There was an error forwarding the response!');
+				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 		;
+
+	// not supported and devo environment
 	} else {
 		response.send( "Api Not supported yet!" );
 	}
 
 }
+
 
 function resolveGETBatch( request, response ) {
 
@@ -230,10 +259,10 @@ function resolveGETBatch( request, response ) {
 
 				var req = reqArray[0];
 				var url = req.isSupported
-                    ? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : ''
-                    : 'http://api.pratilipi.com' + req.url;
+					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : ''
+					: 'http://api.pratilipi.com' + req.url;
 
-				return _apiGET( url, request, response, false )
+				return _apiGET( url, request, response, req.isAuthRequired )
 					.then( (res) => {
 						var responseJson = JSON.parse( res.body );
 						// Modifying reqArray
@@ -249,6 +278,9 @@ function resolveGETBatch( request, response ) {
 						reqArray.shift();
 						return recursiveGET( reqArray );
 					})
+					.catch( (err) => {
+						// TODO: Implementation
+					})
 				;
 			}
 
@@ -260,11 +292,11 @@ function resolveGETBatch( request, response ) {
 					response.status(200).send( serviceResponse.body );
 				});
 				.catch( (err) => {
-	                response.status( err.statusCode ).send( err.error );
-	                request.log.error( JSON.stringify( err.error ) );
-	                request.log.submit( err.statusCode || 500, err.error.length );
-	                latencyMetric.write( Date.now() - request.startTimestamp );
-	            })
+					response.status( err.statusCode ).send( err.error );
+					request.log.error( JSON.stringify( err.error ) );
+					request.log.submit( err.statusCode || 500, err.error.length );
+					latencyMetric.write( Date.now() - request.startTimestamp );
+				})
 			;
 		}
 	}
