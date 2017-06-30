@@ -1,19 +1,19 @@
 module.exports = {
 
 	'/pratilipi/cover': {
-		'GET': { 'path': '/image/pratilipi/cover', 'auth': false }
+		'GET': { 'path': '/image/pratilipi/cover', 'auth': false, 'shouldPipe': true }
 	},
 
 	'/author/image': {
-		'GET': { 'path': '/image/author/profile', 'auth': false }
+		'GET': { 'path': '/image/author/profile', 'auth': false, 'shouldPipe': true }
 	},
 
 	'/author/cover': {
-		'GET': { 'path': '/image/author/cover', 'auth': false }
+		'GET': { 'path': '/image/author/cover', 'auth': false, 'shouldPipe': true }
 	},
 
 	'/image/author/cover': {
-		'GET': { 'path': '/image/author/cover', 'auth': false }
+		'GET': { 'path': '/image/author/cover', 'auth': false, 'shouldPipe': true }
 	},
 
 	'/search': {
@@ -32,7 +32,7 @@ module.exports = {
 		'GET': { 'path': '/recommendation/pratilipis', 'auth': true }
 	},
 
-	'/pages': {
+	'/page': {
 		'GET': { 'path': '/pages', 'auth': true }
 	},
 
