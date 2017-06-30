@@ -60,15 +60,17 @@ function _getUserAuth( request, response ) {
 
 }
 
-function _apiGET( request, response, isAuthRequired ) {
+// uri -> which uri to hit
+// request and response -> for auth
+// isAuthRequired -> for auth
+function _apiGET( uri, request, response, isAuthRequired ) {
 
 	var servicePromise = isAuthRequired
 		? _getUserAuth( request, response )
-		: new Promise( function( resolve, reject ) { resolve(-1); });
+		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
-	var urlSuffix = request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
 	var genericReqOptions = {
-		uri: 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + urlSuffix,
+		uri: uri,
 		agent : httpAgent,
 		resolveWithFullResponse: true
 	};
@@ -96,7 +98,8 @@ function resolveGET( request, response ) {
 		//on its then ie resolve, send req to ILB endpoint with actual request
 		//on its then send same response to client
 		//on its catch send same error to client
-		_apiGET( request, response, isAuthRequired )
+		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '';
+		_apiGET( uri, request, response, isAuthRequired )
 			.then( (serviceResponse) => {
 				addRespectiveServiceHeaders( response, serviceResponse.headers );
 				response.status( serviceResponse.statusCode ).send( serviceResponse.body );
@@ -140,14 +143,22 @@ function resolveGETBatch( request, response ) {
 
 	var requests = JSON.parse( decodeURIComponent( request.url.substring( "/api?requests=".length ) ) );
 	var requestArray = [];
-	for( var req in requests )
-		if( requests.hasOwnProperty(req) )
-			requestArray.push( { "name": req, "url": requests[req], "api": requests[req].split( "?" )[0] } );
+	for( var req in requests ) {
+		if( requests.hasOwnProperty(req) ) {
+			var api = requests[req].split( "?" )[0];
+			requestArray.push({
+				"name": req,
+				"url": requests[req],
+				"api": api,
+				"isSupported": routeConfig[api] != null && routeConfig[api].GET != null,
+				"isAuthRequired": routeConfig[api] != null && routeConfig[api].GET != null && routeConfig[api].GET.auth
+			});
+		}
+	}
 
 	var forwardAllToGAE = true;
 	for( var i = 0; i < requestArray.length; i++ ) {
-		var api = requestArray[i]["api"];
-		if( routeConfig[api] && routeConfig[api].GET ) {
+		if( requestArray[i]["isSupported"] ) {
 			forwardAllToGAE = false;
 			break;
 		}
@@ -156,7 +167,7 @@ function resolveGETBatch( request, response ) {
 	var isAllSupported = true;
 	for( var i = 0; i < requestArray.length; i++ ) {
 		var api = requestArray[i]["api"];
-		if( ! routeConfig[api] || ! routeConfig[api].GET ) {
+		if( ! requestArray[i]["isSupported"] ) {
 			isAllSupported = false;
 			break;
 		}
@@ -171,7 +182,7 @@ function resolveGETBatch( request, response ) {
 			.pipe( response )
 			.on( 'error', function(error) {
 				console.log( JSON.stringify(error) );
-				response.status(error.statusCode || 500).send(error.message || 'There was an error forwarding the response!');
+				response.status( error.statusCode || 500).send(error.message || 'There was an error forwarding the response!' );
 			})
 		;
 
@@ -190,7 +201,25 @@ function resolveGETBatch( request, response ) {
 		}
 
 		if( isParallel ) {
-			// TODO: Promise.all
+			var promiseArray = [];
+			requestArray.forEach( (req) => {
+				var url = req.isSupported
+					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : ''
+					: 'http://api.pratilipi.com' + req.url;
+				promiseArray.push( _apiGET( url, request, response, req.isAuthRequired ) );
+			});
+			Promise.all( promiseArray )
+				.then( (responseArray) => { // responseArray will be in order
+					var returnResponse = {};
+					for( var i = 0; i < responseArray.length; i++ )
+						returnResponse[requestArray[i].name] = responseArray[i].body;
+					request.log.info( "Success making Batch call!" );
+					response.send( returnResponse );
+				}).catch( (error) => {
+					request.log.info( "Error in Making Batch call!" );
+					response.status( 500 ).send( "Some exception occurred at the server! Please try again!" );
+				})
+			;
 		} else {
 			// TODO: Sequential Calls
 		}
