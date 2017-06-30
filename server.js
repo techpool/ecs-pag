@@ -121,9 +121,30 @@ function resolveGET( request, response ) {
 	var api = request.path.substr(4);
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	var isAuthRequired = isApiSupported && routeConfig[api].GET.auth;
+	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
+	// For image requests
+	if( isPipeRequired ) {
+		var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '';
+		var uriNew = routeConfig[api].GET.path + urlSuffix;
+		var url = 'http://' + process.env.API_END_POINT + uriNew;
+		request.pipe( requestModule( url ) )
+			.on( 'error', function( error ) {
+				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the request!' );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+			.pipe( response )
+			.on(' error', function( error ) {
+				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the response!' );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+		;
 	// Supported in ecs
-	if( isApiSupported ) {
+	} else if( isApiSupported ) {
 		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
 		_apiGET( uri, request, response, isAuthRequired )
 			.then( (serviceResponse) => {
