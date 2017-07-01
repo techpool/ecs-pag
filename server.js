@@ -412,7 +412,7 @@ function resolvePOST( request, response ) {
 	Approach
 	1.	check if api is supported
 	2.	if apiSupported
-		a.	check if auth is required
+		a.	check if auth is required
 		b.	check if pipe is required
 		c. 	get all the methods supported
 		d.	get which method to call using the requiredField provided
@@ -531,7 +531,7 @@ app.post( ['/*'], (request, response, next) => {
 	resolvePOST( request, response );
 });
 
-app.listen(8080);
+app.listen(80);
 
 function addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
 	var pagHeaders = [ 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' ];
