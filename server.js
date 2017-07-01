@@ -25,6 +25,7 @@ var httpAgent = new http.Agent({ keepAlive : true });
 
 
 function _getResponseCode( code ) {
+	// TODO: All edge cases
 	if( ! code )
 		return 500;
 	var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
@@ -151,9 +152,9 @@ function resolveGET( request, response ) {
 			.then( (serviceResponse) => {
 				// TODO: Check addRespectiveServiceHeaders
 				addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
+				response.status( serviceResponse.statusCode ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-                	latencyMetric.write( Date.now() - request.startTimestamp );
+				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.catch( (err) => {
 				response.status( _getResponseCode( err.statusCode ) ).send( err.error );
@@ -292,6 +293,7 @@ function resolveGETBatch( request, response ) {
 				promiseArray.push( _apiGET( url, request, response, req.isAuthRequired ) );
 			});
 
+			// TODO: Minor optimisation for Auth
 			// Pretty simple with Promise.all, isn't it?
 			Promise.all( promiseArray )
 				.then( (responseArray) => { // responseArray will be in order
