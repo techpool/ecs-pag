@@ -36,11 +36,28 @@ module.exports = {
 		'GET': { 'path': '/pages', 'auth': true }
 	},
 
-	'/pratilipis': {
-		'GET': { 'path': '/pratilipis', 'auth': false }
+	'/pratilipi': {
+		'GET': { 'path': '/pratilipis', 'auth': false },
+		'POST': {
+			'path': '/pratilipis',
+			'auth': true,
+			'methods': {
+				'DELETE': [
+					{ 'pratilipiId': null },
+					{ 'state': 'DELETED' }
+				],
+				'PATCH': [
+					{ 'pratilipiId': null }
+				],
+				'POST':  [
+					{ 'language': null },
+					{ 'type': null }
+				]
+			}
+		}
 	},
 
-	'/authors':{
+	'/author':{
 		'GET':{ 'path':'/authors', 'auth':false }
 	},
 
