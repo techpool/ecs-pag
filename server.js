@@ -4,6 +4,7 @@ var requestModule = require( 'request' );
 var Promise = require( 'bluebird' );
 var express = require( 'express' );
 var _ = require( 'lodash' );
+var bodyParser = require('body-parser');
 
 const morgan = require( 'morgan' );
 const mainConfig = require( './config/main' )[ process.env.STAGE ];
@@ -90,6 +91,35 @@ function _apiGET( uri, request, response, isAuthRequired ) {
 
 	var genericReqOptions = {
 		uri: uri,
+		agent : httpAgent,
+		resolveWithFullResponse: true
+	};
+
+	return authPromise
+		.then( userId => {
+			if( userId != -1 ) {
+				genericReqOptions.headers = {
+					'User-Id': userId,
+					'AccessToken': request.headers.accesstoken
+				};
+			}
+			request.log.info( 'Sending request on ' + genericReqOptions.uri );
+			return httpPromise( genericReqOptions );
+		})
+	;
+}
+
+function _apiPOST( uri, request, response, isAuthRequired, methodName ) {
+
+	console.log('got the request from resolvePOST');
+	console.log(uri, isAuthRequired, methodName);
+	var authPromise = isAuthRequired
+		? _getUserAuth( request, response )
+		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
+
+	var genericReqOptions = {
+		uri: uri,
+		method: methodName,
 		agent : httpAgent,
 		resolveWithFullResponse: true
 	};
@@ -377,6 +407,83 @@ function resolveGETBatch( request, response ) {
 
 function resolvePOST( request, response ) {
 
+	/*
+	Decide which method to call internally depending on the required fields provided from the config
+	Approach
+	1.	check if api is supported
+	2.	if apiSupported
+		a.	check if auth is required
+		b.	check if pipe is required
+		c. 	get all the methods supported
+		d.	get which method to call using the requiredField provided
+		e.	send request to that method depending on the method selected
+	*/
+	var api = request.path.substr(4);
+	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
+	if( isApiSupported ) {
+		var isAuthRequired = isApiSupported && routeConfig[api].POST.auth;
+		var isPipeRequired = isApiSupported && routeConfig[api].POST.shouldPipe;
+		var listMethods = isApiSupported && routeConfig[api].POST.methods;
+		var method = Object.keys(listMethods);
+		var methodName;
+		var fieldsFlag = 1;
+		loop1 :
+			for( var i = 0; i < method.length; i++ ) {
+				methodName = method[ i ];
+				var requiredFields = listMethods[ methodName ];
+				fieldsFlag = 1;
+				loop2:
+					for( var j = 0; j < requiredFields.length; j++ ) {
+						var fieldObject = requiredFields[ j ];
+						var fieldName = Object.keys( fieldObject );
+						var fieldValue = fieldObject[ fieldName ];
+						if( _.has( request.body, fieldName ) ) {
+							if( fieldValue === null ) {
+								continue loop2;
+							} else if( fieldValue !== request.body[fieldName] ) {
+								console.log('rejecting '+methodName);
+								fieldsFlag = 0;
+								continue loop1;
+							}
+						} else {
+							console.log('rejecting '+methodName);
+							fieldsFlag = 0;
+							continue loop1;
+						}
+				}
+				if( fieldsFlag ) {
+					console.log('method decided is '+methodName);
+					break loop1;
+				} else {
+					console.log('method not decided');
+				}
+		}
+		if(fieldsFlag) {
+			console.log('got the method '+methodName);
+			var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
+			console.log('sending request to _apiPOST');
+			_apiPOST( uri, request, response, isAuthRequired, methodName )
+				.then( (serviceResponse) => {
+					// TODO: Check addRespectiveServiceHeaders
+					addRespectiveServiceHeaders( response, serviceResponse.headers );
+					response.status( serviceResponse.statusCode ).send( serviceResponse.body );
+					request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
+					latencyMetric.write( Date.now() - request.startTimestamp );
+				})
+				.catch( (err) => {
+					response.status( _getResponseCode( err.statusCode ) ).send( err.error );
+					request.log.error( JSON.stringify( err.error ) );
+					request.log.submit( err.statusCode || 500, err.error.length );
+					latencyMetric.write( Date.now() - request.startTimestamp );
+				})
+			;
+
+		} else {
+			console.log('all methods rejected');
+		}
+	} else {
+		response.send( "Api Not supported yet!" );
+	}
 }
 
 
@@ -384,7 +491,8 @@ function resolvePOST( request, response ) {
 const app = express();
 
 app.use( morgan('short') );
-
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 // for initializing log object
 app.use( (request, response, next) => {
 	var log = request.log = new Logging( request );
@@ -423,7 +531,7 @@ app.post( ['/*'], (request, response, next) => {
 	resolvePOST( request, response );
 });
 
-app.listen(80);
+app.listen(8080);
 
 function addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
 	var pagHeaders = [ 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' ];
