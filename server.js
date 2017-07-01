@@ -93,6 +93,8 @@ app.get(['/*'], (request, response, next) => {
     // on its reject forward same response to client with 403
     var authPromise = httpPromise(authOptions)
     .then(authResponse => {
+      request.log.info('Authentication request succeeded and userId is ' + authResponse.headers['user-id']);
+      request.log.info('Authentication headers received are ' + JSON.stringify(authResponse.headers));
       response.locals['user-id'] = authResponse.headers['user-id'];
       request.log.info('Authenticated');
       next();
@@ -133,6 +135,7 @@ app.get(['/*'], (request, response, next) => {
     
     //if auth is req, pass user Id
     if(routeConfig[request.path] && routeConfig[request.path].GET.auth) {
+      request.log.info('Adding user-id in service header ' + response.locals['user-id']);
       genericReqOptions.headers = {
         'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
       };
