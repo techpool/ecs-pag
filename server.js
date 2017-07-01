@@ -480,6 +480,7 @@ function resolvePOST( request, response ) {
 
 		} else {
 			console.log('all methods rejected');
+			response.send( "Wrong arguments" );
 		}
 	} else {
 		response.send( "Api Not supported yet!" );
