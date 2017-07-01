@@ -121,7 +121,7 @@ function _apiPOST( uri, request, response, isAuthRequired, methodName ) {
 		uri: uri,
 		method: methodName,
 		agent : httpAgent,
-		body: request.body,
+		body: JSON.stringify(request.body),
 		resolveWithFullResponse: true
 	};
 
