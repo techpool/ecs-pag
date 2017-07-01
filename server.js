@@ -137,7 +137,8 @@ app.get(['/*'], (request, response, next) => {
     if(routeConfig[api] && routeConfig[api].GET.auth) {
       request.log.info('Adding user-id in service header ' + response.locals['user-id']);
       genericReqOptions.headers = {
-        'User-Id': response.locals['user-id'] //TODO: test for case insensitivity
+        'User-Id': response.locals['user-id'], //TODO: test for case insensitivity
+        'AccessToken': request.headers.accesstoken
       };
     }
 
