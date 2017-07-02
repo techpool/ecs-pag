@@ -111,8 +111,6 @@ function _apiGET( uri, request, response, isAuthRequired ) {
 
 function _apiPOST( uri, request, response, isAuthRequired, methodName ) {
 
-	console.log('got the request from resolvePOST');
-	console.log(uri, isAuthRequired, methodName);
 	var authPromise = isAuthRequired
 		? _getUserAuth( request, response )
 		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
@@ -443,31 +441,24 @@ function resolvePOST( request, response ) {
 							if( fieldValue === null ) {
 								continue loop2;
 							} else if( fieldValue !== request.body[fieldName] ) {
-								console.log('rejecting '+methodName);
 								fieldsFlag = 0;
 								continue loop1;
 							}
 						} else {
-							console.log('rejecting '+methodName);
 							fieldsFlag = 0;
 							continue loop1;
 						}
 				}
 				if( fieldsFlag ) {
-					console.log('method decided is '+methodName);
 					break loop1;
 				} else {
-					console.log('method not decided');
 				}
 		}
 		if(fieldsFlag) {
-			console.log('got the method '+methodName);
 			var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
-			console.log('sending request to _apiPOST');
 			_apiPOST( uri, request, response, isAuthRequired, methodName )
 				.then( (serviceResponse) => {
 					// TODO: Check addRespectiveServiceHeaders
-					console.log(serviceResponse);
 					addRespectiveServiceHeaders( response, serviceResponse.headers );
 					response.status( serviceResponse.statusCode ).send( serviceResponse.body );
 					request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
@@ -482,7 +473,6 @@ function resolvePOST( request, response ) {
 			;
 
 		} else {
-			console.log('all methods rejected');
 			response.send( "Wrong arguments" );
 		}
 	} else {
