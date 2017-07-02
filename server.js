@@ -467,6 +467,7 @@ function resolvePOST( request, response ) {
 			_apiPOST( uri, request, response, isAuthRequired, methodName )
 				.then( (serviceResponse) => {
 					// TODO: Check addRespectiveServiceHeaders
+					console.log(serviceResponse);
 					addRespectiveServiceHeaders( response, serviceResponse.headers );
 					response.status( serviceResponse.statusCode ).send( serviceResponse.body );
 					request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
