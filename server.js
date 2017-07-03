@@ -26,14 +26,15 @@ var httpAgent = new http.Agent({ keepAlive : true });
 
 
 function _getResponseCode( code ) {
-	// TODO: All edge cases
-	if( ! code )
-		return 500;
+	if( ! code ) return 500;
+	code = parseInt( code );
 	var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
 	if( supportedCodesOnFrontend[ code ] )
 		return code;
-	else if( code === 403 ) // From Auth Service
-		return 401;
+	else if( code >= 200 && code < 300 )
+		return 200;
+	else if( code >= 400 && code < 500 )
+		return 401; // Not Authorised
 	else
 		return 500; // Internal Server Exception
 }
@@ -79,7 +80,7 @@ function _getUserAuth( request, response ) {
 
 }
 
-// 3 parameters
+// 4 parameters
 // uri -> which uri to hit
 // request and response -> for auth
 // isAuthRequired -> for auth
@@ -109,6 +110,7 @@ function _apiGET( uri, request, response, isAuthRequired ) {
 	;
 }
 
+// TODO: Change Method Name -> Make it generic for all
 function _apiPOST( uri, request, response, isAuthRequired, methodName ) {
 
 	var authPromise = isAuthRequired
@@ -120,7 +122,7 @@ function _apiPOST( uri, request, response, isAuthRequired, methodName ) {
 		method: methodName,
 		agent : httpAgent,
 		body: request.body,
-		json:true,
+		json: true,
 		resolveWithFullResponse: true
 	};
 
@@ -196,7 +198,9 @@ function resolveGET( request, response ) {
 
 	// Forward to appengine -> Supported only on gamma and prod
 	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
-		request.pipe( requestModule( "https://api.pratilipi.com" + request.url ) )
+		var appengineUrl = "https://api.pratilipi.com" + request.url;
+		appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + request.headers.accesstoken;
+		request.pipe( requestModule( appengineUrl ) )
 			.on( 'error', (error) => {
 				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the request!' );
 				request.log.error( JSON.stringify( error ) );
@@ -323,7 +327,7 @@ function resolveGETBatch( request, response ) {
 				promiseArray.push( _apiGET( url, request, response, req.isAuthRequired ) );
 			});
 
-			// TODO: Minor optimisation for Auth
+			// TODO: Minor optimisation for Auth -> Call it once in case of parallel calls
 			// Pretty simple with Promise.all, isn't it?
 			Promise.all( promiseArray )
 				.then( (responseArray) => { // responseArray will be in order
@@ -412,7 +416,7 @@ function resolvePOST( request, response ) {
 	Approach
 	1.	check if api is supported
 	2.	if apiSupported
-		a.	check if auth is required
+		a.	check if auth is required
 		b.	check if pipe is required
 		c. 	get all the methods supported
 		d.	get which method to call using the requiredField provided
@@ -424,18 +428,18 @@ function resolvePOST( request, response ) {
 		var isAuthRequired = isApiSupported && routeConfig[api].POST.auth;
 		var isPipeRequired = isApiSupported && routeConfig[api].POST.shouldPipe;
 		var listMethods = isApiSupported && routeConfig[api].POST.methods;
-		var method = Object.keys(listMethods);
+		var method = Object.keys( listMethods );
 		var methodName;
-		var fieldsFlag = 1;
+		var fieldsFlag = 1; // TODO: use a boolean?
 		loop1 :
 			for( var i = 0; i < method.length; i++ ) {
 				methodName = method[ i ];
 				var requiredFields = listMethods[ methodName ];
 				fieldsFlag = 1;
-				loop2:
+				loop2 :
 					for( var j = 0; j < requiredFields.length; j++ ) {
 						var fieldObject = requiredFields[ j ];
-						var fieldName = Object.keys( fieldObject );
+						var fieldName = Object.keys( fieldObject ); // TODO: wouldn't it be an array?
 						var fieldValue = fieldObject[ fieldName ];
 						if( _.has( request.body, fieldName ) ) {
 							if( fieldValue === null ) {
@@ -451,10 +455,9 @@ function resolvePOST( request, response ) {
 				}
 				if( fieldsFlag ) {
 					break loop1;
-				} else {
 				}
 		}
-		if(fieldsFlag) {
+		if( fieldsFlag ) {
 			var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
 			_apiPOST( uri, request, response, isAuthRequired, methodName )
 				.then( (serviceResponse) => {
@@ -475,6 +478,7 @@ function resolvePOST( request, response ) {
 		} else {
 			response.send( "Wrong arguments" );
 		}
+	// TODO: Forward to appengine in gamma and prod
 	} else {
 		response.send( "Api Not supported yet!" );
 	}
