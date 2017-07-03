@@ -8,15 +8,17 @@
 
 
 ## Rest of the services - We are following RESTful url format:
-## Request Headers: AccessToken, UserId, Version -> Common to GET, POST, PATCH, DELETE
+## Request Headers: Access-Token, User-Id, Version -> Common to GET, POST, PATCH, DELETE
+## Request Body Type: Json
+## Content-Type: application/x-www-form-urlencoded
 
-## GET: in param
+## GET: id in param
 eg: /pratilipis/12345
 
-## GET BATCH: in query
-eg: /pratilipis?ids=[123,456]
+## GET BATCH: id in query
+eg: /pratilipis?id=12345,67890
 
-## POST: in body
+## POST: data in body
 eg: /pratilipis
 body: {
 	'title': 'yolo',
@@ -24,7 +26,7 @@ body: {
 	'blah': 'blah blah'
 }
 
-## PATCH: in body
+## PATCH: id in param, data in body
 eg: /pratilipis/12345
 body: {
 	'title': 'yolo',
@@ -32,7 +34,7 @@ body: {
 	'blah': 'blah blah'
 }
 
-## DELETE: in body
+## DELETE: id in param
 eg: /pratilipis/12345
 
 
