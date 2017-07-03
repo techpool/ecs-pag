@@ -159,6 +159,7 @@ function resolveGET( request, response ) {
 
 	// For image requests
 	if( isPipeRequired ) {
+		// TODO: isAuthRequired for images? (Content images)
 		var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '';
 		var uriNew = routeConfig[api].GET.path + urlSuffix;
 		var url = 'http://' + process.env.API_END_POINT + uriNew;
@@ -430,33 +431,26 @@ function resolvePOST( request, response ) {
 		var listMethods = isApiSupported && routeConfig[api].POST.methods;
 		var method = Object.keys( listMethods );
 		var methodName;
-		var fieldsFlag = 1; // TODO: use a boolean?
+		var fieldsFlag;
 		loop1 :
 			for( var i = 0; i < method.length; i++ ) {
 				methodName = method[ i ];
 				var requiredFields = listMethods[ methodName ];
-				fieldsFlag = 1;
+				fieldsFlag = true;
 				loop2 :
 					for( var j = 0; j < requiredFields.length; j++ ) {
 						var fieldObject = requiredFields[ j ];
-						var fieldName = Object.keys( fieldObject ); // TODO: wouldn't it be an array?
+						var fieldName = Object.keys( fieldObject )[0];
 						var fieldValue = fieldObject[ fieldName ];
-						if( _.has( request.body, fieldName ) ) {
-							if( fieldValue === null ) {
-								continue loop2;
-							} else if( fieldValue !== request.body[fieldName] ) {
-								fieldsFlag = 0;
-								continue loop1;
-							}
-						} else {
-							fieldsFlag = 0;
+						if( !_.has( request.body, fieldName ) || ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
+							fieldsFlag = false;
 							continue loop1;
 						}
-				}
+					}
 				if( fieldsFlag ) {
 					break loop1;
 				}
-		}
+			}
 		if( fieldsFlag ) {
 			var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
 			_apiPOST( uri, request, response, isAuthRequired, methodName )
@@ -489,8 +483,8 @@ function resolvePOST( request, response ) {
 const app = express();
 
 app.use( morgan('short') );
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use( bodyParser.json() );
+app.use( bodyParser.urlencoded({ extended: false }) );
 // for initializing log object
 app.use( (request, response, next) => {
 	var log = request.log = new Logging( request );
