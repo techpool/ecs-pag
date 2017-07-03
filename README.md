@@ -8,9 +8,9 @@
 
 
 ## Rest of the services - We are following RESTful url format:
-## Request Headers: Access-Token, User-Id, Version -> Common to GET, POST, PATCH, DELETE
-## Request Body Type: Json
-## Content-Type: application/x-www-form-urlencoded
+#### Request Headers: Access-Token, User-Id, Version -> Common to GET, POST, PATCH, DELETE
+#### Request Body Type: Json
+#### Content-Type: application/x-www-form-urlencoded
 
 ## GET: id in param
 eg: /pratilipis/12345
