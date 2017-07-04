@@ -473,22 +473,21 @@ function resolvePOST( request, response ) {
 	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
 		var appengineUrl = "https://api.pratilipi.com" + request.url;
 		appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + request.headers.accesstoken;
-		// TODO: Add Request body
-		request.pipe( requestModule( appengineUrl ) )
-			.on( 'error', (error) => {
-				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
-			.pipe( response )
-			.on( 'error', (error) => {
-				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
-		;
+		var options = {
+			method: 'POST',
+			uri: appengineUrl,
+			form: request.body
+		};
+		requestModule.post( options, (err, httpResponse, body) => {
+			if( err ) {
+				response.status( _getResponseCode( httpResponse.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+				request.log.error( JSON.stringify( err ) );
+				request.log.submit( httpResponse.statusCode || 500, err.message || 'There was an error forwarding the request to gae!' );
+			} else {
+				response.status( httpResponse.statusCode ).send( body );
+			}
+			latencyMetric.write( Date.now() - request.startTimestamp );
+		});
 	} else {
 		response.send( "Api Not supported yet!" );
 	}
