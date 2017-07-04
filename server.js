@@ -22,21 +22,41 @@ const Metric = require( './lib/MetricGcp.js' ).init({
 
 const latencyMetric = new Metric( 'int64', 'Latency' );
 
+const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
+const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
+const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
+
 var httpAgent = new http.Agent({ keepAlive : true });
 
 
+function _addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
+	var pagHeaders = [ 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' ];
+	var serviceHeaders = _.omit( serviceReturnedHeaders, pagHeaders );
+	response.set( serviceHeaders );
+}
+
 function _getResponseCode( code ) {
-	if( ! code ) return 500;
+
+	if( ! code ) {
+		console.log( "Response code is not properly sent!" );
+		return 500;
+	}
+
 	code = parseInt( code );
-	var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
+
+	var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ]; // supportedCodesOnPag = [200, 207, 400, 401, 403, 404, 500, 502, 504];
 	if( supportedCodesOnFrontend[ code ] )
 		return code;
-	else if( code >= 200 && code < 300 )
+	else if( code === 207 )
 		return 200;
-	else if( code >= 400 && code < 500 )
-		return 401; // Not Authorised
-	else
-		return 500; // Internal Server Exception
+	else if( code === 403 )
+		return 401;
+	else if( code === 502 || code === 504 )
+		return 500;
+
+	console.log( "Invalid Response Code sent: " + code );
+	return 500;
+
 }
 
 function _getUserAuth( request, response ) {
@@ -66,7 +86,7 @@ function _getUserAuth( request, response ) {
 	return httpPromise( authOptions )
 		.then( authResponse => {
 			request.log.info( 'Authenticated !' );
-			response.locals[ 'user-id' ] = authResponse.headers['user-id'];
+			response.locals[ 'user-id' ] = authResponse.headers[ 'user-id' ];
 			return response.locals[ 'user-id' ];
 		 })
 		.catch( (authError) => {
@@ -74,81 +94,53 @@ function _getUserAuth( request, response ) {
 			request.log.info( JSON.stringify( authError.error ) );
 			request.log.submit( authError.statusCode || 500, authError.error.length );
 			latencyMetric.write( Date.now() - request.startTimestamp );
-			response.status( _getResponseCode( authError.statusCode ) ).send( authError.error );
+			response.status( _getResponseCode( authError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 		})
 	;
 
 }
 
-// 4 parameters
-// uri -> which uri to hit
-// request and response -> for auth
-// isAuthRequired -> for auth
-function _apiGET( uri, request, response, isAuthRequired ) {
+function _getHttpPromise( uri, method, isAuthRequired, request, response ) {
 
 	var authPromise = isAuthRequired
-		? _getUserAuth( request, response )
-		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
+			? _getUserAuth( request, response )
+			: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
 	var genericReqOptions = {
 		uri: uri,
+		method: method,
 		agent : httpAgent,
-		resolveWithFullResponse: true
-	};
-
-	return authPromise
-		.then( userId => {
-			if( userId != -1 ) {
-				genericReqOptions.headers = {
-					'User-Id': userId,
-					'AccessToken': request.headers.accesstoken
-				};
-			}
-			request.log.info( 'Sending request on ' + genericReqOptions.uri );
-			return httpPromise( genericReqOptions );
-		})
-	;
-}
-
-// TODO: Change Method Name -> Make it generic for all
-function _apiPOST( uri, request, response, isAuthRequired, methodName ) {
-
-	var authPromise = isAuthRequired
-		? _getUserAuth( request, response )
-		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
-
-	var genericReqOptions = {
-		uri: uri,
-		method: methodName,
-		agent : httpAgent,
-		body: request.body,
 		json: true,
 		resolveWithFullResponse: true
 	};
 
-	return authPromise
-		.then( userId => {
-			if( userId != -1 ) {
-				genericReqOptions.headers = {
-					'User-Id': userId,
-					'AccessToken': request.headers.accesstoken
-				};
-			}
-			request.log.info( 'Sending request on ' + genericReqOptions.uri );
-			return httpPromise( genericReqOptions );
-		})
-	;
-}
+	if( request.body )
+		genericReqOptions[ "body" ] = request.body;
 
+	if( request.headers.version )
+		genericReqOptions.headers[ "Version" ] = request.headers.version;
+
+	return authPromise
+			.then( userId => {
+				if( userId != -1 ) {
+					genericReqOptions.headers[ "User-Id" ] = userId;
+					genericReqOptions.headers[ "AccessToken" ] = request.headers.accesstoken; // TODO: Remove it once changes are made in Recommendation
+					genericReqOptions.headers[ "Access-Token" ] = request.headers.accesstoken;
+				}
+				request.log.info( 'Sending request on ' + genericReqOptions.uri );
+				return httpPromise( genericReqOptions );
+			})
+		;
+}
 
 function resolveGET( request, response ) {
 
 	/*
 	*   4 cases:
 	*	1. ecs -> without auth (images)
-	*   2. ecs -> with auth (other services)
+	*   2. ecs -> with auth (other services) (images also)
 	*   3. not supported in ecs && devo environment -> Send 'not supported'
-	*   4. not supported in ecs && ( gamma || prod ) -> Forward request for appengine
+	*   4. not supported in ecs && ( gamma || prod ) -> Forward request to Appengine
 	*/
 
 	// request.path will be /api/xxx
@@ -165,32 +157,31 @@ function resolveGET( request, response ) {
 		var url = 'http://' + process.env.API_END_POINT + uriNew;
 		request.pipe( requestModule( url ) )
 			.on( 'error', function( error ) {
-				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the request!' );
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.pipe( response )
-			.on(' error', function( error ) {
-				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the response!' );
+			.on( 'error', function( error ) {
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 		;
 	// Supported in ecs
 	} else if( isApiSupported ) {
 		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
-		_apiGET( uri, request, response, isAuthRequired )
+		_getHttpPromise( uri, "GET", isAuthRequired, request, response )
 			.then( (serviceResponse) => {
-				// TODO: Check addRespectiveServiceHeaders
-				addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( serviceResponse.statusCode ).send( serviceResponse.body );
+				_addRespectiveServiceHeaders( response, serviceResponse.headers );
+				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.catch( (err) => {
-				response.status( _getResponseCode( err.statusCode ) ).send( err.error );
+				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( err.error ) );
 				request.log.submit( err.statusCode || 500, err.error.length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
@@ -203,16 +194,16 @@ function resolveGET( request, response ) {
 		appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + request.headers.accesstoken;
 		request.pipe( requestModule( appengineUrl ) )
 			.on( 'error', (error) => {
-				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the request!' );
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.pipe( response )
 			.on( 'error', (error) => {
-				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the response!' );
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 		;
@@ -287,18 +278,19 @@ function resolveGETBatch( request, response ) {
 	// Only on gamma and prod environments
 	if( forwardAllToGAE && ( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) ) {
 
-		request.pipe( requestModule( "https://api.pratilipi.com" + request.url ) )
+		var appengineUrl = "https://api.pratilipi.com?accessToken=" + request.headers.accesstoken + "&requests=" + JSON.stringify( requests );
+		request.pipe( requestModule( appengineUrl ) )
 			.on( 'error', function(error) {
-				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the request!' );
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.pipe( response )
 			.on( 'error', function(error) {
-				response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'There was an error forwarding the response!' );
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 		;
@@ -320,26 +312,38 @@ function resolveGETBatch( request, response ) {
 
 		if( isParallel ) {
 
-			var promiseArray = [];
-			requestArray.forEach( (req) => {
-				var url = req.isSupported
-					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
-					: 'http://api.pratilipi.com' + req.url;
-				promiseArray.push( _apiGET( url, request, response, req.isAuthRequired ) );
-			});
+			var authRequired = false;
+			for( var i = 0; i < requestArray.length; i++ ) {
+				if( requestArray[i][ "isAuthRequired" ] ) {
+					authRequired = true;
+					break;
+				}
+			}
 
-			// TODO: Minor optimisation for Auth -> Call it once in case of parallel calls
-			// Pretty simple with Promise.all, isn't it?
-			Promise.all( promiseArray )
+			var authPromise = authRequired
+				? _getUserAuth( request, response )
+				: new Promise( function( resolve, reject ) { resolve(-1); });
+
+			authPromise
+				.then( (auth) => { // Hack -> Calling Auth service only once
+					var promiseArray = [];
+					requestArray.forEach( (req) => {
+						var url = req.isSupported
+							? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
+							: 'http://api.pratilipi.com' + req.url; // TODO: AccessToken
+						promiseArray.push( _getHttpPromise( url, "GET", req.isAuthRequired, request, response ) );
+					});
+					return Promise.all( promiseArray ); // Pretty simple with Promise.all, isn't it?
+				})
 				.then( (responseArray) => { // responseArray will be in order
 					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = responseArray[i].body;
-					response.send( JSON.stringify( returnResponse ) );
+					response.send( returnResponse );
 					request.log.submit( 200, JSON.stringify( returnResponse ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				}).catch( (error) => {
-					response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'Some exception occurred at the server! Please try again!' );
+					response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( JSON.stringify( error ) );
 					request.log.submit( error.statusCode, JSON.stringify( error.message ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
@@ -365,9 +369,9 @@ function resolveGETBatch( request, response ) {
 				var req = reqArray[0];
 				var url = req.isSupported
 					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
-					: 'http://api.pratilipi.com' + req.url;
+					: 'http://api.pratilipi.com' + req.url; // TODO: AccessToken
 
-				return _apiGET( url, request, response, req.isAuthRequired )
+				return _getHttpPromise( url, "GET", req.isAuthRequired, request, response )
 					.then( (res) => {
 						var responseJson = JSON.parse( res.body );
 						// Modifying other requests of the reqArray
@@ -379,13 +383,12 @@ function resolveGETBatch( request, response ) {
 								}
 							}
 						});
-						// Populating the responseObject
-						responseObject[ req.name ] = responseJson;
+						responseObject[ req.name ] = responseJson; // Populating the responseObject
 						reqArray.shift();
 						return recursiveGET( reqArray );
 					})
 					.catch( (error) => {
-						response.status( _getResponseCode( error.statusCode ) ).send( error.message || 'Some exception occurred at the server! Please try again!' );
+						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 						request.log.error( JSON.stringify( error ) );
 						request.log.submit( error.statusCode, JSON.stringify( error.message ).length );
 						latencyMetric.write( Date.now() - request.startTimestamp );
@@ -397,12 +400,6 @@ function resolveGETBatch( request, response ) {
 				.then( (res) => {
 					response.send( res );
 					request.log.submit( 200, JSON.stringify( res ).length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
-				})
-				.catch( (err) => {
-					response.status( _getResponseCode( err.statusCode ) ).send( err.error );
-					request.log.error( JSON.stringify( err.error ) );
-					request.log.submit( err.statusCode || 500, err.error.length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				})
 			;
@@ -442,7 +439,7 @@ function resolvePOST( request, response ) {
 						var fieldObject = requiredFields[ j ];
 						var fieldName = Object.keys( fieldObject )[0];
 						var fieldValue = fieldObject[ fieldName ];
-						if( !_.has( request.body, fieldName ) || ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
+						if( ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
 							fieldsFlag = false;
 							continue loop1;
 						}
@@ -453,16 +450,15 @@ function resolvePOST( request, response ) {
 			}
 		if( fieldsFlag ) {
 			var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
-			_apiPOST( uri, request, response, isAuthRequired, methodName )
+			_getHttpPromise( uri, methodName, isAuthRequired, request, response )
 				.then( (serviceResponse) => {
-					// TODO: Check addRespectiveServiceHeaders
-					addRespectiveServiceHeaders( response, serviceResponse.headers );
+					_addRespectiveServiceHeaders( response, serviceResponse.headers );
 					response.status( serviceResponse.statusCode ).send( serviceResponse.body );
 					request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				})
 				.catch( (err) => {
-					response.status( _getResponseCode( err.statusCode ) ).send( err.error );
+					response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( JSON.stringify( err.error ) );
 					request.log.submit( err.statusCode || 500, err.error.length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
@@ -470,9 +466,29 @@ function resolvePOST( request, response ) {
 			;
 
 		} else {
-			response.send( "Wrong arguments" );
+			response.status(400).send( INVALID_ARGUMENT_EXCEPTION );
 		}
-	// TODO: Forward to appengine in gamma and prod
+
+	// Forward to appengine -> Supported only on gamma and prod
+	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
+		var appengineUrl = "https://api.pratilipi.com" + request.url;
+		appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + request.headers.accesstoken;
+		// TODO: Add Request body
+		request.pipe( requestModule( appengineUrl ) )
+			.on( 'error', (error) => {
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+			.pipe( response )
+			.on( 'error', (error) => {
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+		;
 	} else {
 		response.send( "Api Not supported yet!" );
 	}
@@ -525,8 +541,3 @@ app.post( ['/*'], (request, response, next) => {
 
 app.listen(80);
 
-function addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
-	var pagHeaders = [ 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' ];
-	var serviceHeaders = _.omit( serviceReturnedHeaders, pagHeaders );
-	response.set( serviceHeaders );
-}
