@@ -31,6 +31,18 @@ var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 
+function _getUrlParameter( url, parameter ) {
+	if( url.indexOf( "?" ) !== -1 ) url = url.split( "?" )[1];
+	var vars = url.split( "&" );
+	for( var i = 0; i < vars.length; i++ ) {
+		var pair = vars[i].split( "=" );
+		if( pair[0] == parameter ) {
+			return pair[1];
+		}
+	}
+	return null;
+}
+
 function _addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
 	var pagHeaders = [ 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' ];
 	var serviceHeaders = _.omit( serviceReturnedHeaders, pagHeaders );
@@ -174,7 +186,10 @@ function resolveGET( request, response ) {
 		;
 	// Supported in ecs
 	} else if( isApiSupported ) {
-		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
+		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path;
+		var primaryKey = getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
+		if( primaryKey ) uri += "/" + primaryKey;
+		uri += ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
 		_getHttpPromise( uri, "GET", isAuthRequired, request, response )
 			.then( (serviceResponse) => {
 				_addRespectiveServiceHeaders( response, serviceResponse.headers );
@@ -330,9 +345,15 @@ function resolveGETBatch( request, response ) {
 				.then( (auth) => { // Hack -> Calling Auth service only once
 					var promiseArray = [];
 					requestArray.forEach( (req) => {
-						var url = req.isSupported
-							? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
-							: 'https://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+						var url;
+						if( req.isSupported ) {
+							url = 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path;
+							var primaryKey = getUrlParameter( req.url, routeConfig[req.api].GET.primaryKey );
+							if( primaryKey ) url += "/" + primaryKey;
+							url += ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' );
+						} else {
+							url = 'https://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+						}
 						promiseArray.push( _getHttpPromise( url, "GET", req.isAuthRequired, request, response ) );
 					});
 					return Promise.all( promiseArray ); // Pretty simple with Promise.all, isn't it?
@@ -370,9 +391,15 @@ function resolveGETBatch( request, response ) {
 
 				// Current request Object
 				var req = reqArray[0];
-				var url = req.isSupported
-					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
-					: 'https://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+				var url;
+				if( req.isSupported ) {
+					url = 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path;
+					var primaryKey = getUrlParameter( req.url, routeConfig[req.api].GET.primaryKey );
+					if( primaryKey ) url += "/" + primaryKey;
+					url += ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' );
+				} else {
+					url = 'https://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+				}
 
 				return _getHttpPromise( url, "GET", req.isAuthRequired, request, response )
 					.then( (res) => {
