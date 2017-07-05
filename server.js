@@ -1,4 +1,5 @@
 var http = require( 'http' );
+var https = require( 'https' );
 var httpPromise = require( 'request-promise' );
 var requestModule = require( 'request' );
 var Promise = require( 'bluebird' );
@@ -27,6 +28,7 @@ const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for t
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
 var httpAgent = new http.Agent({ keepAlive : true });
+var httpsAgent = new https.Agent({ keepAlive : true });
 
 
 function _addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
@@ -109,7 +111,7 @@ function _getHttpPromise( uri, method, isAuthRequired, request, response ) {
 	var genericReqOptions = {
 		uri: uri,
 		method: method,
-		agent : httpAgent,
+		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		json: true,
 		resolveWithFullResponse: true
 	};
@@ -330,7 +332,7 @@ function resolveGETBatch( request, response ) {
 					requestArray.forEach( (req) => {
 						var url = req.isSupported
 							? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
-							: 'http://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+							: 'https://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
 						promiseArray.push( _getHttpPromise( url, "GET", req.isAuthRequired, request, response ) );
 					});
 					return Promise.all( promiseArray ); // Pretty simple with Promise.all, isn't it?
@@ -370,7 +372,7 @@ function resolveGETBatch( request, response ) {
 				var req = reqArray[0];
 				var url = req.isSupported
 					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
-					: 'http://api.pratilipi.com' + req.url; // TODO: AccessToken
+					: 'https://api.pratilipi.com' + req.url; // TODO: AccessToken
 
 				return _getHttpPromise( url, "GET", req.isAuthRequired, request, response )
 					.then( (res) => {
