@@ -114,7 +114,7 @@ function _getHttpPromise( uri, method, isAuthRequired, request, response ) {
 		resolveWithFullResponse: true
 	};
 
-	if( request.body )
+	if( ( method === "POST" || method === "PATCH" ) && request.body )
 		genericReqOptions[ "body" ] = request.body;
 
 	if( request.headers.version )
@@ -278,7 +278,7 @@ function resolveGETBatch( request, response ) {
 	// Only on gamma and prod environments
 	if( forwardAllToGAE && ( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) ) {
 
-		var appengineUrl = "https://api.pratilipi.com?accessToken=" + request.headers.accesstoken + "&requests=" + JSON.stringify( requests );
+		var appengineUrl = "https://api.pratilipi.com?accessToken=" + request.headers.accesstoken + "&requests=" + encodeURIComponent( JSON.stringify( requests ) );
 		request.pipe( requestModule( appengineUrl ) )
 			.on( 'error', function(error) {
 				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
@@ -330,7 +330,7 @@ function resolveGETBatch( request, response ) {
 					requestArray.forEach( (req) => {
 						var url = req.isSupported
 							? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
-							: 'http://api.pratilipi.com' + req.url; // TODO: AccessToken
+							: 'http://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
 						promiseArray.push( _getHttpPromise( url, "GET", req.isAuthRequired, request, response ) );
 					});
 					return Promise.all( promiseArray ); // Pretty simple with Promise.all, isn't it?
@@ -343,9 +343,10 @@ function resolveGETBatch( request, response ) {
 					request.log.submit( 200, JSON.stringify( returnResponse ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				}).catch( (error) => {
-					response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( JSON.stringify( error ) );
-					request.log.submit( error.statusCode, JSON.stringify( error.message ).length );
+					response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
+					request.log.error( error.statusCode ); // 'Bad Request'
+					request.log.error( error.message ); // Html
+					request.log.submit( 500, error.message.length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				})
 			;
