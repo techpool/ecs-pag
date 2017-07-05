@@ -437,6 +437,41 @@ function resolveGETBatch( request, response ) {
 	}
 }
 
+function _resolvePostPatchDelete( methodName, request, response ) {
+
+	var api = request.path.substr(4);
+	var isApiSupported = routeConfig[api] && routeConfig[api].POST[ "methods" ][ methodName ];
+
+	if( isApiSupported ) {
+		var uri;
+		if( methodName === "POST" ) {
+			uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
+		} else if( methodName === "PATCH" || methodName === "DELETE" ) {
+			uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path
+				+ "/" + routeConfig[api][ "POST" ][ "methods" ][ methodName ][ "primaryKey" ];
+				+ ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
+		}
+
+		// Assumption: isAuthRequired = true for all POST requests
+		_getHttpPromise( uri, methodName, true, request, response )
+			.then( (serviceResponse) => {
+				_addRespectiveServiceHeaders( response, serviceResponse.headers );
+				response.status( serviceResponse.statusCode ).send( serviceResponse.body );
+				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+			.catch( (err) => {
+				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+				request.log.error( JSON.stringify( err.error ) );
+				request.log.submit( err.statusCode || 500, err.error.length );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+		;
+	} else {
+		response.send( "Method not yet supported!" );
+	}
+}
+
 function resolvePOST( request, response ) {
 
 	/*
@@ -444,25 +479,22 @@ function resolvePOST( request, response ) {
 	Approach
 	1.	check if api is supported
 	2.	if apiSupported
-		a.	check if auth is required
-		b.	check if pipe is required
-		c. 	get all the methods supported
-		d.	get which method to call using the requiredField provided
-		e.	send request to that method depending on the method selected
+		a. 	get all the methods supported
+		b.	get which method to call using the requiredField provided
+		c.	send request to that method depending on the method selected
 	*/
+
 	var api = request.path.substr(4);
 	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
 	if( isApiSupported ) {
-		var isAuthRequired = isApiSupported && routeConfig[api].POST.auth;
-		var isPipeRequired = isApiSupported && routeConfig[api].POST.shouldPipe;
-		var listMethods = isApiSupported && routeConfig[api].POST.methods;
+		var listMethods = routeConfig[api].POST.methods;
 		var method = Object.keys( listMethods );
 		var methodName;
 		var fieldsFlag;
 		loop1 :
 			for( var i = 0; i < method.length; i++ ) {
-				methodName = method[ i ];
-				var requiredFields = listMethods[ methodName ];
+				methodName = method[i];
+				var requiredFields = listMethods[ methodName ][ 'requiredFields' ];
 				fieldsFlag = true;
 				loop2 :
 					for( var j = 0; j < requiredFields.length; j++ ) {
@@ -478,26 +510,12 @@ function resolvePOST( request, response ) {
 					break loop1;
 				}
 			}
-		if( fieldsFlag ) {
-			var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
-			_getHttpPromise( uri, methodName, isAuthRequired, request, response )
-				.then( (serviceResponse) => {
-					_addRespectiveServiceHeaders( response, serviceResponse.headers );
-					response.status( serviceResponse.statusCode ).send( serviceResponse.body );
-					request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
-				})
-				.catch( (err) => {
-					response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( JSON.stringify( err.error ) );
-					request.log.submit( err.statusCode || 500, err.error.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
-				})
-			;
 
-		} else {
-			response.status(400).send( INVALID_ARGUMENT_EXCEPTION );
-		}
+		// TODO: isPipeRequired Implementation
+		if( fieldsFlag )
+			_resolvePostPatchDelete( methodName, request, response );
+		else
+			response.send( "Method not yet supported!" );
 
 	// Forward to appengine -> Supported only on gamma and prod
 	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
@@ -567,6 +585,17 @@ app.get( ['/*'], (request, response, next) => {
 app.post( ['/*'], (request, response, next) => {
 	resolvePOST( request, response );
 });
+
+// patch
+app.patch( ['/*'], (request, response, next) => {
+	_resolvePostPatchDelete( "PATCH", request, response );
+});
+
+// delete
+app.delete( ['/*'], (request, response, next) => {
+	_resolvePostPatchDelete( "DELETE", request, response );
+});
+
 
 app.listen(80);
 

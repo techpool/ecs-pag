@@ -44,19 +44,26 @@ module.exports = {
 		},
 		'POST': {
 			'path': '/pratilipis',
-			'auth': true,
 			'methods': {
-				'DELETE': [
-					{ 'pratilipiId': null },
-					{ 'state': 'DELETED' }
-				],
-				'PATCH': [
-					{ 'pratilipiId': null }
-				],
-				'POST':  [
-					{ 'language': null },
-					{ 'type': null }
-				]
+				'DELETE': {
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null },
+						{ 'state': 'DELETED' }
+					],
+				},
+				'PATCH': {
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					],
+				},
+				'POST': {
+					'requiredFields': [
+						{ 'language': null },
+						{ 'type': null }
+					],
+				}
 			}
 		}
 	},
