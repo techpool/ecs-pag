@@ -108,7 +108,7 @@ function _getUserAuth( request, response ) {
 			request.log.info( JSON.stringify( authError.error ) );
 			request.log.submit( authError.statusCode || 500, authError.error.length );
 			latencyMetric.write( Date.now() - request.startTimestamp );
-			response.status( _getResponseCode( authError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+			response.status( _getResponseCode( authError.statusCode ) ).send( { "message": authError.error } );
 		})
 	;
 
@@ -190,14 +190,17 @@ function resolveGET( request, response ) {
 		var primaryKey = _getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
 		if( primaryKey ) uri += "/" + primaryKey;
 		uri += ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
+		console.log( "Uri to hit: " + uri ); // TODO: Remove
 		_getHttpPromise( uri, "GET", isAuthRequired, request, response )
 			.then( (serviceResponse) => {
+				console.log( "Got serviceResponse" ); // TODO: Remove
 				_addRespectiveServiceHeaders( response, serviceResponse.headers );
 				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.catch( (err) => {
+				console.log( "Error Occured!" ); // TODO: Remove
 				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( err.error ) );
 				request.log.submit( err.statusCode || 500, err.error.length );
@@ -596,6 +599,15 @@ app.delete( ['/*'], (request, response, next) => {
 	_resolvePostPatchDelete( "DELETE", request, response );
 });
 
+// Debugging
+app.use( function (err, req, res, next) {
+	console.error( JSON.stringify(err) );
+	console.error( err.stack );
+	res.status( err.code || 500 ).json( { "error": err.message } );
+});
+
+process.on( 'unhandledRejection', function( reason, p ) {
+	console.info( "Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason );
+});
 
 app.listen(80);
-
