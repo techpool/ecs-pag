@@ -187,7 +187,7 @@ function resolveGET( request, response ) {
 	// Supported in ecs
 	} else if( isApiSupported ) {
 		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path;
-		var primaryKey = getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
+		var primaryKey = _getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
 		if( primaryKey ) uri += "/" + primaryKey;
 		uri += ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
 		_getHttpPromise( uri, "GET", isAuthRequired, request, response )
@@ -348,7 +348,7 @@ function resolveGETBatch( request, response ) {
 						var url;
 						if( req.isSupported ) {
 							url = 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path;
-							var primaryKey = getUrlParameter( req.url, routeConfig[req.api].GET.primaryKey );
+							var primaryKey = _getUrlParameter( req.url, routeConfig[req.api].GET.primaryKey );
 							if( primaryKey ) url += "/" + primaryKey;
 							url += ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' );
 						} else {
@@ -394,7 +394,7 @@ function resolveGETBatch( request, response ) {
 				var url;
 				if( req.isSupported ) {
 					url = 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path;
-					var primaryKey = getUrlParameter( req.url, routeConfig[req.api].GET.primaryKey );
+					var primaryKey = _getUrlParameter( req.url, routeConfig[req.api].GET.primaryKey );
 					if( primaryKey ) url += "/" + primaryKey;
 					url += ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' );
 				} else {
