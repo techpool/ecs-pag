@@ -37,7 +37,11 @@ module.exports = {
 	},
 
 	'/pratilipi': {
-		'GET': { 'path': '/pratilipis', 'auth': false },
+		'GET': {
+			'path': '/pratilipis',
+			'auth': true,
+			'primaryKey': 'pratilipiId'
+		},
 		'POST': {
 			'path': '/pratilipis',
 			'auth': true,

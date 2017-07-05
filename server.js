@@ -372,7 +372,7 @@ function resolveGETBatch( request, response ) {
 				var req = reqArray[0];
 				var url = req.isSupported
 					? 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path + ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' )
-					: 'https://api.pratilipi.com' + req.url; // TODO: AccessToken
+					: 'https://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
 
 				return _getHttpPromise( url, "GET", req.isAuthRequired, request, response )
 					.then( (res) => {
@@ -512,7 +512,7 @@ app.use( (request, response, next) => {
 
 //CORS middleware
 app.use( (request, response, next) => {
-	response.setHeader( 'Access-Control-Allow-Origin', "*" ); //todo add only pratilipi origin
+	response.setHeader( 'Access-Control-Allow-Origin', "*" ); //TODO: add only pratilipi origin
 	response.setHeader( 'Access-Control-Allow-Credentials', true );
 	response.setHeader( 'Access-Control-Allow-Methods', 'GET, OPTIONS, POST' );
 	response.setHeader( 'Access-Control-Allow-Headers', 'Content-Type, Authorization, AccessToken, Origin, Version' );
