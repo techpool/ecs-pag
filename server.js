@@ -95,7 +95,7 @@ function _getUserAuth( request, response ) {
 	response.setHeader( 'Content-Type','application/json' );
 
 	var authOptions = {
-		uri: 'http://' + process.env.API_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT,
+		uri: process.env.API_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT,
 		agent : httpAgent,
 		headers: { 'AccessToken': request.headers.accesstoken },
 		resolveWithFullResponse: true
@@ -129,6 +129,7 @@ function _getHttpPromise( uri, method, isAuthRequired, request, response ) {
 		method: method,
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		json: true,
+		headers: {},
 		resolveWithFullResponse: true
 	};
 
@@ -172,7 +173,7 @@ function resolveGET( request, response ) {
 		// TODO: isAuthRequired for images? (Content images)
 		var urlSuffix = request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '';
 		var uriNew = routeConfig[api].GET.path + urlSuffix;
-		var url = 'http://' + process.env.API_END_POINT + uriNew;
+		var url = process.env.API_END_POINT + uriNew;
 		request.pipe( requestModule( url ) )
 			.on( 'error', function( error ) {
 				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
@@ -190,7 +191,7 @@ function resolveGET( request, response ) {
 		;
 	// Supported in ecs
 	} else if( isApiSupported ) {
-		var uri = 'http://' + process.env.API_END_POINT + routeConfig[api].GET.path;
+		var uri = process.env.API_END_POINT + routeConfig[api].GET.path;
 		var primaryKey = _getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
 		if( primaryKey ) uri += "/" + primaryKey;
 		uri += ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
@@ -354,7 +355,7 @@ function resolveGETBatch( request, response ) {
 					requestArray.forEach( (req) => {
 						var url;
 						if( req.isSupported ) {
-							url = 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path;
+							url = process.env.API_END_POINT + routeConfig[req.api].GET.path;
 							var primaryKey = _getUrlParameter( req.url, routeConfig[req.api].GET.primaryKey );
 							if( primaryKey ) url += "/" + primaryKey;
 							url += ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' );
@@ -400,7 +401,7 @@ function resolveGETBatch( request, response ) {
 				var req = reqArray[0];
 				var url;
 				if( req.isSupported ) {
-					url = 'http://' + process.env.API_END_POINT + routeConfig[req.api].GET.path;
+					url = process.env.API_END_POINT + routeConfig[req.api].GET.path;
 					var primaryKey = _getUrlParameter( req.url, routeConfig[req.api].GET.primaryKey );
 					if( primaryKey ) url += "/" + primaryKey;
 					url += ( req.url.split('?')[1] ? ( '?' + req.url.split('?')[1] ) : '' );
@@ -452,9 +453,9 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 	if( isApiSupported ) {
 		var uri;
 		if( methodName === "POST" ) {
-			uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
+			uri = process.env.API_END_POINT + routeConfig[api].POST.path + ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
 		} else if( methodName === "PATCH" || methodName === "DELETE" ) {
-			uri = 'http://' + process.env.API_END_POINT + routeConfig[api].POST.path
+			uri = process.env.API_END_POINT + routeConfig[api].POST.path
 				+ "/" + routeConfig[api][ "POST" ][ "methods" ][ methodName ][ "primaryKey" ];
 				+ ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
 		}
