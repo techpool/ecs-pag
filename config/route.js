@@ -69,15 +69,30 @@ module.exports = {
 	},
 
 	'/author':{
-		'GET':{ 'path':'/authors', 'auth':false }
+		'GET':{
+			'path': '/authors',
+			'auth': true,
+			'primaryKey': 'authorId'
+		},
+		'POST': {
+			'path': '/authors',
+			'methods': {
+				'PATCH': {
+					'primaryKey': 'authorId',
+					'requiredFields': [
+						{ 'authorId': null }
+					],
+				}
+			}
+		}
 	},
 
 	'/user-activity/is_add_to_lib': {
-		'GET':{ 'path':'/user-activity/is_add_to_lib', 'auth':false }
+		'GET':{ 'path': '/user-activity/is_add_to_lib', 'auth': false }
 	},
 
 	'/user-activity/is_following_author': {
-        'GET':{ 'path':'/user-activity/is_following_author', 'auth':false }
+		'GET':{ 'path': '/user-activity/is_following_author', 'auth': false }
 	}
 
 };
