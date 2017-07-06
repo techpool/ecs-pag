@@ -206,8 +206,8 @@ function resolveGET( request, response ) {
 			.catch( (err) => {
 				console.log( "Error Occured!" ); // TODO: Remove
 				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( err.error ) );
-				request.log.submit( err.statusCode || 500, err.error.length );
+				request.log.error( JSON.stringify( err.message ) );
+				request.log.submit( err.statusCode || 500, err.message.length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 		;
@@ -469,8 +469,8 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 			})
 			.catch( (err) => {
 				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( err.error ) );
-				request.log.submit( err.statusCode || 500, err.error.length );
+				request.log.error( JSON.stringify( err.message ) );
+				request.log.submit( err.statusCode || 500, err.message.length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 		;
