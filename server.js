@@ -58,8 +58,12 @@ function _getResponseCode( code ) {
 
 	code = parseInt( code );
 
+	Array.prototype.contains = function(obj) {
+		return this.indexOf(obj) > -1;
+	};
+
 	var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ]; // supportedCodesOnPag = [200, 207, 400, 401, 403, 404, 500, 502, 504];
-	if( supportedCodesOnFrontend[ code ] )
+	if( supportedCodesOnFrontend.contains( code ) )
 		return code;
 	else if( code === 207 )
 		return 200;
