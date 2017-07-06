@@ -195,17 +195,15 @@ function resolveGET( request, response ) {
 		var primaryKey = _getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
 		if( primaryKey ) uri += "/" + primaryKey;
 		uri += ( request.url.split('?')[1] ? ( '?' + request.url.split('?')[1] ) : '' );
-		console.log( "Uri to hit: " + uri ); // TODO: Remove
+		request.log.info( "Forwarding request to : " + uri );
 		_getHttpPromise( uri, "GET", isAuthRequired, request, response )
 			.then( (serviceResponse) => {
-				console.log( "Got serviceResponse" ); // TODO: Remove
 				_addRespectiveServiceHeaders( response, serviceResponse.headers );
 				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
 			.catch( (err) => {
-				console.log( "Error Occured!" ); // TODO: Remove
 				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 				request.log.error( JSON.stringify( err.message ) );
 				request.log.submit( err.statusCode || 500, err.message.length );
