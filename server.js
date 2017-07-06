@@ -507,7 +507,7 @@ function resolvePOST( request, response ) {
 						var fieldObject = requiredFields[ j ];
 						var fieldName = Object.keys( fieldObject )[0];
 						var fieldValue = fieldObject[ fieldName ];
-						if( ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
+						if( ! request.body[fieldName] || ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
 							fieldsFlag = false;
 							continue loop1;
 						}
