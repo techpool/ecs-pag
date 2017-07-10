@@ -493,35 +493,49 @@ function resolvePOST( request, response ) {
 	var api = request.path.substr(4);
 	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
 	if( isApiSupported ) {
-		var listMethods = routeConfig[api].POST.methods;
-		var method = Object.keys( listMethods );
-		var methodName;
-		var fieldsFlag;
-		loop1 :
-			for( var i = 0; i < method.length; i++ ) {
-				methodName = method[i];
-				var requiredFields = listMethods[ methodName ][ 'requiredFields' ];
-				fieldsFlag = true;
-				loop2 :
-					for( var j = 0; j < requiredFields.length; j++ ) {
-						var fieldObject = requiredFields[ j ];
-						var fieldName = Object.keys( fieldObject )[0];
-						var fieldValue = fieldObject[ fieldName ];
-						if( ! request.body[fieldName] || ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
-							fieldsFlag = false;
-							continue loop1;
+		var isPipeRequired = routeConfig[api].POST.shouldPipe;
+		if( isPipeRequired ) {
+			var url = process.env.API_END_POINT + req.url;
+			req.pipe( requestModule.post( url, req.body ) )
+				.on( 'error', (error) => {
+					console.log( JSON.stringify(error) );
+					response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
+			})
+			.pipe( res )
+			.on( 'error', function(error){
+				console.log( JSON.stringify(error) );
+				response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
+			});
+		} else {
+			var listMethods = routeConfig[api].POST.methods;
+			var method = Object.keys( listMethods );
+			var methodName;
+			var fieldsFlag;
+			loop1 :
+				for( var i = 0; i < method.length; i++ ) {
+					methodName = method[i];
+					var requiredFields = listMethods[ methodName ][ 'requiredFields' ];
+					fieldsFlag = true;
+					loop2 :
+						for( var j = 0; j < requiredFields.length; j++ ) {
+							var fieldObject = requiredFields[ j ];
+							var fieldName = Object.keys( fieldObject )[0];
+							var fieldValue = fieldObject[ fieldName ];
+							if( ! request.body[fieldName] || ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
+								fieldsFlag = false;
+								continue loop1;
+							}
 						}
+					if( fieldsFlag ) {
+						break loop1;
 					}
-				if( fieldsFlag ) {
-					break loop1;
 				}
-			}
 
-		// TODO: isPipeRequired Implementation
-		if( fieldsFlag )
-			_resolvePostPatchDelete( methodName, request, response );
-		else
-			response.send( "Method not yet supported!" );
+			if( fieldsFlag )
+				_resolvePostPatchDelete( methodName, request, response );
+			else
+				response.send( "Method not yet supported!" );
+		}
 
 	// Forward to appengine -> Supported only on gamma and prod
 	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
