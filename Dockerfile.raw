@@ -6,6 +6,7 @@ RUN npm install
 COPY server.js .
 COPY config/main.js config/main.js
 COPY config/route.js config/route.js
+COPY config/auth.js config/auth.js
 
 EXPOSE 80
 
