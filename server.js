@@ -10,6 +10,11 @@ var bodyParser = require('body-parser');
 var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
+const morgan = require( 'morgan' );
+const mainConfig = require( './config/main' )[ process.env.STAGE ];
+const routeConfig = require( './config/route' );
+const authConfig = require( './config/auth' );
+
 const Logging = require( './lib/LoggingGcp.js' ).init({
 	projectId: process.env.GCP_PROJ_ID,
 	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
@@ -21,11 +26,6 @@ const Metric = require( './lib/MetricGcp.js' ).init({
 });
 
 const latencyMetric = new Metric( 'int64', 'Latency' );
-
-const morgan = require( 'morgan' );
-const mainConfig = require( './config/main' )[ process.env.STAGE ];
-const routeConfig = require( './config/route' );
-const authConfig = require( './config/auth' );
 
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
