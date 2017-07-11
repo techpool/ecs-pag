@@ -2,7 +2,7 @@ var config = {};
 
 config.devo = {
   'LOGGING_METRIC_SERVICE_NAME': 'ecs-pag-devo',
-  'AUTHENTICATION_ENDPOINT': '/auth/authorize'
+  'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized'
 };
 
 config.gamma = {

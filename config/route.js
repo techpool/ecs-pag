@@ -1,19 +1,39 @@
 module.exports = {
 
 	'/pratilipi/cover': {
-		'GET': { 'path': '/image/pratilipi/cover', 'auth': false, 'shouldPipe': true }
+		'GET': {
+			'path': '/image/pratilipi/cover',
+			'auth': false,
+			'shouldPipe': true
+		},
+		'POST': {
+			'path': '/image/pratilipi/cover',
+			'shouldPipe': true
+		}
 	},
 
 	'/author/image': {
-		'GET': { 'path': '/image/author/profile', 'auth': false, 'shouldPipe': true }
+		'GET': {
+			'path': '/image/author/profile',
+			'auth': false,
+			'shouldPipe': true
+		}
 	},
 
 	'/author/cover': {
-		'GET': { 'path': '/image/author/cover', 'auth': false, 'shouldPipe': true }
+		'GET': {
+			'path': '/image/author/cover',
+			'auth': false,
+			'shouldPipe': true
+		}
 	},
 
 	'/image/author/cover': {
-		'GET': { 'path': '/image/author/cover', 'auth': false, 'shouldPipe': true }
+		'GET': {
+			'path': '/image/author/cover',
+			'auth': false,
+			'shouldPipe': true
+		}
 	},
 
 	'/search': {
