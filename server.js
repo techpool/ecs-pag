@@ -10,6 +10,18 @@ var bodyParser = require('body-parser');
 var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
+const Logging = require( './lib/LoggingGcp.js' ).init({
+	projectId: process.env.GCP_PROJ_ID,
+	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
+});
+
+const Metric = require( './lib/MetricGcp.js' ).init({
+	projectId: process.env.GCP_PROJ_ID,
+	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
+});
+
+const latencyMetric = new Metric( 'int64', 'Latency' );
+
 const morgan = require( 'morgan' );
 const mainConfig = require( './config/main' )[ process.env.STAGE ];
 const routeConfig = require( './config/route' );
@@ -571,11 +583,7 @@ app.use( morgan('short') );
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: false }) );
 // for initializing log object
-app.use( (request, response, next) => {
-	var log = request.log = new Logging( request );
-	request.startTimestamp = Date.now();
-	next();
-});
+
 
 //CORS middleware
 app.use( (request, response, next) => {
@@ -629,4 +637,4 @@ process.on( 'unhandledRejection', function( reason, p ) {
 	console.info( "Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason );
 });
 
-app.listen(80);
+app.listen(8080);
