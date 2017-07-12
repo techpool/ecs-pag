@@ -272,23 +272,35 @@ function resolveGET( request, response ) {
 
 	// For image requests
 	if( isPipeRequired ) {
-		// TODO: isAuthRequired for images (Content images)
+		var isAuthRequired = routeConfig[api].GET.auth;
+		var resource = encodeURIComponent( routeConfig[api].GET.path );
+		var primaryContentId = _getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
+
+		var authPromise = isAuthRequired
+			? _getAuth( resource, "GET", primaryContentId, null, request, response )
+			: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
+
 		var url = ECS_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '' );
-		request.pipe( requestModule( url ) )
-			.on( 'error', function( error ) {
-				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
-			.pipe( response )
-			.on( 'error', function( error ) {
-				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
-		;
+
+		authPromise
+			.then( (userId) => {
+				request.pipe( requestModule( url ) )
+					.on( 'error', function( error ) {
+						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+						request.log.error( JSON.stringify( error ) );
+						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
+						latencyMetric.write( Date.now() - request.startTimestamp );
+					})
+					.pipe( response )
+					.on( 'error', function( error ) {
+						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+						request.log.error( JSON.stringify( error ) );
+						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
+						latencyMetric.write( Date.now() - request.startTimestamp );
+					})
+				;
+			});
+
 	// Supported in ecs
 	} else if( isApiSupported ) {
 		_getService( "GET", null, request, response )
