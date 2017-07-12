@@ -513,7 +513,7 @@ function resolvePOST( request, response ) {
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 						})
 						.pipe( res )
-						.on( 'error', function(error){
+						.on( 'error', function(error) {
 							console.log( JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 						})
@@ -547,20 +547,7 @@ function resolvePOST( request, response ) {
 				}
 
 			if( fieldsFlag ) {
-				_getService( methodName, null, request, response )
-					.then( (serviceResponse) => {
-						_addRespectiveServiceHeaders( response, serviceResponse.headers );
-						response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
-						request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-						latencyMetric.write( Date.now() - request.startTimestamp );
-					})
-					.catch( (err) => {
-						response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-						request.log.error( JSON.stringify( err.message ) );
-						request.log.submit( err.statusCode || 500, err.message.length );
-						latencyMetric.write( Date.now() - request.startTimestamp );
-					})
-				;
+				_resolvePostPatchDelete( methodName, request, response );
 			} else {
 				response.send( "Method not yet supported!" );
 			}
@@ -578,7 +565,29 @@ function resolvePOST( request, response ) {
 }
 
 function _resolvePostPatchDelete( methodName, request, response ) {
-	// TODO: Implementation
+
+	// Sanity check -> direct request from frontend
+	var api = request.path.substr(4);
+	var isApiSupported = routeConfig[api] && routeConfig[api]["POST"][methodName];
+
+	if( isApiSupported ) {
+		_getService( methodName, null, request, response )
+			.then( (serviceResponse) => {
+				_addRespectiveServiceHeaders( response, serviceResponse.headers );
+				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
+				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+			.catch( (err) => {
+				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+				request.log.error( JSON.stringify( err.message ) );
+				request.log.submit( err.statusCode || 500, err.message.length );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+		;
+	} else {
+		response.send( "Api Not supported yet!" );
+	}
 }
 
 const app = express();
