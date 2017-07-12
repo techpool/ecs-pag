@@ -517,14 +517,16 @@ function resolvePOST( request, response ) {
 	if( isApiSupported ) {
 		var isPipeRequired = routeConfig[api].POST.shouldPipe;
 		if( isPipeRequired ) {
-			_getAuth( servicePath, method, primaryContentId, params, request, response )
+			var resource = encodeURIComponent( routeConfig[api].POST.path );
+			var primaryContentId = _getUrlParameter( request.url, routeConfig[api].POST.primaryKey );
+			_getAuth( resource, "POST", primaryContentId, null, request, response )
 				.then( (userId) => {
-					req.pipe( requestModule.post( ECS_END_POINT + req.url, req.body ) )
+					request.pipe( requestModule.post( ECS_END_POINT + request.url, request.body ) )
 						.on( 'error', (error) => {
 							console.log( JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 						})
-						.pipe( res )
+						.pipe( response )
 						.on( 'error', function(error) {
 							console.log( JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
