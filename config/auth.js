@@ -5,7 +5,7 @@ module.exports = {
 			'params': [ 'resource', 'id', 'method' ]
 		},
 		'POST': {
-			'params': [ 'resource', 'method', 'authorId' ]
+			'params': [ 'resource', 'method', 'authorId', 'language' ]
 		},
 		'PATCH': {
 			'params': [ 'resource', 'id', 'method' ]
