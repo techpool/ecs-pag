@@ -31,6 +31,9 @@ const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
+const APPENGINE_ENDPOINT = "https://api.pratilipi.com";
+const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
+
 function isEmpty( obj ) {
 	for( var prop in obj ) {
 		if( obj.hasOwnProperty( prop ) )
@@ -111,7 +114,7 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 
 function _forwardToGae( method, request, response ) {
 
-	var appengineUrl = "https://api.pratilipi.com" + request.url;
+	var appengineUrl = APPENGINE_ENDPOINT + request.url;
 	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + request.headers.accesstoken;
 
 	request.pipe( method === "GET" ? requestModule( appengineUrl ) : requestModule.post( appengineUrl, request.body ) )
@@ -173,7 +176,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 	// Services that needed Auth -> Considering it to be in application/json format
 	response.setHeader( 'Content-Type','application/json' );
 
-	var authEndpoint = process.env.API_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
+	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 	var headers = { 'Access-Token': request.headers.accesstoken };
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
@@ -239,7 +242,7 @@ function _getService( method, requestUrl, request, response ) {
 		? _getAuth( servicePath, method, primaryContentId, params, request, response )
 		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
-	var serviceUrl = process.env.API_END_POINT + servicePath;
+	var serviceUrl = ECS_END_POINT + servicePath;
 	if( primaryKey ) serviceUrl += "/" + primaryKey; // RESTful
 	serviceUrl += ( isEmpty( urlQueryParams ) ? '' : ( '?' + _formatParams( urlQueryParams ) ) );
 
@@ -269,7 +272,7 @@ function resolveGET( request, response ) {
 	// For image requests
 	if( isPipeRequired ) {
 		// TODO: isAuthRequired for images (Content images)
-		var url = process.env.API_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '' );
+		var url = ECS_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '' );
 		request.pipe( requestModule( url ) )
 			.on( 'error', function( error ) {
 				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
@@ -399,7 +402,7 @@ function resolveGETBatch( request, response ) {
 				if( req.isSupported ) {
 					promiseArray.push( _getService( "GET", req.url, request, response ) );
 				} else {
-					var uri = 'https://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+					var uri = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
 					promiseArray.push( _getHttpPromise( uri, "GET" ) );
 				}
 			});
@@ -443,7 +446,7 @@ function resolveGETBatch( request, response ) {
 				if( req.isSupported ) {
 					promise = _getService( "GET", req.url, request, response );
 				} else {
-					var appengineUrl = 'https://api.pratilipi.com' + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+					var appengineUrl = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
 					promise = _getHttpPromise( appengineUrl, "GET" );
 				}
 
@@ -503,7 +506,7 @@ function resolvePOST( request, response ) {
 		if( isPipeRequired ) {
 			_getAuth( servicePath, method, primaryContentId, params, request, response )
 				.then( (userId) => {
-					req.pipe( requestModule.post( process.env.API_END_POINT + req.url, req.body ) )
+					req.pipe( requestModule.post( ECS_END_POINT + req.url, req.body ) )
 						.on( 'error', (error) => {
 							console.log( JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
@@ -583,7 +586,11 @@ app.use( morgan('short') );
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: false }) );
 // for initializing log object
-
+app.use( (request, response, next) => {
+	var log = request.log = new Logging( request );
+	request.startTimestamp = Date.now();
+	next();
+});
 
 //CORS middleware
 app.use( (request, response, next) => {
