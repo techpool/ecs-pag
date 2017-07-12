@@ -144,7 +144,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	};
 	if( headers ) genericReqOptions.headers = headers;
 	if( body ) genericReqOptions.body = body;
-	console.log( 'HTTP_CALL:' + uri );
+	console.log( 'HTTP_CALL:: ' + uri );
 	return httpPromise( genericReqOptions );
 }
 
@@ -546,7 +546,7 @@ function resolvePOST( request, response ) {
 				}
 
 			if( fieldsFlag ) {
-				_getService( methodName, request, response )
+				_getService( methodName, null, request, response )
 					.then( (serviceResponse) => {
 						_addRespectiveServiceHeaders( response, serviceResponse.headers );
 						response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
