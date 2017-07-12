@@ -34,7 +34,7 @@ const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at ser
 const APPENGINE_ENDPOINT = "https://api.pratilipi.com";
 const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
 
-function isEmpty( obj ) {
+function _isEmpty( obj ) {
 	for( var prop in obj ) {
 		if( obj.hasOwnProperty( prop ) )
 			return false;
@@ -243,8 +243,8 @@ function _getService( method, requestUrl, request, response ) {
 		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
 	var serviceUrl = ECS_END_POINT + servicePath;
-	if( primaryKey ) serviceUrl += "/" + primaryKey; // RESTful
-	serviceUrl += ( isEmpty( urlQueryParams ) ? '' : ( '?' + _formatParams( urlQueryParams ) ) );
+	if( primaryContentId ) serviceUrl += "/" + primaryContentId; // RESTful
+	serviceUrl += ( _isEmpty( urlQueryParams ) ? '' : ( '?' + _formatParams( urlQueryParams ) ) );
 
 	return authPromise
 		.then( (userId) => {
