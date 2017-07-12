@@ -8,7 +8,8 @@ module.exports = {
 		},
 		'POST': {
 			'path': '/image/pratilipi/cover',
-			'shouldPipe': true
+			'shouldPipe': true,
+			'primaryKey': 'pratilipiId'
 		}
 	},
 
