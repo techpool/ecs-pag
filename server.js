@@ -54,7 +54,8 @@ function _getUrlParameters( url ) {
 	var vars = url.split( "&" );
 	for( var i = 0; i < vars.length; i++ ) {
 		var keyValue = vars[i].split( "=" );
-		params[ keyValue[0] ] = keyValue[1];
+		if( keyValue[1] != null )
+			params[ keyValue[0] ] = keyValue[1];
 	}
 	return params;
 }
@@ -144,7 +145,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	};
 	if( headers ) genericReqOptions.headers = headers;
 	if( body ) genericReqOptions.body = body;
-	console.log( 'HTTP_CALL:: ' + uri );
+	console.log( 'HTTP_CALL :: ' + method + " :: " + uri );
 	return httpPromise( genericReqOptions );
 }
 
@@ -211,11 +212,11 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 function _getService( method, requestUrl, request, response ) {
 
-	var api = requestUrl != null
-		? requestUrl.split( "?" )[0]
-		: request.path.substr(4);
+	if( requestUrl == null )
+		requestUrl = request.url.substr(4);
 
-	var urlQueryParams = _getUrlParameters( requestUrl ? requestUrl : request.url );
+	var api = requestUrl.split( "?" )[0];
+	var urlQueryParams = _getUrlParameters( requestUrl );
 
 	var isGETRequest = method === "GET";
 	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["path"];
@@ -244,7 +245,7 @@ function _getService( method, requestUrl, request, response ) {
 
 	var serviceUrl = ECS_END_POINT + servicePath;
 	if( primaryContentId ) serviceUrl += "/" + primaryContentId; // RESTful
-	serviceUrl += ( _isEmpty( urlQueryParams ) ? '' : ( '?' + _formatParams( urlQueryParams ) ) );
+	if( ! _isEmpty( urlQueryParams ) ) serviceUrl += '?' + _formatParams( urlQueryParams );
 
 	return authPromise
 		.then( (userId) => {
