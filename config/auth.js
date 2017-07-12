@@ -13,6 +13,15 @@ module.exports = {
 		'DELETE': {
 			'params': [ 'resource', 'id', 'method' ]
 		}
-	}
+	},
+
+	'/authors': {
+    		'GET': {
+    			'params': [ 'resource', 'id', 'method' ]
+    		},
+    		'PATCH': {
+    			'params': [ 'resource', 'id', 'method' ]
+    		}
+    	}
 
 };
