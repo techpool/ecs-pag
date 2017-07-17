@@ -207,7 +207,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 /*
 	_getService() -> Generic function returning a httpPromise
 	requestUrl is used for GET Batch calls,
-	if requestUrl == null, consider from request.url
+	if requestUrl == null, fallback to request.url
 */
 
 function _getService( method, requestUrl, request, response ) {
@@ -642,9 +642,12 @@ app.get( ['/*'], (request, response, next) => {
 	}
 });
 
+/*
 // post
 app.post( ['/*'], (request, response, next) => {
 	resolvePOST( request, response );
+	// TODO: Uncomment once Frontend makes all calls
+	// _resolvePostPatchDelete( "PATCH", request, response );
 });
 
 // patch
@@ -656,6 +659,7 @@ app.patch( ['/*'], (request, response, next) => {
 app.delete( ['/*'], (request, response, next) => {
 	_resolvePostPatchDelete( "DELETE", request, response );
 });
+*/
 
 // Debugging
 app.use( function (err, req, res, next) {
