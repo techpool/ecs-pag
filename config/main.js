@@ -7,7 +7,7 @@ config.devo = {
 
 config.gamma = {
   'LOGGING_METRIC_SERVICE_NAME': 'ecs-pag-gamma',
-  'AUTHENTICATION_ENDPOINT': '/auth/authorize'
+  'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized'
 };
 
 config.prod = {
