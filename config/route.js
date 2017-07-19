@@ -54,7 +54,7 @@ module.exports = {
 	},
 
 	'/page': {
-		'GET': { 'path': '/pages', 'auth': true }
+		'GET': { 'path': '/pages', 'auth': false }
 	},
 
 	'/pratilipi': {
