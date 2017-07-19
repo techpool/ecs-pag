@@ -381,8 +381,7 @@ function resolveGETBatch( request, response ) {
 		/api?requests={"req1":"/page?uri=/k-billa-ramesh/en-kanmani","req2":"/pratilipi?_apiVer=2&pratilipiId=$req1.primaryContentId"}
 
 		Cases - Environment:
-		1. Devo Environment -> If all requests are not supported, just say NO.
-		2. Gamma or prod -> Forward Request to appengine
+		1. If all requests are not supported -> Forward Request to appengine
 
 		Cases - Serial / Parallel :
 		1. If all requests are independent -> Use promise.all
@@ -424,25 +423,11 @@ function resolveGETBatch( request, response ) {
 		}
 	}
 
-	var isAllSupported = true;
-	for( var i = 0; i < requestArray.length; i++ ) {
-		var api = requestArray[i]["api"];
-		if( ! requestArray[i]["isSupported"] ) {
-			isAllSupported = false;
-			break;
-		}
-	}
 
-	// Only on gamma and prod environments
-	if( forwardAllToGAE && ( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) ) {
+	if( forwardAllToGAE ) {
 		_forwardToGae( "GET", request, response );
 
-	// Devo environment
-	} else if( process.env.STAGE === 'devo' && ! isAllSupported ) {
-		response.send( "Api Not supported yet!" );
-
-	// Sequential or batch calls
-	} else {
+	} else { // Sequential or batch calls
 
 		var isParallel = true;
 		for( var i = 0; i < requestArray.length; i++ ) {
