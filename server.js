@@ -612,13 +612,9 @@ function resolvePOST( request, response ) {
 			}
 		}
 
-	// Forward to appengine -> Supported only on gamma and prod
-	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
-		_forwardToGae( "POST", request, response );
-
-	// not supported on devo environment
+	// Forward to appengine
 	} else {
-		response.send( "Api Not supported yet!" );
+		_forwardToGae( "POST", request, response );
 	}
 
 }
@@ -687,7 +683,6 @@ app.get( ['/*'], (request, response, next) => {
 	}
 });
 
-/*
 // post
 app.post( ['/*'], (request, response, next) => {
 	resolvePOST( request, response );
@@ -695,6 +690,7 @@ app.post( ['/*'], (request, response, next) => {
 	// _resolvePostPatchDelete( "PATCH", request, response );
 });
 
+/*
 // patch
 app.patch( ['/*'], (request, response, next) => {
 	_resolvePostPatchDelete( "PATCH", request, response );
