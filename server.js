@@ -31,7 +31,11 @@ const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
-const APPENGINE_ENDPOINT = "https://api.pratilipi.com";
+const APPENGINE_ENDPOINT =
+	( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) ?
+	"https://api.pratilipi.com" :
+	"https://devo-pratilipi.appspot.com";
+
 const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
 
 function _isEmpty( obj ) {
@@ -363,13 +367,9 @@ function resolveGET( request, response ) {
 			})
 		;
 
-	// Forward to appengine -> Supported only on gamma and prod
-	} else if( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) {
-		_forwardToGae( "GET", request, response );
-
-	// not supported on devo environment
+	// Forward to appengine
 	} else {
-		response.send( "Api Not supported yet!" );
+		_forwardToGae( "GET", request, response );
 	}
 
 }
