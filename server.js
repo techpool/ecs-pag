@@ -255,12 +255,18 @@ function _getService( method, requestUrl, request, response ) {
 	var primaryContentId = params[ primaryKey ] ? params[ primaryKey ] : null;
 	console.log( "primaryContentId = " + primaryContentId ); // TODO: Remove
 
+	if( primaryContentId ) {
+		delete urlQueryParams[ primaryKey ];
+		delete request.body[ primaryKey ];
+	}
+
 	// headers
 	var headers = { 'Access-Token': response.locals[ "access-token" ] };
 	headers[ "AccessToken" ] = response.locals[ "access-token" ]; // TODO: Remove it once changes are made in Recommendation
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
 	console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
+
 	// body
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
 	console.log( "body = " + JSON.stringify( body ) ); // TODO: Remove
