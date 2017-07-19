@@ -5,7 +5,8 @@ var requestModule = require( 'request' );
 var Promise = require( 'bluebird' );
 var express = require( 'express' );
 var _ = require( 'lodash' );
-var bodyParser = require('body-parser');
+var cookieParser = require( 'cookie-parser' );
+var bodyParser = require( 'body-parser' );
 
 var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
@@ -121,7 +122,7 @@ function _forwardToGae( method, request, response ) {
 
 	console.log( "_forwardToGae" ); // TODO: Remove
 	var appengineUrl = APPENGINE_ENDPOINT + request.url;
-	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + request.headers.accesstoken;
+	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + response.locals[ "access-token" ];
 	console.log( "appengineUrl = " + appengineUrl ); // TODO: Remove
 
 	request.pipe( method === "GET" ? requestModule( appengineUrl ) : requestModule.post( appengineUrl, request.body ) )
@@ -164,11 +165,6 @@ function _getHttpPromise( uri, method, headers, body ) {
 function _getAuth( resource, method, primaryContentId, params, request, response ) {
 
 	console.log( "_getAuth" ); // TODO: Remove
-	// Bad Request
-	if( ! request.headers.accesstoken ) {
-		response.status( 400 ).send( "AccessToken is missing in header!" );
-		return;
-	}
 
 	var authParams = {
 		'resource': encodeURIComponent( resource ),
@@ -188,7 +184,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 	console.log( 'Sending authentication request...' );
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
-	var headers = { 'Access-Token': request.headers.accesstoken };
+	var headers = { 'Access-Token': response.locals[ "access-token" ] };
 
 	console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
 
@@ -257,8 +253,8 @@ function _getService( method, requestUrl, request, response ) {
 	console.log( "primaryContentId = " + primaryContentId ); // TODO: Remove
 
 	// headers
-	var headers = { 'Access-Token': request.headers.accesstoken };
-	headers[ "AccessToken" ] = request.headers.accesstoken; // TODO: Remove it once changes are made in Recommendation
+	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+	headers[ "AccessToken" ] = response.locals[ "access-token" ]; // TODO: Remove it once changes are made in Recommendation
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
 	console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
@@ -445,7 +441,7 @@ function resolveGETBatch( request, response ) {
 				if( req.isSupported ) {
 					promiseArray.push( _getService( "GET", req.url, request, response ) );
 				} else {
-					var uri = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+					var uri = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
 					promiseArray.push( _getHttpPromise( uri, "GET" ) );
 				}
 			});
@@ -489,7 +485,7 @@ function resolveGETBatch( request, response ) {
 				if( req.isSupported ) {
 					promise = _getService( "GET", req.url, request, response );
 				} else {
-					var appengineUrl = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + request.headers.accesstoken;
+					var appengineUrl = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
 					promise = _getHttpPromise( appengineUrl, "GET" );
 				}
 
@@ -633,8 +629,10 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 const app = express();
 
 app.use( morgan('short') );
+app.use( cookieParser() );
 app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: false }) );
+
 // for initializing log object
 app.use( (request, response, next) => {
 	var log = request.log = new Logging( request );
@@ -657,6 +655,26 @@ app.options( "/*", (request, response, next) => {
 
 app.get( "/health", (request, response, next) => {
 	response.send( 'Pag ' + process.env.STAGE + ' is healthy !' );
+});
+
+// Setting access-token in response.locals
+app.use( (request, response, next) => {
+
+	var accessToken = null;
+	if( request.headers.accesstoken )
+		accessToken = request.headers.accesstoken;
+	else if( request.cookies[ "access_token" ] )
+		accessToken = request.cookies[ "access_token" ];
+	else if( _getUrlParameter( request.url, "accessToken" ) )
+		accessToken = _getUrlParameter( request.url, "accessToken" );
+
+	if( accessToken ) {
+		response.locals[ "access-token" ] = accessToken;
+		next();
+	} else {
+		response.status( 400 ).send( "AccessToken is missing in header!" );
+	}
+
 });
 
 // get
