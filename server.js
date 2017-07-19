@@ -125,7 +125,10 @@ function _forwardToGae( method, request, response ) {
 	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + response.locals[ "access-token" ];
 	console.log( "appengineUrl = " + appengineUrl ); // TODO: Remove
 
-	request.pipe( method === "GET" ? requestModule( appengineUrl ) : requestModule.post( appengineUrl, request.body ) )
+	var reqModule = method === "GET" ?
+		request.pipe( requestModule( appengineUrl ) ) :
+		requestModule.post( appengineUrl, { form: request.body } );
+    	reqModule
 		.on( 'error', (error) => {
 			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 			request.log.error( JSON.stringify( error ) );
