@@ -283,7 +283,8 @@ function _getService( method, requestUrl, request, response ) {
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
 	console.log( "body = " + JSON.stringify( body ) ); // TODO: Remove
 
-	var isAuthRequired = isGETRequest ? routeConfig[api]["GET"].auth : true; // true for all non-GET requests
+	// TODO: !!!!REMOVE HACK!!!!
+	var isAuthRequired = isGETRequest ? routeConfig[api]["GET"].auth : false; // true for all non-GET requests
 	console.log( "isAuthRequired = " + isAuthRequired ); // TODO: Remove
 
 	var serviceUrl = ECS_END_POINT + servicePath;
