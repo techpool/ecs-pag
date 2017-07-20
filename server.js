@@ -35,7 +35,7 @@ const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at ser
 const APPENGINE_ENDPOINT =
 	( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) ?
 	"https://api.pratilipi.com" :
-	"https://devo-pratilipi.appspot.com";
+	"https://devo-pratilipi.appspot.com/api";
 
 const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
 
