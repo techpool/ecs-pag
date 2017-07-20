@@ -46,6 +46,9 @@ module.exports = {
 		'GET': {
 			'params': [ 'resource', 'id', 'method' ]
 		},
+		'POST': {
+			'params': [ 'resource', 'method', 'language' ]
+		},
 		'PATCH': {
 			'params': [ 'resource', 'id', 'method' ]
 		}

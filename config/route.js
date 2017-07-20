@@ -69,19 +69,19 @@ module.exports = {
 					'requiredFields': [
 						{ 'pratilipiId': null },
 						{ 'state': 'DELETED' }
-					],
+					]
 				},
 				'PATCH': {
 					'primaryKey': 'pratilipiId',
 					'requiredFields': [
 						{ 'pratilipiId': null }
-					],
+					]
 				},
 				'POST': {
 					'requiredFields': [
 						{ 'language': null },
 						{ 'type': null }
-					],
+					]
 				}
 			}
 		}
@@ -101,6 +101,13 @@ module.exports = {
 					'requiredFields': [
 						{ 'authorId': null }
 					],
+				},
+				'POST': {
+					'requiredFields': [
+						{ 'name': null },
+						{ 'language': null },
+						{ 'userId': 0 } // Only AEEs can add Authors
+					]
 				}
 			}
 		}
