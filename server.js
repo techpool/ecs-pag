@@ -223,7 +223,8 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 		}, (httpError) => {
 			console.log( httpError.message );
 			response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.submit( 500, "AUTHENTICATION_CALL_FAILED" );
+			request.log.error( "AUTHENTICATION_CALL_FAILED" );
+			request.log.submit( 500, httpError.message.length );
 			latencyMetric.write( Date.now() - request.startTimestamp );
 			return Promise.reject();
 		});
