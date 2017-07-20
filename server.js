@@ -361,13 +361,16 @@ function resolveGET( request, response ) {
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			}, (httpError) => {
-				console.log( "Error ServiceResponse" ); // TODO: Remove
-				console.log( "httpError.statusCode = " + httpError.statusCode ); // TODO: Remove
-				console.log( "httpError.message = " + httpError.message ); // TODO: Remove
-				response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( httpError.message ) );
-				request.log.submit( httpError.statusCode || 500, httpError.message.length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "Error ServiceResponse" ); // TODO: Remove
+					console.log( "httpError.statusCode = " + httpError.statusCode ); // TODO: Remove
+					console.log( "httpError.message = " + httpError.message ); // TODO: Remove
+					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+					request.log.error( JSON.stringify( httpError.message ) );
+					request.log.submit( httpError.statusCode || 500, httpError.message.length );
+					latencyMetric.write( Date.now() - request.startTimestamp );
+				}
 			});
 		;
 
