@@ -621,6 +621,7 @@ function resolvePOST( request, response ) {
 			console.log( "resource = " + resource );
 			var primaryContentId = _getUrlParameter( request.url, routeConfig[api].POST.primaryKey );
 			console.log( "primaryContentId = " + primaryContentId );
+			/*
 			_getAuth( resource, "POST", primaryContentId, null, request, response )
 				.then( (userId) => {
 					request.pipe( requestModule.post( ECS_END_POINT + request.url, request.body ) )
@@ -636,6 +637,19 @@ function resolvePOST( request, response ) {
 					;
 				})
 			;
+			*/
+			// TODO: !!!! REMOVE HACK !!!! -> Lot of haccks
+			request.pipe( requestModule.post( ECS_END_POINT + request.url, request.body ) )
+                .on( 'error', (error) => {
+                    console.log( JSON.stringify(error) );
+                    response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
+                })
+                .pipe( response )
+                .on( 'error', function(error) {
+                    console.log( JSON.stringify(error) );
+                    response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
+                })
+            ;
 
 		} else {
 			var listMethods = routeConfig[api].POST.methods;
