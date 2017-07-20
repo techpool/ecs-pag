@@ -2,28 +2,19 @@ module.exports = {
 
 	'/image/pratilipi/cover': {
 		'POST': {
-			'auth_as': {
-				'resource': '/pratilipis',
-				'method': 'PATCH'
-			}
+			'params': [ 'resource', 'id', 'method' ]
 		}
 	},
 
 	'/image/author/profile': {
 		'POST': {
-			'auth_as': {
-				'resource': '/authors',
-				'method': 'PATCH'
-			}
+			'params': [ 'resource', 'id', 'method' ]
 		}
 	},
 
 	'/image/author/cover': {
 		'POST': {
-			'auth_as': {
-				'resource': '/authors',
-				'method': 'PATCH'
-			}
+			'params': [ 'resource', 'id', 'method' ]
 		}
 	},
 
