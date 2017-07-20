@@ -128,7 +128,7 @@ function _forwardToGae( method, request, response ) {
 	var reqModule = method === "GET" ?
 		request.pipe( requestModule( appengineUrl ) ) :
 		requestModule.post( appengineUrl, { form: request.body } );
-    	reqModule
+		reqModule
 		.on( 'error', (error) => {
 			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 			request.log.error( JSON.stringify( error ) );
@@ -203,19 +203,19 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 				console.log( 'AUTHENTICATION_FAILED' );
 				request.log.submit( statusCode, "AUTHENTICATION_FAILED" );
 				latencyMetric.write( Date.now() - request.startTimestamp );
-				return;
+				return Promise.reject();
 			} else {
 				console.log( 'AUTHENTICATION_SUCCESSFUL' );
 				console.log( "auth response headers = " + JSON.stringify( authResponse.headers ) ); // TODO: Remove
 				return authResponse.headers[ 'user-id' ];
 			}
-		 })
-		.catch( (authError) => {
-			console.log( authError.message );
-			response.status( _getResponseCode( authError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+		}, (httpError) => {
+			console.log( httpError.message );
+			response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 			request.log.submit( 500, "AUTHENTICATION_CALL_FAILED" );
 			latencyMetric.write( Date.now() - request.startTimestamp );
-		})
+			return Promise.reject();
+		});
 	;
 
 }
@@ -275,9 +275,9 @@ function _getService( method, requestUrl, request, response ) {
 	console.log( "isAuthRequired = " + isAuthRequired ); // TODO: Remove
 
 	var serviceUrl = ECS_END_POINT + servicePath;
-    	if( primaryContentId ) serviceUrl += "/" + primaryContentId; // RESTful
-    	if( ! _isEmpty( urlQueryParams ) ) serviceUrl += '?' + _formatParams( urlQueryParams );
-    	console.log( "serviceUrl = " + serviceUrl ); // TODO: Remove
+		if( primaryContentId ) serviceUrl += "/" + primaryContentId; // RESTful
+		if( ! _isEmpty( urlQueryParams ) ) serviceUrl += '?' + _formatParams( urlQueryParams );
+		console.log( "serviceUrl = " + serviceUrl ); // TODO: Remove
 
 	var authPromise = isAuthRequired
 		? _getAuth( servicePath, method, primaryContentId, params, request, response )
@@ -360,16 +360,15 @@ function resolveGET( request, response ) {
 				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
-			.catch( (err) => {
+			}, (httpError) => {
 				console.log( "Error ServiceResponse" ); // TODO: Remove
-				console.log( "err.statusCode = " + err.statusCode ); // TODO: Remove
-				console.log( "err.message = " + err.message ); // TODO: Remove
-				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( err.message ) );
-				request.log.submit( err.statusCode || 500, err.message.length );
+				console.log( "httpError.statusCode = " + httpError.statusCode ); // TODO: Remove
+				console.log( "httpError.message = " + httpError.message ); // TODO: Remove
+				response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+				request.log.error( JSON.stringify( httpError.message ) );
+				request.log.submit( httpError.statusCode || 500, httpError.message.length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
+			});
 		;
 
 	// Forward to appengine
