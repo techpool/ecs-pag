@@ -8,8 +8,7 @@ module.exports = {
 		},
 		'POST': {
 			'path': '/image/pratilipi/cover',
-			'shouldPipe': true,
-			'primaryKey': 'pratilipiId'
+			'shouldPipe': true
 		}
 	},
 
@@ -17,6 +16,10 @@ module.exports = {
 		'GET': {
 			'path': '/image/author/profile',
 			'auth': false,
+			'shouldPipe': true
+		},
+		'POST': {
+			'path': '/image/author/profile',
 			'shouldPipe': true
 		}
 	},
@@ -26,19 +29,11 @@ module.exports = {
 			'path': '/image/author/cover',
 			'auth': false,
 			'shouldPipe': true
-		}
-	},
-
-	'/image/author/cover': {
-		'GET': {
+		},
+		'POST': {
 			'path': '/image/author/cover',
-			'auth': false,
 			'shouldPipe': true
 		}
-	},
-
-	'/search': {
-		'GET': { 'path': '/search/search', 'auth': true }
 	},
 
 	'/search/search': {
