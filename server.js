@@ -201,7 +201,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 			if( ! isAuthorized ) {
 				response.status( _getResponseCode( statusCode ) ).send( INSUFFICIENT_ACCESS_EXCEPTION );
 				console.log( 'AUTHENTICATION_FAILED' );
-				request.log.submit( statusCode, "AUTHENTICATION_FAILED" );
+				request.log.submit( statusCode, JSON.stringify( authResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 				return Promise.reject();
 			} else {
@@ -620,17 +620,26 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 	if( isApiSupported ) {
 		_getService( methodName, null, request, response )
 			.then( (serviceResponse) => {
+				console.log( "Got ServiceResponse" ); // TODO: Remove
+				console.log( "serviceResponse.headers = " + JSON.stringify( serviceResponse.headers ) ); // TODO: Remove
 				_addRespectiveServiceHeaders( response, serviceResponse.headers );
+				console.log( "serviceResponse.statusCode = " + serviceResponse.statusCode ); // TODO: Remove
+				console.log( "serviceResponse.body = " + JSON.stringify( serviceResponse.body ) ); // TODO: Remove
 				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
-			.catch( (err) => {
-				response.status( _getResponseCode( err.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( err.message ) );
-				request.log.submit( err.statusCode || 500, err.message.length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "Error ServiceResponse" ); // TODO: Remove
+					console.log( "httpError.statusCode = " + httpError.statusCode ); // TODO: Remove
+					console.log( "httpError.message = " + httpError.message ); // TODO: Remove
+					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+					request.log.error( JSON.stringify( httpError.message ) );
+					request.log.submit( httpError.statusCode || 500, httpError.message.length );
+					latencyMetric.write( Date.now() - request.startTimestamp );
+				}
+			});
 		;
 	} else {
 		response.send( "Api Not supported yet!" );
