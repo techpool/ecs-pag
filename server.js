@@ -641,7 +641,7 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 
 	// Sanity check -> direct request from frontend
 	var api = request.path.substr(4);
-	var isApiSupported = routeConfig[api] && routeConfig[api]["POST"][methodName];
+	var isApiSupported = routeConfig[api] && routeConfig[api]["POST"]["methods"][methodName];
 
 	if( isApiSupported ) {
 		_getService( methodName, null, request, response )
