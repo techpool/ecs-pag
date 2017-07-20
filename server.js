@@ -522,16 +522,18 @@ function resolveGETBatch( request, response ) {
 						responseObject[ req.name ] = responseJson; // Populating the responseObject
 						reqArray.shift();
 						return recursiveGET( reqArray );
-					})
-					.catch( (error) => {
-						console.log( "Error Occured calling a service! " ) // TODO: Remove
-						console.log( "error.statusCode = " + error.statusCode ); // TODO: Remove
-						console.log( "error.message = " + error.message ); // TODO: Remove
-						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-						request.log.error( JSON.stringify( error ) );
-						request.log.submit( error.statusCode, error.message.length );
-						latencyMetric.write( Date.now() - request.startTimestamp );
-						return Promise.reject();
+					}, (error) => {
+						// error might be null from Promise.reject() thrown by the same block
+						if( error ) {
+							console.log( "Error Occured calling a service! " ) // TODO: Remove
+							console.log( "error.statusCode = " + error.statusCode ); // TODO: Remove
+							console.log( "error.message = " + error.message ); // TODO: Remove
+							response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+							request.log.error( JSON.stringify( error.message ) );
+							request.log.submit( error.statusCode, error.message.length );
+							latencyMetric.write( Date.now() - request.startTimestamp );
+							return Promise.reject();
+						}
 					})
 				;
 			}
