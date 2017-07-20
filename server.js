@@ -243,7 +243,7 @@ function _getService( method, requestUrl, request, response ) {
 
 	console.log( "_getService" ); // TODO: Remove
 	if( requestUrl == null )
-		requestUrl = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+		requestUrl = request.url.startsWith( '/api' ) ? request.url.substr(4) : request.url;
 
 	console.log( "requestUrl = " + requestUrl ); // TODO: Remove
 
