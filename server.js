@@ -242,7 +242,7 @@ function _getService( method, requestUrl, request, response ) {
 
 	console.log( "_getService" ); // TODO: Remove
 	if( requestUrl == null )
-		requestUrl = request.url.substr(4);
+		requestUrl = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
 
 	console.log( "requestUrl = " + requestUrl ); // TODO: Remove
 
@@ -314,8 +314,8 @@ function resolveGET( request, response ) {
 	*/
 
 	console.log( "resolveGET" ); // TODO: Remove
-	// request.path will be /api/xxx
-	var api = request.path.substr(4);
+	// request.path will be /api/xxx or /xxx (android)
+	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
 	console.log( "api = " + api ); // TODO: Remove
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	console.log( "isApiSupported = " + isApiSupported ); // TODO: Remove
@@ -573,7 +573,7 @@ function resolvePOST( request, response ) {
 	3. pipe is required for image requests
 	*/
 
-	var api = request.path.substr(4);
+	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
 	if( isApiSupported ) {
 		var isPipeRequired = routeConfig[api].POST.shouldPipe;
@@ -640,7 +640,7 @@ function resolvePOST( request, response ) {
 function _resolvePostPatchDelete( methodName, request, response ) {
 
 	// Sanity check -> direct request from frontend
-	var api = request.path.substr(4);
+	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api]["POST"]["methods"][methodName];
 
 	if( isApiSupported ) {
