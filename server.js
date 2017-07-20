@@ -169,6 +169,16 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	console.log( "_getAuth" ); // TODO: Remove
 
+	// Special case handling - auth_as in case of images
+	if( authConfig[ resource ][ method ][ "auth_as" ] ) {
+		return _getAuth( authConfig[ resource ][ method ][ "auth_as" ][ "resource" ],
+			             authConfig[ resource ][ method ][ "auth_as" ][ "method" ],
+			             primaryContentId,
+			             params,
+			             request,
+			             response );
+	}
+
 	var authParams = {
 		'resource': encodeURIComponent( resource ),
 		'method': method
@@ -567,8 +577,10 @@ function resolvePOST( request, response ) {
 	if( isApiSupported ) {
 		var isPipeRequired = routeConfig[api].POST.shouldPipe;
 		if( isPipeRequired ) {
-			var resource = encodeURIComponent( routeConfig[api].POST.path );
+			var resource = routeConfig[api].POST.path;
+			console.log( "resource = " + resource );
 			var primaryContentId = _getUrlParameter( request.url, routeConfig[api].POST.primaryKey );
+			console.log( "primaryContentId = " + primaryContentId );
 			_getAuth( resource, "POST", primaryContentId, null, request, response )
 				.then( (userId) => {
 					request.pipe( requestModule.post( ECS_END_POINT + request.url, request.body ) )
