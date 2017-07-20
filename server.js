@@ -563,6 +563,17 @@ function resolveGETBatch( request, response ) {
 
 function resolvePOST( request, response ) {
 
+	// TODO: Remove these functions once everything is moved to ecs
+	if( request.path.startsWith( '/api/pratilipis' ) && request.path.endsWith( '/review-data' ) ) {
+		var url = ECS_END_POINT + request.path.substr(4);
+		var headers = {
+			'Access-Token': request.headers.accesstoken,
+			'User-Id': request.headers["user-id"]
+		};
+		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
+		return;
+	}
+
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
 	Approach
