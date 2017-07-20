@@ -563,9 +563,31 @@ function resolveGETBatch( request, response ) {
 
 function resolvePOST( request, response ) {
 
-	// TODO: Remove these functions once everything is moved to ecs
-	if( request.path.startsWith( '/api/pratilipis' ) && request.path.endsWith( '/review-data' ) ) {
+	// TODO: Remove once everything is moved to ecs
+	// url: /api/pratilipis/12345/review-data
+	// body: reviewCount, ratingCount, totalRating
+	// headers: AccessToken, User-Id
+	if( request.path.startsWith( '/api/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
 		var url = ECS_END_POINT + request.path.substr(4);
+		var headers = {
+			'Access-Token': request.headers.accesstoken,
+			'User-Id': request.headers["user-id"]
+		};
+		console.log( "url = " + url ); // TODO: Remove
+		console.log( "form = " + JSON.stringify( request.body ) ); // TODO: Remove
+		console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
+		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
+		return;
+	}
+
+	// TODO: Remove once everything is moved to ecs
+	// url: /api/authors/12345/follow-count
+	// body: followCount
+	// headers: AccessToken, User-Id
+	if( request.path.startsWith( '/api/authors/' ) && request.path.endsWith( '/follow-count' ) ) {
+		var arr = request.path.split( '/' );
+		var authorId = arr[arr.length - 2];
+		var url = ECS_END_POINT + "/authors/" + authorId;
 		var headers = {
 			'Access-Token': request.headers.accesstoken,
 			'User-Id': request.headers["user-id"]
