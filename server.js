@@ -171,6 +171,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	// Special case handling - auth_as in case of images
 	if( authConfig[ resource ][ method ][ "auth_as" ] ) {
+		console.log( "auth_as present -> authenticating as : " ) // TODO: Remove
 		return _getAuth( authConfig[ resource ][ method ][ "auth_as" ][ "resource" ],
 			             authConfig[ resource ][ method ][ "auth_as" ][ "method" ],
 			             primaryContentId,
