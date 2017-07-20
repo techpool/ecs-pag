@@ -570,6 +570,9 @@ function resolvePOST( request, response ) {
 			'Access-Token': request.headers.accesstoken,
 			'User-Id': request.headers["user-id"]
 		};
+		console.log( "url = " + url ); // TODO: Remove
+		console.log( "form = " + JSON.stringify( request.body ) ); // TODO: Remove
+		console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
 		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
 		return;
 	}
