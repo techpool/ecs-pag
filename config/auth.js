@@ -1,5 +1,23 @@
 module.exports = {
 
+	'/pratilipi/cover': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/author/image': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/author/cover': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
 	'/pratilipis': {
 		'GET': {
 			'params': [ 'resource', 'id', 'method' ]
@@ -16,12 +34,12 @@ module.exports = {
 	},
 
 	'/authors': {
-    		'GET': {
-    			'params': [ 'resource', 'id', 'method' ]
-    		},
-    		'PATCH': {
-    			'params': [ 'resource', 'id', 'method' ]
-    		}
-    	}
+		'GET': {
+			'params': [ 'resource', 'id', 'method' ]
+		},
+		'PATCH': {
+			'params': [ 'resource', 'id', 'method' ]
+		}
+	}
 
 };

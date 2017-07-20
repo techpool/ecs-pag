@@ -529,7 +529,7 @@ function resolveGETBatch( request, response ) {
 							console.log( "error.statusCode = " + error.statusCode ); // TODO: Remove
 							console.log( "error.message = " + error.message ); // TODO: Remove
 							response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-							request.log.error( JSON.stringify( error.message ) );
+							request.log.error( error.message );
 							request.log.submit( error.statusCode, error.message.length );
 							latencyMetric.write( Date.now() - request.startTimestamp );
 							return Promise.reject();
@@ -726,6 +726,7 @@ app.post( ['/*'], (request, response, next) => {
 	// _resolvePostPatchDelete( "PATCH", request, response );
 });
 
+// TODO: Uncomment once Frontend makes all calls
 /*
 // patch
 app.patch( ['/*'], (request, response, next) => {
