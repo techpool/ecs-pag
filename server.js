@@ -121,7 +121,8 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 function _forwardToGae( method, request, response ) {
 
 	console.log( "_forwardToGae" ); // TODO: Remove
-	var appengineUrl = APPENGINE_ENDPOINT + request.url;
+	var requestUrl = request.url.startsWith( "/api" ) ? request.url.substr(4) : request.url;
+	var appengineUrl = APPENGINE_ENDPOINT + requestUrl;
 	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + response.locals[ "access-token" ];
 	console.log( "appengineUrl = " + appengineUrl ); // TODO: Remove
 
