@@ -421,6 +421,7 @@ function resolveGETBatch( request, response ) {
 			});
 		}
 	}
+	console.log( "requestArray = " + JSON.stringify( requestArray ) ); // TODO: Remove
 
 	var forwardAllToGAE = true;
 	for( var i = 0; i < requestArray.length; i++ ) {
@@ -429,6 +430,7 @@ function resolveGETBatch( request, response ) {
 			break;
 		}
 	}
+	console.log( "forwardAllToGAE = " + forwardAllToGAE ); // TODO: Remove
 
 
 	if( forwardAllToGAE ) {
@@ -443,6 +445,7 @@ function resolveGETBatch( request, response ) {
 				break;
 			}
 		}
+		console.log( "isParallel = " + isParallel ); // TODO: Remove
 
 		if( isParallel ) {
 
@@ -460,6 +463,7 @@ function resolveGETBatch( request, response ) {
 			// Pretty simple with Promise.all, isn't it?
 			Promise.all( promiseArray )
 				.then( (responseArray) => { // responseArray will be in order
+					console.log( "Got ResponseArray" ); // TODO: Remove
 					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = responseArray[i].body;
@@ -467,6 +471,9 @@ function resolveGETBatch( request, response ) {
 					request.log.submit( 200, JSON.stringify( returnResponse ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				}).catch( (error) => {
+					console.log( "Promise.all error" ); // TODO: Remove
+					console.log( "error.statusCode = " + error.statusCode ); // TODO: Remove
+					console.log( "error.message = " + error.message ); // TODO: Remove
 					response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( error.statusCode ); // 'Bad Request'
 					request.log.error( error.message ); // Html
@@ -517,10 +524,14 @@ function resolveGETBatch( request, response ) {
 						return recursiveGET( reqArray );
 					})
 					.catch( (error) => {
+						console.log( "Error Occured calling a service! " ) // TODO: Remove
+						console.log( "error.statusCode = " + error.statusCode ); // TODO: Remove
+						console.log( "error.message = " + error.message ); // TODO: Remove
 						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 						request.log.error( JSON.stringify( error ) );
-						request.log.submit( error.statusCode, error.message );
+						request.log.submit( error.statusCode, error.message.length );
 						latencyMetric.write( Date.now() - request.startTimestamp );
+						return Promise.reject();
 					})
 				;
 			}
