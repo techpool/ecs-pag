@@ -623,7 +623,7 @@ function resolvePOST( request, response ) {
 			_getAuth( resource, "POST", primaryContentId, null, request, response )
 				.then( (userId) => {
 					var url = ECS_END_POINT + resource;
-					if( request.url.indexOf( "?" ) !== -1 ) url += request.url.split( "?" )[1];
+					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					console.log( "url to pipe: " + url ); // TODO: Remove
 					request.pipe( requestModule.post( url, request.body ) )
 						.on( 'error', (error) => {
