@@ -755,12 +755,8 @@ app.use( (request, response, next) => {
 	else if( _getUrlParameter( request.url, "accessToken" ) )
 		accessToken = _getUrlParameter( request.url, "accessToken" );
 
-	if( accessToken ) {
-		response.locals[ "access-token" ] = accessToken;
-		next();
-	} else {
-		response.status( 400 ).send( "AccessToken is missing in header!" );
-	}
+	response.locals[ "access-token" ] = accessToken;
+	next();
 
 });
 
