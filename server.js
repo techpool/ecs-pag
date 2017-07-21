@@ -622,7 +622,10 @@ function resolvePOST( request, response ) {
 			console.log( "primaryContentId = " + primaryContentId );
 			_getAuth( resource, "POST", primaryContentId, null, request, response )
 				.then( (userId) => {
-					request.pipe( requestModule.post( ECS_END_POINT + request.url, request.body ) )
+					var url = ECS_END_POINT + resource;
+					if( request.url.indexOf( "?" ) !== -1 ) url += request.url.split( "?" )[1];
+					console.log( "url to pipe: " + url ); // TODO: Remove
+					request.pipe( requestModule.post( url, request.body ) )
 						.on( 'error', (error) => {
 							console.log( JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
