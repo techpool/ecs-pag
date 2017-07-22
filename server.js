@@ -174,11 +174,11 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 	if( authConfig[ resource ][ method ][ "auth_as" ] ) {
 		console.log( "auth_as present -> authenticating as : " ) // TODO: Remove
 		return _getAuth( authConfig[ resource ][ method ][ "auth_as" ][ "resource" ],
-			             authConfig[ resource ][ method ][ "auth_as" ][ "method" ],
-			             primaryContentId,
-			             params,
-			             request,
-			             response );
+						authConfig[ resource ][ method ][ "auth_as" ][ "method" ],
+						primaryContentId,
+						params,
+						request,
+						response );
 	}
 
 	var authParams = {
@@ -555,9 +555,11 @@ function resolveGETBatch( request, response ) {
 
 			recursiveGET( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
 				.then( (res) => {
-					response.send( res );
-					request.log.submit( 200, JSON.stringify( res ).length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					if( res ) {
+						response.send( res );
+						request.log.submit( 200, JSON.stringify( res ).length );
+						latencyMetric.write( Date.now() - request.startTimestamp );
+					}
 				})
 			;
 		}
