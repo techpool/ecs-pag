@@ -503,7 +503,7 @@ function resolveGETBatch( request, response ) {
 				3. GET the next call
 				4. Repeat
 			*/
-			var responseObject = {}; // To be sent to Client
+			var responseObject = {}; // To be sent to Client TODO: Check with multiple concurrent requests
 
 			function recursiveGET( reqArray ) {
 

@@ -119,6 +119,22 @@ module.exports = {
 
 	'/user-activity/is_following_author': {
 		'GET':{ 'path': '/user-activity/is_following_author', 'auth': false }
+	},
+
+	'/pratilipi/tags/update': {
+		'POST': {
+			'path': '/pratilipis',
+			'methods': {
+                'PATCH': {
+                    'primaryKey': 'pratilipiId',
+                    'requiredFields': [
+                        { 'pratilipiId': null }
+                    ]
+                }
+            }
+		}
 	}
+
+
 
 };
