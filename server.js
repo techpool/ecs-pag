@@ -503,12 +503,14 @@ function resolveGETBatch( request, response ) {
 				3. GET the next call
 				4. Repeat
 			*/
-			var responseObject = {}; // To be sent to Client TODO: Check with multiple concurrent requests
 
-			function recursiveGET( reqArray ) {
+			function recursiveGET( reqArray, responseObject ) {
 
 				if( reqArray.length === 0 )
 					return new Promise( function( resolve, reject ) { resolve( responseObject ) } );
+
+				if( ! responseObject )
+					responseObject = {}; // Initialising
 
 				// Current request Object
 				var req = reqArray[0];
@@ -534,7 +536,7 @@ function resolveGETBatch( request, response ) {
 						});
 						responseObject[ req.name ] = { "status": 200, "response": responseJson }; // Populating the responseObject
 						reqArray.shift();
-						return recursiveGET( reqArray );
+						return recursiveGET( reqArray, responseObject );
 					}, (error) => {
 						// error might be null from Promise.reject() thrown by the same block
 						if( error ) {
