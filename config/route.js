@@ -8,8 +8,12 @@ module.exports = {
 		},
 		'POST': {
 			'path': '/image/pratilipi/cover',
-			'primaryKey': 'pratilipiId',
-			'shouldPipe': true
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'pratilipiId'
+				}
+			}
 		}
 	},
 
@@ -21,8 +25,12 @@ module.exports = {
 		},
 		'POST': {
 			'path': '/image/author/profile',
-			'primaryKey': 'authorId',
-			'shouldPipe': true
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'authorId'
+				}
+			}
 		}
 	},
 
@@ -34,8 +42,40 @@ module.exports = {
 		},
 		'POST': {
 			'path': '/image/author/cover',
-			'primaryKey': 'authorId',
-			'shouldPipe': true
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'authorId'
+				}
+			}
+		}
+	},
+
+	'/author/image/remove': {
+		'POST': {
+			'path': '/image/author/$primaryContentId/profile',
+			'methods': {
+				'DELETE': {
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'authorId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/author/cover/remove': {
+		'POST': {
+			'path': '/image/author/$primaryContentId/cover',
+			'methods': {
+				'DELETE': {
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'authorId': null }
+					]
+				}
+			}
 		}
 	},
 
@@ -125,13 +165,13 @@ module.exports = {
 		'POST': {
 			'path': '/pratilipis',
 			'methods': {
-                'PATCH': {
-                    'primaryKey': 'pratilipiId',
-                    'requiredFields': [
-                        { 'pratilipiId': null }
-                    ]
-                }
-            }
+				'PATCH': {
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
 		}
 	}
 
