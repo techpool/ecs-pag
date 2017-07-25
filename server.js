@@ -635,7 +635,7 @@ function resolvePOST( request, response ) {
 					var options = {
 						method: "POST",
 						uri: url,
-						formData: request.body,
+						body: request.body,
 						headers: headers
 					};
 					console.log( "options = " + JSON.stringify( options ) );
