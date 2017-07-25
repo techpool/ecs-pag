@@ -161,7 +161,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		resolveWithFullResponse: true
 	};
 	if( headers ) genericReqOptions.headers = headers;
-	if( body ) genericReqOptions.body = body;
+	if( body ) genericReqOptions.form = body;
 	console.log( 'HTTP_CALL :: ' + method + " :: " + uri );
 	return httpPromise( genericReqOptions );
 }
