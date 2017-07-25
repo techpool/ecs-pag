@@ -732,7 +732,7 @@ const app = express();
 app.use( morgan('short') );
 app.use( cookieParser() );
 app.use( bodyParser.json() );
-app.use( bodyParser.urlencoded({ extended: false }) );
+app.use( bodyParser.urlencoded({ extended: true }) );
 
 // for initializing log object
 app.use( (request, response, next) => {
