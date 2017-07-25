@@ -5,6 +5,7 @@ var requestModule = require( 'request' );
 var Promise = require( 'bluebird' );
 var express = require( 'express' );
 var _ = require( 'lodash' );
+var lomath = require('lomath');
 var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
 
@@ -632,19 +633,15 @@ function resolvePOST( request, response ) {
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					console.log( "url to pipe: " + url ); // TODO: Remove
+					console.log( "request.body" + JSON.stringify( request.body, null, 4 ) );
 					var options = {
 						method: "POST",
 						uri: url,
-						formData : { file : request.body },
+						formData : { file : lomath.flattenJSON( request.body ) },
 						headers: headers
 					};
 					console.log( "options = " + JSON.stringify( options ) );
-					request.pipe( requestModule( options, function optionalCallback(err, httpResponse, body) {
-						if (err) {
-    						return console.error('upload failed: in optionalCallback ', err);
-  						}
-  						console.log('Upload successful!  Server responded with:', body);
-						} ) )
+					request.pipe( requestModule.post( options ) )
 						.on( 'error', (error) => {
 							console.log( JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
