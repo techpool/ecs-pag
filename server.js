@@ -639,7 +639,12 @@ function resolvePOST( request, response ) {
 						headers: headers
 					};
 					console.log( "options = " + JSON.stringify( options ) );
-					request.pipe( requestModule( options ) )
+					request.pipe( requestModule( options, function optionalCallback(err, httpResponse, body) {
+						if (err) {
+    						return console.error('upload failed: in optionalCallback ', err);
+  						}
+  						console.log('Upload successful!  Server responded with:', body);
+						} ) )
 						.on( 'error', (error) => {
 							console.log( JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
