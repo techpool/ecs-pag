@@ -126,10 +126,17 @@ function _forwardToGae( method, request, response ) {
 	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + response.locals[ "access-token" ];
 	console.log( "appengineUrl = " + appengineUrl ); // TODO: Remove
 
-	var reqModule = method === "GET" ?
-		request.pipe( requestModule( appengineUrl ) ) :
-		requestModule.post( appengineUrl, { form: request.body } );
-		reqModule
+	var reqModule;
+	// POST Image Pipe Request
+	if( requestUrl.startsWith( "/pratilipi/content/image" ) || requestUrl.startsWith( "/event/banner" ) ) {
+		reqModule = requestModule.post( appengineUrl, request.body );
+	} else if( method === "GET" ) {
+		reqModule = request.pipe( requestModule( appengineUrl ) );
+	} else {
+		reqModule = requestModule.post( appengineUrl, { form: request.body } );
+	}
+
+	reqModule
 		.on( 'error', (error) => {
 			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 			request.log.error( JSON.stringify( error ) );
