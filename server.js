@@ -107,7 +107,7 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 	else if( code === 502 || code === 504 )
 		return 500;
 
-	console.log( "INVALID_RESPONSE_CODE::" + code );
+	console.log( "INVALID_RESPONSE_CODE :: " + code );
 
 	if( code >= 200 && code < 300 )
 		return 200;
@@ -151,11 +151,6 @@ function _forwardToGae( method, request, response ) {
 }
 
 function _getHttpPromise( uri, method, headers, body ) {
-	console.log( "_getHttpPromise" );
-	console.log( "uri = " + uri );
-	console.log( "method = " + method );
-	console.log( "headers = " + JSON.stringify( headers ) );
-	console.log( "body = " + JSON.stringify( body ) );
 	var genericReqOptions = {
 		uri: uri,
 		method: method,
@@ -165,7 +160,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	};
 	if( headers ) genericReqOptions.headers = headers;
 	if( body ) genericReqOptions.form = body;
-	console.log( 'HTTP_CALL :: ' + method + " :: " + uri );
+	console.log( 'HTTP :: ' + method + " :: " + uri + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( body ) );
 	return httpPromise( genericReqOptions );
 }
 
@@ -199,7 +194,6 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 	authParams[ "method" ] = method;
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
-	console.log( "authEndpoint = " + authEndpoint );
 
 	var headers = { 'Access-Token': response.locals[ "access-token" ] };
 
@@ -364,8 +358,8 @@ function resolveGET( request, response ) {
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "httpError.statusCode = " + httpError.statusCode );
-					console.log( "httpError.message = " + httpError.message );
+					console.log( "statusCode = " + httpError.statusCode );
+					console.log( "message = " + httpError.message );
 					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( JSON.stringify( httpError.message ) );
 					request.log.submit( httpError.statusCode || 500, httpError.message.length );
@@ -468,8 +462,8 @@ function resolveGETBatch( request, response ) {
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				}).catch( (error) => {
 					console.log( "Promise.all error" );
-					console.log( "error.statusCode = " + error.statusCode );
-					console.log( "error.message = " + error.message );
+					console.log( "statusCode = " + error.statusCode );
+					console.log( "message = " + error.message );
 					response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( error.statusCode ); // 'Bad Request'
 					request.log.error( error.message ); // Html
@@ -523,8 +517,8 @@ function resolveGETBatch( request, response ) {
 					}, (error) => {
 						// error might be null from Promise.reject() thrown by the same block
 						if( error ) {
-							console.log( "error.statusCode = " + error.statusCode );
-							console.log( "error.message = " + error.message );
+							console.log( "statusCode = " + error.statusCode );
+							console.log( "message = " + error.message );
 							response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 							request.log.error( error.message );
 							request.log.submit( error.statusCode, error.message.length );
@@ -598,16 +592,12 @@ function resolvePOST( request, response ) {
 		if( isPipeRequired ) {
 			// Assumption: Only POST implementation in case of Image requests
 			var resource = routeConfig[api].POST.path;
-			console.log( "resource = " + resource );
 			var primaryKey = routeConfig[api]['POST']['methods']['POST'].primaryKey;
-			console.log( "primaryKey = " + primaryKey );
 			var primaryContentId = _getUrlParameter( request.url, primaryKey );
-			console.log( "primaryContentId = " + primaryContentId );
 			_getAuth( resource, "POST", primaryContentId, null, request, response )
 				.then( (userId) => {
 					request[ "headers" ][ "User-Id" ] = userId;
 					request[ "headers" ][ "Access-Token" ] = response.locals[ "access-token" ];
-					console.log( "Request headers = " + JSON.stringify( request[ "headers" ] ) );
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					request.pipe( requestModule.post( url, request.body ) )
@@ -679,8 +669,8 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "httpError.statusCode = " + httpError.statusCode );
-					console.log( "httpError.message = " + httpError.message );
+					console.log( "statusCode = " + httpError.statusCode );
+					console.log( "message = " + httpError.message );
 					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( JSON.stringify( httpError.message ) );
 					request.log.submit( httpError.statusCode || 500, httpError.message.length );
