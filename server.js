@@ -667,17 +667,11 @@ function resolvePOST( request, response ) {
 				.then( (userId) => {
 					var headers = { "User-Id": userId,
 									"Access-Token": response.locals["access-token"] };
-					console.log( "headers = " + JSON.stringify( headers ) );
+					console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
+					request[ "headers" ] = headers;
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					console.log( "url to pipe: " + url ); // TODO: Remove
-//					var options = {
-//						method: "POST",
-//						uri: url,
-//						formData : { file : request.body },
-//						headers: headers
-//					};
-//					console.log( "options = " + JSON.stringify( options ) );
 					request.pipe( requestModule.post( url, request.body ) )
 						.on( 'error', (error) => {
 							console.log( JSON.stringify(error) );
