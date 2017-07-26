@@ -665,10 +665,9 @@ function resolvePOST( request, response ) {
 			console.log( "primaryContentId = " + primaryContentId );
 			_getAuth( resource, "POST", primaryContentId, null, request, response )
 				.then( (userId) => {
-					var headers = { "User-Id": userId,
-									"Access-Token": response.locals["access-token"] };
-					console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
-					request[ "headers" ] = headers;
+					request[ "headers" ][ "User-Id" ] = userId;
+					request[ "headers" ][ "Access-Token" ] = response.locals[ "access-token" ];
+					console.log( "Request headers = " + JSON.stringify( request[ "headers" ] ) );
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					console.log( "url to pipe: " + url ); // TODO: Remove
