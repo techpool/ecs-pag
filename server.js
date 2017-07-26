@@ -181,13 +181,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 						response );
 	}
 
-	var authParams = {
-		'resource': encodeURIComponent( resource ),
-		'method': method
-	};
-
-	if( primaryContentId ) authParams.id = primaryContentId;
-
+	var authParams = {};
 	var paramsWhiteList = authConfig[ resource ][ method ][ "params" ];
 	for( var i = 0; i < paramsWhiteList.length; i++ ) {
 		var key = paramsWhiteList[i];
@@ -195,10 +189,23 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 			authParams[key] = params[key];
 	}
 
+	if( authConfig[ resource ][ method ][ "resource_as" ] )
+		resource = authConfig[ resource ][ method ][ "resource_as" ];
+
+	if( primaryContentId ) {
+		resource = resource.replace( "$primaryContentId", primaryContentId );
+		authParams[ "id" ] = primaryContentId;
+	}
+
+	authParams[ "resource" ] = encodeURIComponent( resource );
+	authParams[ "method" ] = method;
+
 	console.log( "authParams = " + JSON.stringify( authParams ) ); // TODO: Remove
 	console.log( 'Sending authentication request...' );
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
+	console.log( "authEndpoint = " + authEndpoint );
+
 	var headers = { 'Access-Token': response.locals[ "access-token" ] };
 
 	console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
@@ -255,8 +262,6 @@ function _getService( method, requestUrl, request, response ) {
 
 	var isGETRequest = method === "GET";
 	console.log( "isGETRequest = " + isGETRequest ); // TODO: Remove
-	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["path"];
-	console.log( "servicePath = " + servicePath ); // TODO: Remove
 
 	var primaryKey = isGETRequest
 		? routeConfig[api]["GET"].primaryKey
@@ -287,14 +292,21 @@ function _getService( method, requestUrl, request, response ) {
 	var isAuthRequired = isGETRequest ? routeConfig[api]["GET"].auth : true; // true for all non-GET requests
 	console.log( "isAuthRequired = " + isAuthRequired ); // TODO: Remove
 
-	var serviceUrl = ECS_END_POINT + servicePath;
-		if( primaryContentId ) serviceUrl += "/" + primaryContentId; // RESTful
-		if( ! _isEmpty( urlQueryParams ) ) serviceUrl += '?' + _formatParams( urlQueryParams );
-		console.log( "serviceUrl = " + serviceUrl ); // TODO: Remove
+	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
 
+	// Calling auth before replacing $primaryContentId
 	var authPromise = isAuthRequired
 		? _getAuth( servicePath, method, primaryContentId, params, request, response )
 		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
+
+	// Replacing $primaryContentId
+	servicePath = servicePath.replace( "$primaryContentId", primaryContentId );
+	console.log( "servicePath = " + servicePath ); // TODO: Remove
+
+	var serviceUrl = ECS_END_POINT + servicePath;
+	if( ! _isEmpty( urlQueryParams ) ) serviceUrl += '?' + _formatParams( urlQueryParams );
+	console.log( "serviceUrl = " + serviceUrl ); // TODO: Remove
+
 
 	return authPromise
 		.then( (userId) => {

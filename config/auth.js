@@ -30,30 +30,41 @@ module.exports = {
 		}
 	},
 
-	'/pratilipis': {
+	'/pratilipis/$primaryContentId': {
 		'GET': {
+			'resource_as': "/pratilipis",
 			'params': [ 'resource', 'id', 'method' ]
 		},
-		'POST': {
-			'params': [ 'resource', 'method', 'authorId', 'language' ]
-		},
 		'PATCH': {
+			'resource_as': "/pratilipis",
 			'params': [ 'resource', 'id', 'method' ]
 		},
 		'DELETE': {
+			'resource_as': "/pratilipis",
+			'params': [ 'resource', 'id', 'method' ]
+		}
+	},
+
+	'/pratilipis': {
+		'POST': {
+			'params': [ 'resource', 'method', 'authorId', 'language' ]
+		}
+	},
+
+	'/authors/$primaryContentId': {
+		'GET': {
+			'resource_as': "/authors",
+			'params': [ 'resource', 'id', 'method' ]
+		},
+		'PATCH': {
+			'resource_as': "/authors",
 			'params': [ 'resource', 'id', 'method' ]
 		}
 	},
 
 	'/authors': {
-		'GET': {
-			'params': [ 'resource', 'id', 'method' ]
-		},
 		'POST': {
 			'params': [ 'resource', 'method', 'language' ]
-		},
-		'PATCH': {
-			'params': [ 'resource', 'id', 'method' ]
 		}
 	}
 

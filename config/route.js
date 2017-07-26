@@ -56,7 +56,7 @@ module.exports = {
 			'path': '/image/author/$primaryContentId/profile',
 			'methods': {
 				'DELETE': {
-					'primaryKey': 'pratilipiId',
+					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
 					]
@@ -70,7 +70,7 @@ module.exports = {
 			'path': '/image/author/$primaryContentId/cover',
 			'methods': {
 				'DELETE': {
-					'primaryKey': 'pratilipiId',
+					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
 					]
@@ -97,14 +97,14 @@ module.exports = {
 
 	'/pratilipi': {
 		'GET': {
-			'path': '/pratilipis',
+			'path': '/pratilipis/$primaryContentId',
 			'auth': true,
 			'primaryKey': 'pratilipiId'
 		},
 		'POST': {
-			'path': '/pratilipis',
 			'methods': {
 				'DELETE': {
+					'path': '/pratilipis/$primaryContentId',
 					'primaryKey': 'pratilipiId',
 					'requiredFields': [
 						{ 'pratilipiId': null },
@@ -112,12 +112,14 @@ module.exports = {
 					]
 				},
 				'PATCH': {
+					'path': '/pratilipis/$primaryContentId',
 					'primaryKey': 'pratilipiId',
 					'requiredFields': [
 						{ 'pratilipiId': null }
 					]
 				},
 				'POST': {
+					'path': '/pratilipis',
 					'requiredFields': [
 						{ 'language': null },
 						{ 'type': null }
@@ -134,15 +136,16 @@ module.exports = {
 			'primaryKey': 'authorId'
 		},
 		'POST': {
-			'path': '/authors',
 			'methods': {
 				'PATCH': {
+					'path': '/authors/$primaryContentId',
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
 					],
 				},
 				'POST': {
+					'path': '/authors',
 					'requiredFields': [
 						{ 'name': null },
 						{ 'language': null },
@@ -163,9 +166,9 @@ module.exports = {
 
 	'/pratilipi/tags/update': {
 		'POST': {
-			'path': '/pratilipis',
 			'methods': {
 				'PATCH': {
+					'path': '/pratilipis/$primaryContentId',
 					'primaryKey': 'pratilipiId',
 					'requiredFields': [
 						{ 'pratilipiId': null }
@@ -174,7 +177,5 @@ module.exports = {
 			}
 		}
 	}
-
-
 
 };
