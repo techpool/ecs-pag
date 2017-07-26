@@ -195,9 +195,6 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 			authParams[key] = params[key];
 	}
 
-	if( authConfig[ resource ][ method ][ "resource_as" ] )
-		resource = authConfig[ resource ][ method ][ "resource_as" ];
-
 	if( primaryContentId ) {
 		resource = resource.replace( "$primaryContentId", primaryContentId );
 		authParams[ "id" ] = primaryContentId;

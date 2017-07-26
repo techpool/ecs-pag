@@ -32,15 +32,12 @@ module.exports = {
 
 	'/pratilipis/$primaryContentId': {
 		'GET': {
-			'resource_as': "/pratilipis",
 			'params': [ 'resource', 'id', 'method' ]
 		},
 		'PATCH': {
-			'resource_as': "/pratilipis",
 			'params': [ 'resource', 'id', 'method' ]
 		},
 		'DELETE': {
-			'resource_as': "/pratilipis",
 			'params': [ 'resource', 'id', 'method' ]
 		}
 	},
@@ -53,11 +50,9 @@ module.exports = {
 
 	'/authors/$primaryContentId': {
 		'GET': {
-			'resource_as': "/authors",
 			'params': [ 'resource', 'id', 'method' ]
 		},
 		'PATCH': {
-			'resource_as': "/authors",
 			'params': [ 'resource', 'id', 'method' ]
 		}
 	},
