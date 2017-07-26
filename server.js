@@ -120,11 +120,9 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 
 function _forwardToGae( method, request, response ) {
 
-	console.log( "_forwardToGae" ); // TODO: Remove
 	var requestUrl = request.url.startsWith( "/api" ) ? request.url.substr(4) : request.url;
 	var appengineUrl = APPENGINE_ENDPOINT + requestUrl;
 	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + response.locals[ "access-token" ];
-	console.log( "appengineUrl = " + appengineUrl ); // TODO: Remove
 
 	var reqModule;
 	if( method === "GET" ) {
@@ -174,11 +172,8 @@ function _getHttpPromise( uri, method, headers, body ) {
 
 function _getAuth( resource, method, primaryContentId, params, request, response ) {
 
-	console.log( "_getAuth" ); // TODO: Remove
-
 	// Special case handling - auth_as in case of images
 	if( authConfig[ resource ][ method ][ "auth_as" ] ) {
-		console.log( "auth_as present -> authenticating as : " ) // TODO: Remove
 		return _getAuth( authConfig[ resource ][ method ][ "auth_as" ][ "resource" ],
 						authConfig[ resource ][ method ][ "auth_as" ][ "method" ],
 						primaryContentId,
@@ -203,23 +198,15 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 	authParams[ "resource" ] = encodeURIComponent( resource );
 	authParams[ "method" ] = method;
 
-	console.log( "authParams = " + JSON.stringify( authParams ) ); // TODO: Remove
-	console.log( 'Sending authentication request...' );
-
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 	console.log( "authEndpoint = " + authEndpoint );
 
 	var headers = { 'Access-Token': response.locals[ "access-token" ] };
 
-	console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
-
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
-			console.log( "authResponse.body = " + JSON.stringify( authResponse.body ) ); // TODO: Remove
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
-			console.log( "isAuthorized = " + isAuthorized ); // TODO: Remove
 			var statusCode = authResponse.body.data[0].code;
-			console.log( "statusCode = " + statusCode ); // TODO: Remove
 			if( ! isAuthorized ) {
 				response.status( _getResponseCode( statusCode ) ).send( INSUFFICIENT_ACCESS_EXCEPTION );
 				console.log( 'AUTHENTICATION_FAILED' );
@@ -228,13 +215,11 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 				return Promise.reject();
 			} else {
 				console.log( 'AUTHENTICATION_SUCCESSFUL' );
-				console.log( "auth response headers = " + JSON.stringify( authResponse.headers ) ); // TODO: Remove
 				return authResponse.headers[ 'user-id' ];
 			}
 		}, (httpError) => {
-			console.log( httpError.message );
+			console.log( httpError.message, "AUTHENTICATION_CALL_FAILED" );
 			response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.error( "AUTHENTICATION_CALL_FAILED" );
 			request.log.submit( 500, httpError.message.length );
 			latencyMetric.write( Date.now() - request.startTimestamp );
 			return Promise.reject();
@@ -252,29 +237,20 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 function _getService( method, requestUrl, request, response ) {
 
-	console.log( "_getService" ); // TODO: Remove
 	if( requestUrl == null )
 		requestUrl = request.url.startsWith( '/api' ) ? request.url.substr(4) : request.url;
 
-	console.log( "requestUrl = " + requestUrl ); // TODO: Remove
-
 	var api = requestUrl.split( "?" )[0];
-	console.log( "api = " + api ); // TODO: Remove
 	var urlQueryParams = _getUrlParameters( requestUrl );
-	console.log( "urlQueryParams = " + JSON.stringify( urlQueryParams ) ); // TODO: Remove
 
 	var isGETRequest = method === "GET";
-	console.log( "isGETRequest = " + isGETRequest ); // TODO: Remove
 
 	var primaryKey = isGETRequest
 		? routeConfig[api]["GET"].primaryKey
 		: routeConfig[api]["POST"]["methods"][method].primaryKey;
-	console.log( "primaryKey = " + primaryKey ); // TODO: Remove
 
 	var params = isGETRequest ? urlQueryParams : request.body;
-	console.log( "params = " + JSON.stringify( params ) ); // TODO: Remove
 	var primaryContentId = params[ primaryKey ] ? params[ primaryKey ] : null;
-	console.log( "primaryContentId = " + primaryContentId ); // TODO: Remove
 
 	if( primaryContentId ) {
 		delete urlQueryParams[ primaryKey ];
@@ -286,14 +262,11 @@ function _getService( method, requestUrl, request, response ) {
 	headers[ "AccessToken" ] = response.locals[ "access-token" ]; // TODO: Remove it once changes are made in Recommendation
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
-	console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
 
 	// body
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
-	console.log( "body = " + JSON.stringify( body ) ); // TODO: Remove
 
 	var isAuthRequired = isGETRequest ? routeConfig[api]["GET"].auth : true; // true for all non-GET requests
-	console.log( "isAuthRequired = " + isAuthRequired ); // TODO: Remove
 
 	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
 
@@ -304,17 +277,13 @@ function _getService( method, requestUrl, request, response ) {
 
 	// Replacing $primaryContentId
 	servicePath = servicePath.replace( "$primaryContentId", primaryContentId );
-	console.log( "servicePath = " + servicePath ); // TODO: Remove
 
 	var serviceUrl = ECS_END_POINT + servicePath;
 	if( ! _isEmpty( urlQueryParams ) ) serviceUrl += '?' + _formatParams( urlQueryParams );
-	console.log( "serviceUrl = " + serviceUrl ); // TODO: Remove
-
 
 	return authPromise
 		.then( (userId) => {
 			if( userId !== -1 ) headers[ "User-Id" ] = userId;
-			console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
 			return _getHttpPromise( serviceUrl, method, headers, body );
 		})
 	;
@@ -330,31 +299,22 @@ function resolveGET( request, response ) {
 	*	3. not supported in ecs && devo environment -> Send 'not supported'
 	*/
 
-	console.log( "resolveGET" ); // TODO: Remove
 	// request.path will be /api/xxx or /xxx (android)
 	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
-	console.log( "api = " + api ); // TODO: Remove
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
-	console.log( "isApiSupported = " + isApiSupported ); // TODO: Remove
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
-	console.log( "isPipeRequired = " + isPipeRequired ); // TODO: Remove
 
 	// For image requests
 	if( isPipeRequired ) {
-		console.log( "isPipeRequired block" ); // TODO: Remove
 		var isAuthRequired = routeConfig[api].GET.auth;
-		console.log( "isAuthRequired = " + isAuthRequired ); // TODO: Remove
 		var resource = encodeURIComponent( routeConfig[api].GET.path );
-		console.log( "resource = " + resource ); // TODO: Remove
 		var primaryContentId = _getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
-		console.log( "primaryContentId = " + primaryContentId ); // TODO: Remove
 
 		var authPromise = isAuthRequired
 			? _getAuth( resource, "GET", primaryContentId, null, request, response )
 			: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
 		var url = ECS_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '' );
-		console.log( "url = " + url ); // TODO: Remove
 
 		authPromise
 			.then( (userId) => {
@@ -377,7 +337,6 @@ function resolveGET( request, response ) {
 
 	// Supported in ecs
 	} else if( isApiSupported ) {
-		console.log( "isApiSupported block" ); // TODO: Remove
 
 		var requestUrl = null;
 		// TODO: Implement cleaner solution
@@ -398,20 +357,15 @@ function resolveGET( request, response ) {
 
 		_getService( "GET", requestUrl, request, response )
 			.then( (serviceResponse) => {
-				console.log( "Got ServiceResponse" ); // TODO: Remove
-				console.log( "serviceResponse.headers = " + JSON.stringify( serviceResponse.headers ) ); // TODO: Remove
 				_addRespectiveServiceHeaders( response, serviceResponse.headers );
-				console.log( "serviceResponse.statusCode = " + serviceResponse.statusCode ); // TODO: Remove
-				console.log( "serviceResponse.body = " + JSON.stringify( serviceResponse.body ) ); // TODO: Remove
 				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "Error ServiceResponse" ); // TODO: Remove
-					console.log( "httpError.statusCode = " + httpError.statusCode ); // TODO: Remove
-					console.log( "httpError.message = " + httpError.message ); // TODO: Remove
+					console.log( "httpError.statusCode = " + httpError.statusCode );
+					console.log( "httpError.message = " + httpError.message );
 					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( JSON.stringify( httpError.message ) );
 					request.log.submit( httpError.statusCode || 500, httpError.message.length );
@@ -467,7 +421,6 @@ function resolveGETBatch( request, response ) {
 			});
 		}
 	}
-	console.log( "requestArray = " + JSON.stringify( requestArray ) ); // TODO: Remove
 
 	var forwardAllToGAE = true;
 	for( var i = 0; i < requestArray.length; i++ ) {
@@ -476,7 +429,6 @@ function resolveGETBatch( request, response ) {
 			break;
 		}
 	}
-	console.log( "forwardAllToGAE = " + forwardAllToGAE ); // TODO: Remove
 
 
 	if( forwardAllToGAE ) {
@@ -491,7 +443,6 @@ function resolveGETBatch( request, response ) {
 				break;
 			}
 		}
-		console.log( "isParallel = " + isParallel ); // TODO: Remove
 
 		if( isParallel ) {
 
@@ -509,7 +460,6 @@ function resolveGETBatch( request, response ) {
 			// Pretty simple with Promise.all, isn't it?
 			Promise.all( promiseArray )
 				.then( (responseArray) => { // responseArray will be in order
-					console.log( "Got ResponseArray" ); // TODO: Remove
 					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = { "status": 200, "response": responseArray[i].body };
@@ -517,9 +467,9 @@ function resolveGETBatch( request, response ) {
 					request.log.submit( 200, JSON.stringify( returnResponse ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				}).catch( (error) => {
-					console.log( "Promise.all error" ); // TODO: Remove
-					console.log( "error.statusCode = " + error.statusCode ); // TODO: Remove
-					console.log( "error.message = " + error.message ); // TODO: Remove
+					console.log( "Promise.all error" );
+					console.log( "error.statusCode = " + error.statusCode );
+					console.log( "error.message = " + error.message );
 					response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( error.statusCode ); // 'Bad Request'
 					request.log.error( error.message ); // Html
@@ -573,9 +523,8 @@ function resolveGETBatch( request, response ) {
 					}, (error) => {
 						// error might be null from Promise.reject() thrown by the same block
 						if( error ) {
-							console.log( "Error Occured calling a service! " ) // TODO: Remove
-							console.log( "error.statusCode = " + error.statusCode ); // TODO: Remove
-							console.log( "error.message = " + error.message ); // TODO: Remove
+							console.log( "error.statusCode = " + error.statusCode );
+							console.log( "error.message = " + error.message );
 							response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 							request.log.error( error.message );
 							request.log.submit( error.statusCode, error.message.length );
@@ -611,9 +560,6 @@ function resolvePOST( request, response ) {
 			'Access-Token': request.headers.accesstoken,
 			'User-Id': request.headers["user-id"]
 		};
-		console.log( "url = " + url ); // TODO: Remove
-		console.log( "form = " + JSON.stringify( request.body ) ); // TODO: Remove
-		console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
 		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
 		return;
 	}
@@ -630,9 +576,6 @@ function resolvePOST( request, response ) {
 			'Access-Token': request.headers.accesstoken,
 			'User-Id': request.headers["user-id"]
 		};
-		console.log( "url = " + url ); // TODO: Remove
-		console.log( "form = " + JSON.stringify( request.body ) ); // TODO: Remove
-		console.log( "headers = " + JSON.stringify( headers ) ); // TODO: Remove
 		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
 		return;
 	}
@@ -667,7 +610,6 @@ function resolvePOST( request, response ) {
 					console.log( "Request headers = " + JSON.stringify( request[ "headers" ] ) );
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
-					console.log( "url to pipe: " + url ); // TODO: Remove
 					request.pipe( requestModule.post( url, request.body ) )
 						.on( 'error', (error) => {
 							console.log( JSON.stringify(error) );
@@ -730,20 +672,15 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 	if( isApiSupported ) {
 		_getService( methodName, null, request, response )
 			.then( (serviceResponse) => {
-				console.log( "Got ServiceResponse" ); // TODO: Remove
-				console.log( "serviceResponse.headers = " + JSON.stringify( serviceResponse.headers ) ); // TODO: Remove
 				_addRespectiveServiceHeaders( response, serviceResponse.headers );
-				console.log( "serviceResponse.statusCode = " + serviceResponse.statusCode ); // TODO: Remove
-				console.log( "serviceResponse.body = " + JSON.stringify( serviceResponse.body ) ); // TODO: Remove
 				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
 				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "Error ServiceResponse" ); // TODO: Remove
-					console.log( "httpError.statusCode = " + httpError.statusCode ); // TODO: Remove
-					console.log( "httpError.message = " + httpError.message ); // TODO: Remove
+					console.log( "httpError.statusCode = " + httpError.statusCode );
+					console.log( "httpError.message = " + httpError.message );
 					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( JSON.stringify( httpError.message ) );
 					request.log.submit( httpError.statusCode || 500, httpError.message.length );
