@@ -127,11 +127,10 @@ function _forwardToGae( method, request, response ) {
 	console.log( "appengineUrl = " + appengineUrl ); // TODO: Remove
 
 	var reqModule;
-	// POST Image Pipe Request
-	if( requestUrl.startsWith( "/pratilipi/content/image" ) || requestUrl.startsWith( "/event/banner" ) ) {
+	if( method === "GET" ) {
+    		reqModule = request.pipe( requestModule( appengineUrl ) );
+	} else if( method === "POST" && ( requestUrl.startsWith( "/pratilipi/content/image" ) || requestUrl.startsWith( "/event/banner" ) ) ) {
 		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
-	} else if( method === "GET" ) {
-		reqModule = request.pipe( requestModule( appengineUrl ) );
 	} else {
 		reqModule = requestModule.post( appengineUrl, { form: request.body } );
 	}
