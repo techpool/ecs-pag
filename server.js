@@ -382,7 +382,25 @@ function resolveGET( request, response ) {
 	// Supported in ecs
 	} else if( isApiSupported ) {
 		console.log( "isApiSupported block" ); // TODO: Remove
-		_getService( "GET", null, request, response )
+
+		var requestUrl = null;
+		// TODO: Implement cleaner solution
+		if( api == '/pratilipi/list' ) {
+			var params = _getUrlParameters( request.url );
+			if( params[ "authorId" ] && params[ "state" ] && params[ "state" ] == "PUBLISHED" ) {
+				var params = _getUrlParameters( request.url );
+				if( params[ "resultCount" ] ) {
+					params[ "limit" ] = params[ "resultCount" ]
+					delete params[ "resultCount" ];
+				}
+				requestUrl = api + "?" + _formatParams( params );
+			} else {
+				_forwardToGae( "GET", request, response );
+				return;
+			}
+		}
+
+		_getService( "GET", requestUrl, request, response )
 			.then( (serviceResponse) => {
 				console.log( "Got ServiceResponse" ); // TODO: Remove
 				console.log( "serviceResponse.headers = " + JSON.stringify( serviceResponse.headers ) ); // TODO: Remove

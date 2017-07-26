@@ -176,6 +176,13 @@ module.exports = {
 				}
 			}
 		}
+	},
+
+	'/pratilipi/list': {
+		'GET':{
+			'path': '/pratilipis',
+			'auth': false
+		}
 	}
 
 };
