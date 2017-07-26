@@ -383,7 +383,7 @@ function resolveGET( request, response ) {
 		// TODO: Implement cleaner solution
 		if( api == '/pratilipi/list' ) {
 			var params = _getUrlParameters( request.url );
-			if( params[ "authorId" ] && params[ "state" ] && params[ "state" ] == "PUBLISHED" ) {
+			if( params[ "authorId" ] && params[ "state" ] ) {
 				var params = _getUrlParameters( request.url );
 				if( params[ "resultCount" ] ) {
 					params[ "limit" ] = params[ "resultCount" ]
