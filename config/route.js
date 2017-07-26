@@ -131,7 +131,7 @@ module.exports = {
 
 	'/author':{
 		'GET':{
-			'path': '/authors',
+			'path': '/authors/$primaryContentId',
 			'auth': true,
 			'primaryKey': 'authorId'
 		},
