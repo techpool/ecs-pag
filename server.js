@@ -129,7 +129,7 @@ function _forwardToGae( method, request, response ) {
 	var reqModule;
 	// POST Image Pipe Request
 	if( requestUrl.startsWith( "/pratilipi/content/image" ) || requestUrl.startsWith( "/event/banner" ) ) {
-		reqModule = requestModule.post( appengineUrl, request.body );
+		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
 	} else if( method === "GET" ) {
 		reqModule = request.pipe( requestModule( appengineUrl ) );
 	} else {
