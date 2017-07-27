@@ -64,6 +64,24 @@ module.exports = {
 		'POST': {
 			'params': [ 'resource', 'method', 'language' ]
 		}
+	},
+
+	'/recommendation/pratilipis': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/search/search': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/search/trending_search': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
 	}
 
 };
