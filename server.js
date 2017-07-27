@@ -253,7 +253,6 @@ function _getService( method, requestUrl, request, response ) {
 
 	// headers
 	var headers = { 'Access-Token': response.locals[ "access-token" ] };
-	headers[ "AccessToken" ] = response.locals[ "access-token" ]; // TODO: Remove it once changes are made in Recommendation
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
 
