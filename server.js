@@ -116,9 +116,10 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 
 function _forwardToGae( method, request, response ) {
 
-	var requestUrl = request.url.startsWith( "/api" ) ? request.url.substr(4) : request.url;
-	var appengineUrl = APPENGINE_ENDPOINT + requestUrl;
-	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + response.locals[ "access-token" ];
+	var api = request.path.startsWith( "/api" ) ? request.path.substr(4) : request.path;
+	var params = _getUrlParameters( request.url );
+	params[ "accessToken" ] = response.locals[ "access-token" ];
+	var appengineUrl = APPENGINE_ENDPOINT + api + "?" + _formatParams( params );
 	console.log( "GAE :: " + method + " :: " + appengineUrl );
 
 	var reqModule;
