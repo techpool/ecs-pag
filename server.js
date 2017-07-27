@@ -32,11 +32,7 @@ const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
-const APPENGINE_ENDPOINT =
-	( process.env.STAGE === 'gamma' || process.env.STAGE === 'prod' ) ?
-	"https://api.pratilipi.com" :
-	"https://devo-pratilipi.appspot.com/api";
-
+const APPENGINE_ENDPOINT = mainConfig.APPENGINE_ENDPOINT;
 const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
 
 function _isEmpty( obj ) {
@@ -123,6 +119,7 @@ function _forwardToGae( method, request, response ) {
 	var requestUrl = request.url.startsWith( "/api" ) ? request.url.substr(4) : request.url;
 	var appengineUrl = APPENGINE_ENDPOINT + requestUrl;
 	appengineUrl += ( appengineUrl.indexOf( "?" ) === -1 ? "?" : "&" ) + "accessToken=" + response.locals[ "access-token" ];
+	console.log( "GAE :: " + method + " :: " + appengineUrl );
 
 	var reqModule;
 	if( method === "GET" ) {
