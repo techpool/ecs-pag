@@ -120,9 +120,9 @@ function _forwardToGae( method, request, response ) {
 	var params = _getUrlParameters( request.url );
 	params[ "accessToken" ] = response.locals[ "access-token" ];
 	var appengineUrl = APPENGINE_ENDPOINT + api + "?" + _formatParams( params );
-	request.headers[ "ECS-HostName" ] = req.headers.host;
+	request.headers[ "ECS-HostName" ] = request.headers.host;
 
-	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( headers ) );
+	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( request.headers ) );
 
 	var reqModule;
 	if( method === "GET" ) {
