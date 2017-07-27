@@ -120,7 +120,9 @@ function _forwardToGae( method, request, response ) {
 	var params = _getUrlParameters( request.url );
 	params[ "accessToken" ] = response.locals[ "access-token" ];
 	var appengineUrl = APPENGINE_ENDPOINT + api + "?" + _formatParams( params );
-	console.log( "GAE :: " + method + " :: " + appengineUrl );
+	request.headers[ "ECS-HostName" ] = req.headers.host;
+
+	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( headers ) );
 
 	var reqModule;
 	if( method === "GET" ) {
@@ -128,7 +130,7 @@ function _forwardToGae( method, request, response ) {
 	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
 		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
 	} else {
-		reqModule = requestModule.post( appengineUrl, { form: request.body } );
+		reqModule = requestModule.post( { uri: appengineUrl, form: request.body, headers: request.headers } );
 	}
 
 	reqModule
