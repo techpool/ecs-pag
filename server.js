@@ -210,7 +210,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 				return authResponse.headers[ 'user-id' ];
 			}
 		}, (httpError) => {
-			console.log( httpError.message, "AUTHENTICATION_CALL_FAILED" );
+			console.log( "ERROR_MESSAGE :: " + httpError.message );
 			response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 			request.log.submit( 500, httpError.message.length );
 			latencyMetric.write( Date.now() - request.startTimestamp );
@@ -356,8 +356,8 @@ function resolveGET( request, response ) {
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "statusCode = " + httpError.statusCode );
-					console.log( "message = " + httpError.message );
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( JSON.stringify( httpError.message ) );
 					request.log.submit( httpError.statusCode || 500, httpError.message.length );
@@ -459,9 +459,9 @@ function resolveGETBatch( request, response ) {
 					request.log.submit( 200, JSON.stringify( returnResponse ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
 				}).catch( (error) => {
-					console.log( "Promise.all error" );
-					console.log( "statusCode = " + error.statusCode );
-					console.log( "message = " + error.message );
+					console.log( "ERROR_CAUSE :: Promise.all" );
+					console.log( "ERROR_STATUS :: " + error.statusCode );
+					console.log( "ERROR_MESSAGE :: " + error.message );
 					response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( error.statusCode ); // 'Bad Request'
 					request.log.error( error.message ); // Html
@@ -515,8 +515,8 @@ function resolveGETBatch( request, response ) {
 					}, (error) => {
 						// error might be null from Promise.reject() thrown by the same block
 						if( error ) {
-							console.log( "statusCode = " + error.statusCode );
-							console.log( "message = " + error.message );
+							console.log( "ERROR_STATUS :: " + error.statusCode );
+							console.log( "ERROR_MESSAGE :: " + error.message );
 							response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 							request.log.error( error.message );
 							request.log.submit( error.statusCode, error.message.length );
@@ -600,12 +600,12 @@ function resolvePOST( request, response ) {
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					request.pipe( requestModule.post( url, request.body ) )
 						.on( 'error', (error) => {
-							console.log( JSON.stringify(error) );
+							console.log( "ERROR_MESSAGE :: " + JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 						})
 						.pipe( response )
 						.on( 'error', function(error) {
-							console.log( JSON.stringify(error) );
+							console.log( "ERROR_MESSAGE :: " + JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 						})
 					;
@@ -667,8 +667,8 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "statusCode = " + httpError.statusCode );
-					console.log( "message = " + httpError.message );
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 					request.log.error( JSON.stringify( httpError.message ) );
 					request.log.submit( httpError.statusCode || 500, httpError.message.length );
