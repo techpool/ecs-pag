@@ -446,7 +446,8 @@ function resolveGETBatch( request, response ) {
 					promiseArray.push( _getService( "GET", req.url, request, response ) );
 				} else {
 					var uri = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
-					promiseArray.push( _getHttpPromise( uri, "GET" ) );
+					var headers = { "ECS-HostName": request.headers.host };
+					promiseArray.push( _getHttpPromise( uri, "GET", headers ) );
 				}
 			});
 
@@ -495,7 +496,8 @@ function resolveGETBatch( request, response ) {
 					promise = _getService( "GET", req.url, request, response );
 				} else {
 					var appengineUrl = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
-					promise = _getHttpPromise( appengineUrl, "GET" );
+					var headers = { "ECS-HostName": request.headers.host };
+					promise = _getHttpPromise( appengineUrl, "GET", headers );
 				}
 
 				return promise
