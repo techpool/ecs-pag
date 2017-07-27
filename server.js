@@ -125,7 +125,7 @@ function _forwardToGae( method, request, response ) {
 	var reqModule;
 	if( method === "GET" ) {
     		reqModule = request.pipe( requestModule( appengineUrl ) );
-	} else if( method === "POST" && ( requestUrl.startsWith( "/pratilipi/content/image" ) || requestUrl.startsWith( "/event/banner" ) ) ) {
+	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
 		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
 	} else {
 		reqModule = requestModule.post( appengineUrl, { form: request.body } );
