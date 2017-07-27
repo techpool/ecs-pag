@@ -130,7 +130,7 @@ function _forwardToGae( method, request, response ) {
 	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
 		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
 	} else {
-		reqModule = requestModule.post( { uri: appengineUrl, form: request.body, headers: request.headers } );
+		reqModule = requestModule.post( appengineUrl, { form: request.body } );
 	}
 
 	reqModule
