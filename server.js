@@ -65,10 +65,10 @@ function _getUrlParameter( url, parameter ) {
 	return null;
 }
 
-function _addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
+function _addRespectiveServiceHeaders( res, serviceReturnedHeaders ) {
 	var pagHeaders = [ 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' ];
 	var serviceHeaders = _.omit( serviceReturnedHeaders, pagHeaders );
-	response.set( serviceHeaders );
+	res.set( serviceHeaders );
 }
 
 function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
@@ -106,38 +106,38 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 
 }
 
-function _forwardToGae( method, request, response ) {
+function _forwardToGae( method, req, res ) {
 
-	var api = request.path.startsWith( "/api" ) ? request.path.substr(4) : request.path;
-	var params = _getUrlParameters( request.url );
-	params[ "accessToken" ] = response.locals[ "access-token" ];
+	var api = req.path.startsWith( "/api" ) ? req.path.substr(4) : req.path;
+	var params = _getUrlParameters( req.url );
+	params[ "accessToken" ] = res.locals[ "access-token" ];
 	var appengineUrl = APPENGINE_ENDPOINT + api + "?" + _formatParams( params );
-	request.headers[ "ECS-HostName" ] = request.headers.host;
+	req.headers[ "ECS-HostName" ] = req.headers.host;
 
-	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( request.headers ) );
+	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( req.headers ) );
 
 	var reqModule;
 	if( method === "GET" ) {
-    		reqModule = request.pipe( requestModule( appengineUrl ) );
+		reqModule = req.pipe( requestModule( appengineUrl ) );
 	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
-		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
+		reqModule = req.pipe( requestModule.post( appengineUrl, req.body ) );
 	} else {
-		reqModule = requestModule.post( appengineUrl, { form: request.body } );
+		reqModule = requestModule.post( appengineUrl, { form: req.body } );
 	}
 
 	reqModule
 		.on( 'error', (error) => {
-			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.error( JSON.stringify( error ) );
-			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-			latencyMetric.write( Date.now() - request.startTimestamp );
+			res.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+			req.log.error( JSON.stringify( error ) );
+			req.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
+			latencyMetric.write( Date.now() - req.startTimestamp );
 		})
-		.pipe( response )
+		.pipe( res )
 		.on( 'error', (error) => {
-			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.error( JSON.stringify( error ) );
-			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-			latencyMetric.write( Date.now() - request.startTimestamp );
+			res.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+			req.log.error( JSON.stringify( error ) );
+			req.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
+			latencyMetric.write( Date.now() - req.startTimestamp );
 		})
 	;
 }
@@ -157,7 +157,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 }
 
 
-function _getAuth( resource, method, primaryContentId, params, request, response ) {
+function _getAuth( resource, method, primaryContentId, params, req, res ) {
 
 	// Special case handling - auth_as in case of images
 	if( authConfig[ resource ][ method ][ "auth_as" ] ) {
@@ -165,8 +165,8 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 						authConfig[ resource ][ method ][ "auth_as" ][ "method" ],
 						primaryContentId,
 						params,
-						request,
-						response );
+						req,
+						res );
 	}
 
 	var authParams = {};
@@ -187,17 +187,17 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
-	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+	var headers = { 'Access-Token': res.locals[ "access-token" ] };
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
 			var statusCode = authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
-				response.status( _getResponseCode( statusCode ) ).send( INSUFFICIENT_ACCESS_EXCEPTION );
+				res.status( _getResponseCode( statusCode ) ).send( INSUFFICIENT_ACCESS_EXCEPTION );
 				console.log( 'AUTHENTICATION_FAILED' );
-				request.log.submit( statusCode, JSON.stringify( authResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				req.log.submit( statusCode, JSON.stringify( authResponse.body ).length );
+				latencyMetric.write( Date.now() - req.startTimestamp );
 				return Promise.reject();
 			} else {
 				console.log( 'AUTHENTICATION_SUCCESSFUL' );
@@ -205,9 +205,9 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 			}
 		}, (httpError) => {
 			console.log( "ERROR_MESSAGE :: " + httpError.message );
-			response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.submit( 500, httpError.message.length );
-			latencyMetric.write( Date.now() - request.startTimestamp );
+			res.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+			req.log.submit( 500, httpError.message.length );
+			latencyMetric.write( Date.now() - req.startTimestamp );
 			return Promise.reject();
 		});
 	;
@@ -218,13 +218,13 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 /*
 	_getService() -> Generic function returning a httpPromise
 	requestUrl is used for GET Batch calls,
-	if requestUrl == null, fallback to request.url
+	if requestUrl == null, fallback to req.url
 */
 
-function _getService( method, requestUrl, request, response ) {
+function _getService( method, requestUrl, req, res ) {
 
 	if( requestUrl == null )
-		requestUrl = request.url.startsWith( '/api' ) ? request.url.substr(4) : request.url;
+		requestUrl = req.url.startsWith( '/api' ) ? req.url.substr(4) : req.url;
 
 	var api = requestUrl.split( "?" )[0];
 	var urlQueryParams = _getUrlParameters( requestUrl );
@@ -235,21 +235,21 @@ function _getService( method, requestUrl, request, response ) {
 		? routeConfig[api]["GET"].primaryKey
 		: routeConfig[api]["POST"]["methods"][method].primaryKey;
 
-	var params = isGETRequest ? urlQueryParams : request.body;
+	var params = isGETRequest ? urlQueryParams : req.body;
 	var primaryContentId = params[ primaryKey ] ? params[ primaryKey ] : null;
 
 	if( primaryContentId ) {
 		delete urlQueryParams[ primaryKey ];
-		delete request.body[ primaryKey ];
+		delete req.body[ primaryKey ];
 	}
 
 	// headers
-	var headers = { 'Access-Token': response.locals[ "access-token" ] };
-	if( request.headers.version )
-		headers[ "Version" ] = request.headers.version;
+	var headers = { 'Access-Token': res.locals[ "access-token" ] };
+	if( req.headers.version )
+		headers[ "Version" ] = req.headers.version;
 
 	// body
-	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
+	var body = ( ( method === "POST" || method === "PATCH" ) && req.body ) ? req.body : null;
 
 	var isAuthRequired = isGETRequest ? routeConfig[api]["GET"].auth : true; // true for all non-GET requests
 
@@ -257,7 +257,7 @@ function _getService( method, requestUrl, request, response ) {
 
 	// Calling auth before replacing $primaryContentId
 	var authPromise = isAuthRequired
-		? _getAuth( servicePath, method, primaryContentId, params, request, response )
+		? _getAuth( servicePath, method, primaryContentId, params, req, res )
 		: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
 	// Replacing $primaryContentId
@@ -275,7 +275,7 @@ function _getService( method, requestUrl, request, response ) {
 
 }
 
-function resolveGET( request, response ) {
+function resolveGET( req, res ) {
 
 	/*
 	*	3 cases:
@@ -284,8 +284,8 @@ function resolveGET( request, response ) {
 	*	3. not supported in ecs && devo environment -> Send 'not supported'
 	*/
 
-	// request.path will be /api/xxx or /xxx (android)
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	// req.path will be /api/xxx or /xxx (android)
+	var api = req.path.startsWith( '/api' ) ? req.path.substr(4) : req.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
@@ -293,29 +293,29 @@ function resolveGET( request, response ) {
 	if( isPipeRequired ) {
 		var isAuthRequired = routeConfig[api].GET.auth;
 		var resource = encodeURIComponent( routeConfig[api].GET.path );
-		var primaryContentId = _getUrlParameter( request.url, routeConfig[api].GET.primaryKey );
+		var primaryContentId = _getUrlParameter( req.url, routeConfig[api].GET.primaryKey );
 
 		var authPromise = isAuthRequired
-			? _getAuth( resource, "GET", primaryContentId, null, request, response )
+			? _getAuth( resource, "GET", primaryContentId, null, req, res )
 			: new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
-		var url = ECS_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '' );
+		var url = ECS_END_POINT + routeConfig[api].GET.path + ( req.url.split('?')[1] ? ('?' + req.url.split('?')[1]) : '' );
 
 		authPromise
 			.then( (userId) => {
-				request.pipe( requestModule( url ) )
+				req.pipe( requestModule( url ) )
 					.on( 'error', function( error ) {
-						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-						request.log.error( JSON.stringify( error ) );
-						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-						latencyMetric.write( Date.now() - request.startTimestamp );
+						res.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+						req.log.error( JSON.stringify( error ) );
+						req.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
+						latencyMetric.write( Date.now() - req.startTimestamp );
 					})
-					.pipe( response )
+					.pipe( res )
 					.on( 'error', function( error ) {
-						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-						request.log.error( JSON.stringify( error ) );
-						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-						latencyMetric.write( Date.now() - request.startTimestamp );
+						res.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+						req.log.error( JSON.stringify( error ) );
+						req.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
+						latencyMetric.write( Date.now() - req.startTimestamp );
 					})
 				;
 			});
@@ -326,47 +326,47 @@ function resolveGET( request, response ) {
 		var requestUrl = null;
 		// TODO: Implement cleaner solution
 		if( api == '/pratilipi/list' ) {
-			var params = _getUrlParameters( request.url );
+			var params = _getUrlParameters( req.url );
 			if( params[ "authorId" ] && params[ "state" ] ) {
-				var params = _getUrlParameters( request.url );
+				var params = _getUrlParameters( req.url );
 				if( params[ "resultCount" ] ) {
 					params[ "limit" ] = params[ "resultCount" ]
 					delete params[ "resultCount" ];
 				}
 				requestUrl = api + "?" + _formatParams( params );
 			} else {
-				_forwardToGae( "GET", request, response );
+				_forwardToGae( "GET", req, res );
 				return;
 			}
 		}
 
-		_getService( "GET", requestUrl, request, response )
+		_getService( "GET", requestUrl, req, res )
 			.then( (serviceResponse) => {
-				_addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
-				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_addRespectiveServiceHeaders( res, serviceResponse.headers );
+				res.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
+				req.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
+				latencyMetric.write( Date.now() - req.startTimestamp );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
-					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( JSON.stringify( httpError.message ) );
-					request.log.submit( httpError.statusCode || 500, httpError.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					res.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+					req.log.error( JSON.stringify( httpError.message ) );
+					req.log.submit( httpError.statusCode || 500, httpError.message.length );
+					latencyMetric.write( Date.now() - req.startTimestamp );
 				}
 			});
 		;
 
 	// Forward to appengine
 	} else {
-		_forwardToGae( "GET", request, response );
+		_forwardToGae( "GET", req, res );
 	}
 
 }
 
-function resolveGETBatch( request, response ) {
+function resolveGETBatch( req, res ) {
 
 	/*
 		Sample batch call request:
@@ -381,10 +381,10 @@ function resolveGETBatch( request, response ) {
 	*/
 
 	// Just another bad request
-	if( ! request.url.startsWith( "/api?requests=" ) )
-		response.status( 400 ).send( "Bad Request !" );
+	if( ! req.url.startsWith( "/api?requests=" ) )
+		res.status( 400 ).send( "Bad Request !" );
 
-	var requests = JSON.parse( decodeURIComponent( request.url.substring( "/api?requests=".length ) ) );
+	var requests = JSON.parse( decodeURIComponent( req.url.substring( "/api?requests=".length ) ) );
 
 	/* requestArray -> Contains all necessary fields for processing in next steps
 		name -> name of the request (req1)
@@ -394,12 +394,12 @@ function resolveGETBatch( request, response ) {
 		isAuthRequired -> no need to explain
 	*/
 	var requestArray = [];
-	for( var req in requests ) {
-		if( requests.hasOwnProperty(req) ) {
-			var api = requests[req].split( "?" )[0];
+	for( var aReq in requests ) {
+		if( requests.hasOwnProperty(aReq) ) {
+			var api = requests[aReq].split( "?" )[0];
 			requestArray.push({
-				"name": req,
-				"url": requests[req],
+				"name": aReq,
+				"url": requests[aReq],
 				"api": api,
 				"isSupported": routeConfig[api] != null && routeConfig[api].GET != null,
 				"isAuthRequired": routeConfig[api] != null && routeConfig[api].GET != null && routeConfig[api].GET.auth
@@ -417,7 +417,7 @@ function resolveGETBatch( request, response ) {
 
 
 	if( forwardAllToGAE ) {
-		_forwardToGae( "GET", request, response );
+		_forwardToGae( "GET", req, res );
 
 	} else { // Sequential or batch calls
 
@@ -432,13 +432,13 @@ function resolveGETBatch( request, response ) {
 		if( isParallel ) {
 
 			var promiseArray = [];
-			requestArray.forEach( (req) => {
+			requestArray.forEach( (aReq) => {
 				var url;
-				if( req.isSupported ) {
-					promiseArray.push( _getService( "GET", req.url, request, response ) );
+				if( aReq.isSupported ) {
+					promiseArray.push( _getService( "GET", aReq.url, req, res ) );
 				} else {
-					var uri = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
-					var headers = { "ECS-HostName": request.headers.host };
+					var uri = APPENGINE_ENDPOINT + aReq.url + ( aReq.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + res.locals[ "access-token" ];
+					var headers = { "ECS-HostName": req.headers.host };
 					promiseArray.push( _getHttpPromise( uri, "GET", headers ) );
 				}
 			});
@@ -449,18 +449,18 @@ function resolveGETBatch( request, response ) {
 					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = { "status": 200, "response": responseArray[i].body };
-					response.send( returnResponse );
-					request.log.submit( 200, JSON.stringify( returnResponse ).length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					res.send( returnResponse );
+					req.log.submit( 200, JSON.stringify( returnResponse ).length );
+					latencyMetric.write( Date.now() - req.startTimestamp );
 				}).catch( (error) => {
 					console.log( "ERROR_CAUSE :: Promise.all" );
 					console.log( "ERROR_STATUS :: " + error.statusCode );
 					console.log( "ERROR_MESSAGE :: " + error.message );
-					response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( error.statusCode ); // 'Bad Request'
-					request.log.error( error.message ); // Html
-					request.log.submit( 500, error.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					res.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
+					req.log.error( error.statusCode ); // 'Bad Request'
+					req.log.error( error.message ); // Html
+					req.log.submit( 500, error.message.length );
+					latencyMetric.write( Date.now() - req.startTimestamp );
 				})
 			;
 		} else {
@@ -482,13 +482,13 @@ function resolveGETBatch( request, response ) {
 					responseObject = {}; // Initialising
 
 				// Current request Object
-				var req = reqArray[0];
+				var aReq = reqArray[0];
 				var promise;
-				if( req.isSupported ) {
-					promise = _getService( "GET", req.url, request, response );
+				if( aReq.isSupported ) {
+					promise = _getService( "GET", aReq.url, req, res );
 				} else {
-					var appengineUrl = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
-					var headers = { "ECS-HostName": request.headers.host };
+					var appengineUrl = APPENGINE_ENDPOINT + aReq.url + ( aReq.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + res.locals[ "access-token" ];
+					var headers = { "ECS-HostName": req.headers.host };
 					promise = _getHttpPromise( appengineUrl, "GET", headers );
 				}
 
@@ -498,13 +498,13 @@ function resolveGETBatch( request, response ) {
 						// Modifying other requests of the reqArray
 						reqArray.forEach( (aReq) => {
 							for( var key in responseJson ) {
-								var find = "$" + req.name + "." + key;
+								var find = "$" + aReq.name + "." + key;
 								if( aReq.url.indexOf( find ) !== -1 ) {
 									aReq.url = aReq.url.replace( find, responseJson[key] );
 								}
 							}
 						});
-						responseObject[ req.name ] = { "status": 200, "response": responseJson }; // Populating the responseObject
+						responseObject[ aReq.name ] = { "status": 200, "response": responseJson }; // Populating the responseObject
 						reqArray.shift();
 						return recursiveGET( reqArray, responseObject );
 					}, (error) => {
@@ -512,10 +512,10 @@ function resolveGETBatch( request, response ) {
 						if( error ) {
 							console.log( "ERROR_STATUS :: " + error.statusCode );
 							console.log( "ERROR_MESSAGE :: " + error.message );
-							response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-							request.log.error( error.message );
-							request.log.submit( error.statusCode, error.message.length );
-							latencyMetric.write( Date.now() - request.startTimestamp );
+							res.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+							req.log.error( error.message );
+							req.log.submit( error.statusCode, error.message.length );
+							latencyMetric.write( Date.now() - req.startTimestamp );
 							return Promise.reject();
 						}
 					})
@@ -525,9 +525,9 @@ function resolveGETBatch( request, response ) {
 			recursiveGET( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
 				.then( (res) => {
 					if( res ) {
-						response.send( res );
-						request.log.submit( 200, JSON.stringify( res ).length );
-						latencyMetric.write( Date.now() - request.startTimestamp );
+						res.send( res );
+						req.log.submit( 200, JSON.stringify( res ).length );
+						latencyMetric.write( Date.now() - req.startTimestamp );
 					}
 				})
 			;
@@ -535,19 +535,19 @@ function resolveGETBatch( request, response ) {
 	}
 }
 
-function resolvePOST( request, response ) {
+function resolvePOST( req, res ) {
 
 	// TODO: Remove once everything is moved to ecs
 	// url: /api/pratilipis/12345/review-data
 	// body: reviewCount, ratingCount, totalRating
 	// headers: AccessToken, User-Id
-	if( request.path.startsWith( '/api/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
-		var url = ECS_END_POINT + request.path.substr(4);
+	if( req.path.startsWith( '/api/pratilipis/' ) && req.path.endsWith( '/review-data' ) ) {
+		var url = ECS_END_POINT + req.path.substr(4);
 		var headers = {
-			'Access-Token': request.headers.accesstoken,
-			'User-Id': request.headers["user-id"]
+			'Access-Token': req.headers.accesstoken,
+			'User-Id': req.headers["user-id"]
 		};
-		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
+		requestModule.patch( url, { form: req.body, headers: headers } ).pipe( res );
 		return;
 	}
 
@@ -555,15 +555,15 @@ function resolvePOST( request, response ) {
 	// url: /api/authors/12345/follow-count
 	// body: followCount
 	// headers: AccessToken, User-Id
-	if( request.path.startsWith( '/api/authors/' ) && request.path.endsWith( '/follow-count' ) ) {
-		var arr = request.path.split( '/' );
+	if( req.path.startsWith( '/api/authors/' ) && req.path.endsWith( '/follow-count' ) ) {
+		var arr = req.path.split( '/' );
 		var authorId = arr[arr.length - 2];
 		var url = ECS_END_POINT + "/authors/" + authorId;
 		var headers = {
-			'Access-Token': request.headers.accesstoken,
-			'User-Id': request.headers["user-id"]
+			'Access-Token': req.headers.accesstoken,
+			'User-Id': req.headers["user-id"]
 		};
-		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
+		requestModule.patch( url, { form: req.body, headers: headers } ).pipe( res );
 		return;
 	}
 
@@ -578,7 +578,7 @@ function resolvePOST( request, response ) {
 	3. pipe is required for image requests
 	*/
 
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	var api = req.path.startsWith( '/api' ) ? req.path.substr(4) : req.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
 	if( isApiSupported ) {
 		var isPipeRequired = routeConfig[api].POST.shouldPipe;
@@ -586,22 +586,22 @@ function resolvePOST( request, response ) {
 			// Assumption: Only POST implementation in case of Image requests
 			var resource = routeConfig[api].POST.path;
 			var primaryKey = routeConfig[api]['POST']['methods']['POST'].primaryKey;
-			var primaryContentId = _getUrlParameter( request.url, primaryKey );
-			_getAuth( resource, "POST", primaryContentId, null, request, response )
+			var primaryContentId = _getUrlParameter( req.url, primaryKey );
+			_getAuth( resource, "POST", primaryContentId, null, req, res )
 				.then( (userId) => {
-					request[ "headers" ][ "User-Id" ] = userId;
-					request[ "headers" ][ "Access-Token" ] = response.locals[ "access-token" ];
+					req[ "headers" ][ "User-Id" ] = userId;
+					req[ "headers" ][ "Access-Token" ] = res.locals[ "access-token" ];
 					var url = ECS_END_POINT + resource;
-					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
-					request.pipe( requestModule.post( url, request.body ) )
+					if( req.url.indexOf( "?" ) !== -1 ) url += "?" + req.url.split( "?" )[1];
+					req.pipe( requestModule.post( url, req.body ) )
 						.on( 'error', (error) => {
 							console.log( "ERROR_MESSAGE :: " + JSON.stringify(error) );
-							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
+							res.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 						})
-						.pipe( response )
+						.pipe( res )
 						.on( 'error', function(error) {
 							console.log( "ERROR_MESSAGE :: " + JSON.stringify(error) );
-							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
+							res.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 						})
 					;
 				})
@@ -622,7 +622,7 @@ function resolvePOST( request, response ) {
 							var fieldObject = requiredFields[ j ];
 							var fieldName = Object.keys( fieldObject )[0];
 							var fieldValue = fieldObject[ fieldName ];
-							if( ! request.body[fieldName] || ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
+							if( ! req.body[fieldName] || ( fieldValue !== null && fieldValue !== req.body[fieldName] ) ) {
 								fieldsFlag = false;
 								continue loop1;
 							}
@@ -633,46 +633,46 @@ function resolvePOST( request, response ) {
 				}
 
 			if( fieldsFlag ) {
-				_resolvePostPatchDelete( methodName, request, response );
+				_resolvePostPatchDelete( methodName, req, res );
 			} else {
-				response.send( "Method not yet supported!" );
+				res.send( "Method not yet supported!" );
 			}
 		}
 
 	// Forward to appengine
 	} else {
-		_forwardToGae( "POST", request, response );
+		_forwardToGae( "POST", req, res );
 	}
 
 }
 
-function _resolvePostPatchDelete( methodName, request, response ) {
+function _resolvePostPatchDelete( methodName, req, res ) {
 
 	// Sanity check -> direct request from frontend
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	var api = req.path.startsWith( '/api' ) ? req.path.substr(4) : req.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api]["POST"]["methods"][methodName];
 
 	if( isApiSupported ) {
-		_getService( methodName, null, request, response )
+		_getService( methodName, null, req, res )
 			.then( (serviceResponse) => {
-				_addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
-				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_addRespectiveServiceHeaders( res, serviceResponse.headers );
+				res.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
+				req.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
+				latencyMetric.write( Date.now() - req.startTimestamp );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
-					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( JSON.stringify( httpError.message ) );
-					request.log.submit( httpError.statusCode || 500, httpError.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					res.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+					req.log.error( JSON.stringify( httpError.message ) );
+					req.log.submit( httpError.statusCode || 500, httpError.message.length );
+					latencyMetric.write( Date.now() - req.startTimestamp );
 				}
 			});
 		;
 	} else {
-		response.send( "Api Not supported yet!" );
+		res.send( "Api Not supported yet!" );
 	}
 }
 
@@ -684,71 +684,71 @@ app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: true }) );
 
 // for initializing log object
-app.use( (request, response, next) => {
-	var log = request.log = new Logging( request );
-	request.startTimestamp = Date.now();
+app.use( (req, res, next) => {
+	var log = req.log = new Logging( req );
+	req.startTimestamp = Date.now();
 	next();
 });
 
 //CORS middleware
-app.use( (request, response, next) => {
-	response.setHeader( 'Access-Control-Allow-Origin', "*" ); //TODO: add only pratilipi origin
-	response.setHeader( 'Access-Control-Allow-Credentials', true );
-	response.setHeader( 'Access-Control-Allow-Methods', 'GET, OPTIONS, POST' );
-	response.setHeader( 'Access-Control-Allow-Headers', 'Content-Type, Authorization, AccessToken, Origin, Version' );
+app.use( (req, res, next) => {
+	res.setHeader( 'Access-Control-Allow-Origin', "*" ); //TODO: add only pratilipi origin
+	res.setHeader( 'Access-Control-Allow-Credentials', true );
+	res.setHeader( 'Access-Control-Allow-Methods', 'GET, OPTIONS, POST' );
+	res.setHeader( 'Access-Control-Allow-Headers', 'Content-Type, Authorization, AccessToken, Origin, Version' );
 	next();
 });
 
-app.options( "/*", (request, response, next) => {
-	response.send(200);
+app.options( "/*", (req, res, next) => {
+	res.send(200);
 });
 
-app.get( "/health", (request, response, next) => {
-	response.send( 'Pag ' + process.env.STAGE + ' is healthy !' );
+app.get( "/health", (req, res, next) => {
+	res.send( 'Pag ' + process.env.STAGE + ' is healthy !' );
 });
 
-// Setting access-token in response.locals
-app.use( (request, response, next) => {
+// Setting access-token in res.locals
+app.use( (req, res, next) => {
 
 	var accessToken = null;
-	if( request.headers.accesstoken )
-		accessToken = request.headers.accesstoken;
-	else if( request.cookies[ "access_token" ] )
-		accessToken = request.cookies[ "access_token" ];
-	else if( _getUrlParameter( request.url, "accessToken" ) )
-		accessToken = _getUrlParameter( request.url, "accessToken" );
+	if( req.headers.accesstoken )
+		accessToken = req.headers.accesstoken;
+	else if( req.cookies[ "access_token" ] )
+		accessToken = req.cookies[ "access_token" ];
+	else if( _getUrlParameter( req.url, "accessToken" ) )
+		accessToken = _getUrlParameter( req.url, "accessToken" );
 
-	response.locals[ "access-token" ] = accessToken;
+	res.locals[ "access-token" ] = accessToken;
 	next();
 
 });
 
 // get
-app.get( ['/*'], (request, response, next) => {
-	if( request.path === '/api' ) {
-		resolveGETBatch( request, response );
-	} else if( request.path.startsWith( '/api/' ) ) {
-		resolveGET( request, response );
+app.get( ['/*'], (req, res, next) => {
+	if( req.path === '/api' ) {
+		resolveGETBatch( req, res );
+	} else if( req.path.startsWith( '/api/' ) ) {
+		resolveGET( req, res );
 	}
 });
 
 // post
-app.post( ['/*'], (request, response, next) => {
-	resolvePOST( request, response );
+app.post( ['/*'], (req, res, next) => {
+	resolvePOST( req, res );
 	// TODO: Uncomment once Frontend makes all calls
-	// _resolvePostPatchDelete( "PATCH", request, response );
+	// _resolvePostPatchDelete( "PATCH", req, res );
 });
 
 // TODO: Uncomment once Frontend makes all calls
 /*
 // patch
-app.patch( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "PATCH", request, response );
+app.patch( ['/*'], (req, res, next) => {
+	_resolvePostPatchDelete( "PATCH", req, res );
 });
 
 // delete
-app.delete( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "DELETE", request, response );
+app.delete( ['/*'], (req, res, next) => {
+	_resolvePostPatchDelete( "DELETE", req, res );
 });
 */
 
