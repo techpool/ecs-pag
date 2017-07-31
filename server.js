@@ -448,7 +448,7 @@ function resolveGETBatch( request, response ) {
 				.then( (responseArray) => { // responseArray will be in order
 					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
-						returnResponse[ requestArray[i].name ] = { "status": 200, "response": responseArray[i].body };
+						returnResponse[ requestArray[i].name ] = { "status": responseArray[i].statusCode, "response": responseArray[i].body };
 					response.send( returnResponse );
 					request.log.submit( 200, JSON.stringify( returnResponse ).length );
 					latencyMetric.write( Date.now() - request.startTimestamp );
@@ -504,7 +504,7 @@ function resolveGETBatch( request, response ) {
 								}
 							}
 						});
-						responseObject[ req.name ] = { "status": 200, "response": responseJson }; // Populating the responseObject
+						responseObject[ req.name ] = { "status": res.statusCode, "response": responseJson }; // Populating the responseObject
 						reqArray.shift();
 						return recursiveGET( reqArray, responseObject );
 					}, (error) => {
