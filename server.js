@@ -118,7 +118,7 @@ function _forwardToGae( method, request, response ) {
 
 	var reqModule;
 	if( method === "GET" ) {
-    		reqModule = request.pipe( requestModule( appengineUrl ) );
+		reqModule = request.pipe( requestModule( appengineUrl ) );
 	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
 		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
 	} else {
@@ -492,32 +492,31 @@ function resolveGETBatch( request, response ) {
 					promise = _getHttpPromise( appengineUrl, "GET", headers );
 				}
 
-				return promise
-					.then( (res) => {
-						var responseJson = res.body;
+				function _onRes( status, body ) {
+					if( typeof(body) === 'object' ) {
 						// Modifying other requests of the reqArray
 						reqArray.forEach( (aReq) => {
-							for( var key in responseJson ) {
+							for( var key in body ) {
 								var find = "$" + req.name + "." + key;
 								if( aReq.url.indexOf( find ) !== -1 ) {
-									aReq.url = aReq.url.replace( find, responseJson[key] );
+									aReq.url = aReq.url.replace( find, body[key] );
 								}
 							}
 						});
-						responseObject[ req.name ] = { "status": res.statusCode, "response": responseJson }; // Populating the responseObject
-						reqArray.shift();
+					}
+					responseObject[ req.name ] = { "status": status, "response": body }; // Populating the responseObject
+					reqArray.shift();
+				}
+
+				return promise
+					.then( (res) => {
+						_onRes( res.statusCode, res.body );
 						return recursiveGET( reqArray, responseObject );
 					}, (error) => {
-						// error might be null from Promise.reject() thrown by the same block
-						if( error ) {
-							console.log( "ERROR_STATUS :: " + error.statusCode );
-							console.log( "ERROR_MESSAGE :: " + error.message );
-							response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-							request.log.error( error.message );
-							request.log.submit( error.statusCode, error.message.length );
-							latencyMetric.write( Date.now() - request.startTimestamp );
-							return Promise.reject();
-						}
+						console.log( "ERROR_STATUS :: " + error.statusCode );
+						console.log( "ERROR_MESSAGE :: " + error.message );
+						_onRes( error.statusCode, error.message );
+						return recursiveGET( reqArray, responseObject );
 					})
 				;
 			}
