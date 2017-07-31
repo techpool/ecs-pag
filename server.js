@@ -498,7 +498,7 @@ function resolveGETBatch( req, res ) {
 						// Modifying other requests of the reqArray
 						reqArray.forEach( (reqq) => {
 							for( var key in responseJson ) {
-								var find = "$" + reqq.name + "." + key;
+								var find = "$" + aReq.name + "." + key;
 								if( reqq.url.indexOf( find ) !== -1 ) {
 									reqq.url = reqq.url.replace( find, responseJson[key] );
 								}
