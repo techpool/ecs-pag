@@ -496,11 +496,11 @@ function resolveGETBatch( req, res ) {
 					.then( (res) => {
 						var responseJson = res.body;
 						// Modifying other requests of the reqArray
-						reqArray.forEach( (aReq) => {
+						reqArray.forEach( (reqq) => {
 							for( var key in responseJson ) {
-								var find = "$" + aReq.name + "." + key;
-								if( aReq.url.indexOf( find ) !== -1 ) {
-									aReq.url = aReq.url.replace( find, responseJson[key] );
+								var find = "$" + reqq.name + "." + key;
+								if( reqq.url.indexOf( find ) !== -1 ) {
+									reqq.url = reqq.url.replace( find, responseJson[key] );
 								}
 							}
 						});
@@ -680,8 +680,8 @@ const app = express();
 
 app.use( morgan('short') );
 app.use( cookieParser() );
-app.use( bodyParser.json() );
-app.use( bodyParser.urlencoded({ extended: true }) );
+app.use( bodyParser.json({ limit: '50mb' }) );
+app.use( bodyParser.urlencoded({ extended: true, limit: '50mb' }) );
 
 // for initializing log object
 app.use( (req, res, next) => {
