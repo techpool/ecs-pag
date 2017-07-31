@@ -7,6 +7,7 @@ var express = require( 'express' );
 var _ = require( 'lodash' );
 var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
+var urlModule = require( 'url' );
 
 var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
@@ -36,10 +37,9 @@ const APPENGINE_ENDPOINT = mainConfig.APPENGINE_ENDPOINT;
 const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
 
 function _isEmpty( obj ) {
-	for( var prop in obj ) {
-		if( obj.hasOwnProperty( prop ) )
-			return false;
-	}
+	if( ! obj ) return true;
+	for( var prop in obj )
+		return false;
 	return JSON.stringify( obj ) === JSON.stringify( {} );
 }
 
@@ -50,15 +50,7 @@ function _formatParams( params ) {
 };
 
 function _getUrlParameters( url ) {
-	if( url.indexOf( "?" ) !== -1 ) url = url.split( "?" )[1];
-	var params = {};
-	var vars = url.split( "&" );
-	for( var i = 0; i < vars.length; i++ ) {
-		var keyValue = vars[i].split( "=" );
-		if( keyValue[1] != null )
-			params[ keyValue[0] ] = keyValue[1];
-	}
-	return params;
+	return urlModule.parse( url, true ).query;
 }
 
 function _getUrlParameter( url, parameter ) {
