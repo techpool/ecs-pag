@@ -293,7 +293,7 @@ function _isGETApiSupported( url ) {
 	if( api.startsWith( '/api' ) )
 		api = api.substr(4);
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
-	if( routeConfig[api].GET.requiredFields ) {
+	if( isApiSupported && routeConfig[api].GET.requiredFields ) {
 		var requiredFields = routeConfig[api].GET.requiredFields;
 		for( var i = 0; i < requiredFields.length; i++ ) {
 			var fieldName = Object.keys( requiredFields[i] )[0];
