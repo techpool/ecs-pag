@@ -54,15 +54,7 @@ function _getUrlParameters( url ) {
 }
 
 function _getUrlParameter( url, parameter ) {
-	if( url.indexOf( "?" ) !== -1 ) url = url.split( "?" )[1];
-	var vars = url.split( "&" );
-	for( var i = 0; i < vars.length; i++ ) {
-		var pair = vars[i].split( "=" );
-		if( pair[0] == parameter ) {
-			return pair[1];
-		}
-	}
-	return null;
+	return _getUrlParameters( url )[ parameter ];
 }
 
 function _addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
@@ -400,11 +392,11 @@ function resolveGETBatch( request, response ) {
 		2. Else use sequential promises
 	*/
 
-	// Just another bad request
-	if( ! request.url.startsWith( "/api?requests=" ) )
-		response.status( 400 ).send( "Bad Request !" );
+	var requests = JSON.parse( _getUrlParameter( request.url, "requests" ) );
 
-	var requests = JSON.parse( decodeURIComponent( request.url.substring( "/api?requests=".length ) ) );
+	// Just another bad request
+	if( ! requests )
+		response.status( 400 ).send( "Bad Request !" );
 
 	/* requestArray -> Contains all necessary fields for processing in next steps
 		name -> name of the request (req1)
@@ -416,13 +408,14 @@ function resolveGETBatch( request, response ) {
 	var requestArray = [];
 	for( var req in requests ) {
 		if( requests.hasOwnProperty(req) ) {
-			var api = requests[req].split( "?" )[0];
+			var url = decodeURIComponent( requests[req] );
+			var api = url.split("?")[0];
 			requestArray.push({
 				"name": req,
-				"url": requests[req],
+				"url": url,
 				"api": api,
-				"isSupported": _isGETApiSupported(requests[req]),
-				"isAuthRequired": _isGETApiSupported(requests[req]) && routeConfig[api].GET.auth
+				"isSupported": _isGETApiSupported(url),
+				"isAuthRequired": _isGETApiSupported(url) && routeConfig[api].GET.auth
 			});
 		}
 	}
