@@ -121,7 +121,6 @@ module.exports = {
 				'POST': {
 					'path': '/pratilipis',
 					'requiredFields': [
-						{ 'title': null },
 						{ 'language': null },
 						{ 'type': null }
 					]
