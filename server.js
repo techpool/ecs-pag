@@ -111,6 +111,8 @@ function _forwardToGae( method, request, response ) {
 	var api = request.path.startsWith( "/api" ) ? request.path.substr(4) : request.path;
 	var params = _getUrlParameters( request.url );
 	params[ "accessToken" ] = response.locals[ "access-token" ];
+	if( params[ "requests" ] )
+		params[ "requests" ] = encodeURIComponent( params[ "requests" ] ); // Batch Requests -> encode string
 	var appengineUrl = APPENGINE_ENDPOINT + api + "?" + _formatParams( params );
 	request.headers[ "ECS-HostName" ] = request.headers.host;
 
