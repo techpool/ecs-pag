@@ -255,6 +255,19 @@ function _getService( method, requestUrl, request, response ) {
 
 	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
 
+	// TODO: Better implementation
+	if( isGETRequest && routeConfig[api]["GET"][ "copyParam" ] ) {
+		var copyParam = routeConfig[api]["GET"][ "copyParam" ];
+		for( var i = 0; i < copyParam.length; i++ ) {
+			var from = Object.keys( copyParam[i] )[0];
+			var to = copyParam[i][ from ];
+			if( urlQueryParams[from] ) {
+				urlQueryParams[to] = urlQueryParams[from];
+				delete urlQueryParams[from];
+			}
+		}
+	}
+
 	// Calling auth before replacing $primaryContentId
 	var authPromise = isAuthRequired
 		? _getAuth( servicePath, method, primaryContentId, params, request, response )
@@ -275,6 +288,26 @@ function _getService( method, requestUrl, request, response ) {
 
 }
 
+function _isGETApiSupported( url ) {
+	var api = url.split("?")[0];
+	if( api.startsWith( '/api' ) )
+		api = api.substr(4);
+	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
+	if( routeConfig[api].GET.requiredFields ) {
+		var requiredFields = routeConfig[api].GET.requiredFields;
+		for( var i = 0; i < requiredFields.length; i++ ) {
+			var fieldName = Object.keys( requiredFields[i] )[0];
+			var fieldValue = requiredFields[i][ fieldName ];
+			var params = _getUrlParameters( url );
+			if( ! params[fieldName] || ( fieldValue !== null && fieldValue !== params[fieldName] ) ) {
+				isApiSupported = false;
+				break;
+			}
+		}
+	}
+	return isApiSupported;
+}
+
 function resolveGET( request, response ) {
 
 	/*
@@ -286,7 +319,7 @@ function resolveGET( request, response ) {
 
 	// request.path will be /api/xxx or /xxx (android)
 	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
-	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
+	var isApiSupported = _isGETApiSupported( request.url );
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
 	// For image requests
@@ -324,21 +357,6 @@ function resolveGET( request, response ) {
 	} else if( isApiSupported ) {
 
 		var requestUrl = null;
-		// TODO: Implement cleaner solution
-		if( api == '/pratilipi/list' ) {
-			var params = _getUrlParameters( request.url );
-			if( params[ "authorId" ] && params[ "state" ] ) {
-				var params = _getUrlParameters( request.url );
-				if( params[ "resultCount" ] ) {
-					params[ "limit" ] = params[ "resultCount" ]
-					delete params[ "resultCount" ];
-				}
-				requestUrl = api + "?" + _formatParams( params );
-			} else {
-				_forwardToGae( "GET", request, response );
-				return;
-			}
-		}
 
 		_getService( "GET", requestUrl, request, response )
 			.then( (serviceResponse) => {
@@ -401,8 +419,8 @@ function resolveGETBatch( request, response ) {
 				"name": req,
 				"url": requests[req],
 				"api": api,
-				"isSupported": routeConfig[api] != null && routeConfig[api].GET != null,
-				"isAuthRequired": routeConfig[api] != null && routeConfig[api].GET != null && routeConfig[api].GET.auth
+				"isSupported": _isGETApiSupported(requests[req]),
+				"isAuthRequired": _isGETApiSupported(requests[req]) && routeConfig[api].GET.auth
 			});
 		}
 	}

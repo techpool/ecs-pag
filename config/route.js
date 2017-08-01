@@ -182,7 +182,14 @@ module.exports = {
 	'/pratilipi/list': {
 		'GET':{
 			'path': '/pratilipis',
-			'auth': true
+			'auth': true,
+			'requiredFields': [
+				{ 'authorId': null },
+				{ 'state': null }
+			],
+			'copyParam': [
+				{ 'resultCount': 'limit' }
+			]
 		}
 	}
 
