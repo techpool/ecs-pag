@@ -150,7 +150,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
-			console.log(`TIME TAKEN FOR ${uri} ${method} is ${Date.now() - startTimestamp} msec`);
+			console.log(`TIME TAKEN ${Date.now() - startTimestamp} msec FOR ${method} ${uri}`);
 			return response;
 		} )
 		;
