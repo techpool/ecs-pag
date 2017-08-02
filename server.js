@@ -147,7 +147,14 @@ function _getHttpPromise( uri, method, headers, body ) {
 	if( headers ) genericReqOptions.headers = headers;
 	if( body ) genericReqOptions.form = body;
 	console.log( 'HTTP :: ' + method + " :: " + uri + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( body ) );
-	return httpPromise( genericReqOptions );
+	var startTimestamp = Date.now();
+	return httpPromise( genericReqOptions )
+		.then( response => {
+			console.log(`TIME TAKEN ${Date.now() - startTimestamp} msec FOR ${method} ${uri}`);
+			return response;
+		} )
+		;
+
 }
 
 
