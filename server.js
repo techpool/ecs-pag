@@ -128,7 +128,7 @@ function _forwardToGae( method, request, response ) {
 			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
 			latencyMetric.write( Date.now() - request.startTimestamp );
 		})
-		.on('finish', function() {
+		.on('end', function() {
 		  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
 		})
 		.pipe( response )
@@ -350,7 +350,7 @@ function resolveGET( request, response ) {
 						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
 						latencyMetric.write( Date.now() - request.startTimestamp );
 					})
-					.on('finish', function() {
+					.on('end', function() {
 					  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE GET ${url}` );
 					})
 					.pipe( response )
@@ -627,7 +627,7 @@ function resolvePOST( request, response ) {
 							console.log( "ERROR_MESSAGE :: " + JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 						})
-						.on('finish', function() {
+						.on('end', function() {
 						  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE POST ${url}` );
 						})
 						.pipe( response )
