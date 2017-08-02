@@ -111,6 +111,8 @@ function _forwardToGae( method, request, response ) {
 	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( request.headers ) );
 
 	var reqModule;
+	var startTimestamp = Date.now();
+
 	if( method === "GET" ) {
 		reqModule = request.pipe( requestModule( appengineUrl ) );
 	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
@@ -125,6 +127,9 @@ function _forwardToGae( method, request, response ) {
 			request.log.error( JSON.stringify( error ) );
 			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
 			latencyMetric.write( Date.now() - request.startTimestamp );
+		})
+		.on('finish', function() {
+		  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
 		})
 		.pipe( response )
 		.on( 'error', (error) => {
@@ -150,7 +155,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
-			console.log(`TIME TAKEN ${Date.now() - startTimestamp} msec FOR ${method} ${uri}`);
+			console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR ${method} ${uri}` );
 			return response;
 		} )
 		;
@@ -337,12 +342,16 @@ function resolveGET( request, response ) {
 
 		authPromise
 			.then( (userId) => {
+				var startTimestamp = Date.now();
 				request.pipe( requestModule( url ) )
 					.on( 'error', function( error ) {
 						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
 						request.log.error( JSON.stringify( error ) );
 						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
 						latencyMetric.write( Date.now() - request.startTimestamp );
+					})
+					.on('finish', function() {
+					  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE GET ${url}` );
 					})
 					.pipe( response )
 					.on( 'error', function( error ) {
@@ -612,10 +621,14 @@ function resolvePOST( request, response ) {
 					request[ "headers" ][ "Access-Token" ] = response.locals[ "access-token" ];
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
+					var startTimestamp = Date.now();
 					request.pipe( requestModule.post( url, request.body ) )
 						.on( 'error', (error) => {
 							console.log( "ERROR_MESSAGE :: " + JSON.stringify(error) );
 							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
+						})
+						.on('finish', function() {
+						  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE POST ${url}` );
 						})
 						.pipe( response )
 						.on( 'error', function(error) {
