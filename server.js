@@ -100,7 +100,7 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 
 function _forwardToGae( method, request, response ) {
 
-	var api = request.path.startsWith( "/api" ) ? request.path.substr(4) : request.path;
+	var api = request.path;
 	var params = _getUrlParameters( request.url );
 	params[ "accessToken" ] = response.locals[ "access-token" ];
 	if( params[ "requests" ] )
@@ -230,7 +230,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 function _getService( method, requestUrl, request, response ) {
 
 	if( requestUrl == null )
-		requestUrl = request.url.startsWith( '/api' ) ? request.url.substr(4) : request.url;
+		requestUrl = request.url;
 
 	var api = requestUrl.split( "?" )[0];
 	var urlQueryParams = _getUrlParameters( requestUrl );
@@ -296,8 +296,6 @@ function _getService( method, requestUrl, request, response ) {
 
 function _isGETApiSupported( url ) {
 	var api = url.split("?")[0];
-	if( api.startsWith( '/api' ) )
-		api = api.substr(4);
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	if( isApiSupported && routeConfig[api].GET.requiredFields ) {
 		var requiredFields = routeConfig[api].GET.requiredFields;
@@ -323,8 +321,8 @@ function resolveGET( request, response ) {
 	*	3. not supported in ecs && devo environment -> Send 'not supported'
 	*/
 
-	// request.path will be /api/xxx or /xxx (android)
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	// request.path will be /xxx
+	var api = request.path;
 	var isApiSupported = _isGETApiSupported( request.url );
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
@@ -398,7 +396,7 @@ function resolveGETBatch( request, response ) {
 
 	/*
 		Sample batch call request:
-		/api?requests={"req1":"/page?uri=/k-billa-ramesh/en-kanmani","req2":"/pratilipi?_apiVer=2&pratilipiId=$req1.primaryContentId"}
+		/?requests={"req1":"/page?uri=/k-billa-ramesh/en-kanmani","req2":"/pratilipi?_apiVer=2&pratilipiId=$req1.primaryContentId"}
 
 		Cases - Environment:
 		1. If all requests are not supported -> Forward Request to appengine
@@ -566,10 +564,10 @@ function resolveGETBatch( request, response ) {
 function resolvePOST( request, response ) {
 
 	// TODO: Remove once everything is moved to ecs
-	// url: /api/pratilipis/12345/review-data
+	// url: /pratilipis/12345/review-data
 	// body: reviewCount, ratingCount, totalRating
 	// headers: AccessToken, User-Id
-	if( request.path.startsWith( '/api/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
+	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
 		var url = ECS_END_POINT + request.path.substr(4);
 		var headers = {
 			'Access-Token': request.headers.accesstoken,
@@ -580,10 +578,10 @@ function resolvePOST( request, response ) {
 	}
 
 	// TODO: Remove once everything is moved to ecs
-	// url: /api/authors/12345/follow-count
+	// url: /authors/12345/follow-count
 	// body: followCount
 	// headers: AccessToken, User-Id
-	if( request.path.startsWith( '/api/authors/' ) && request.path.endsWith( '/follow-count' ) ) {
+	if( request.path.startsWith( '/authors/' ) && request.path.endsWith( '/follow-count' ) ) {
 		var arr = request.path.split( '/' );
 		var authorId = arr[arr.length - 2];
 		var url = ECS_END_POINT + "/authors/" + authorId;
@@ -606,7 +604,7 @@ function resolvePOST( request, response ) {
 	3. pipe is required for image requests
 	*/
 
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	var api = request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
 	if( isApiSupported ) {
 		var isPipeRequired = routeConfig[api].POST.shouldPipe;
@@ -681,7 +679,7 @@ function resolvePOST( request, response ) {
 function _resolvePostPatchDelete( methodName, request, response ) {
 
 	// Sanity check -> direct request from frontend
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	var api = request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api]["POST"]["methods"][methodName];
 
 	if( isApiSupported ) {
@@ -755,11 +753,28 @@ app.use( (request, response, next) => {
 
 });
 
+// Remove /api in the beginning
+app.use( (request, response, next) => {
+	// /api?requests=
+	if( request.url.startsWith( '/api?' ) ) {
+		request.path = "/";
+		request.url = request.url.substr(4);
+		request.url = "/" + request.url;
+
+	// /api/?requests=
+	// /api/xyz?param1=
+	} else if( request.url.startsWith( '/api' ) ) {
+		request.path = request.path.substr(4);
+		request.url = request.url.substr(4);
+	}
+	next();
+});
+
 // get
 app.get( ['/*'], (request, response, next) => {
-	if( request.path === '/api' ) {
+	if( request.path === '/' ) {
 		resolveGETBatch( request, response );
-	} else if( request.path.startsWith( '/api/' ) ) {
+	} else {
 		resolveGET( request, response );
 	}
 });
