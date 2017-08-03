@@ -410,11 +410,13 @@ function resolveGETBatch( request, response ) {
 		2. Else use sequential promises
 	*/
 
-	var requests = JSON.parse( _getUrlParameter( request.url, "requests" ) );
+	var requestsObject = _getUrlParameter( request.url, "requests" );
 
-	// Just another bad request
-	if( ! requests )
-		response.status( 400 ).send( "Bad Request !" );
+	// Hitting on /
+	if( ! requestsObject )
+		response.status( 400 ).send( "Well, Hello!" );
+
+	var requests = JSON.parse( requestsObject );
 
 	/* requestArray -> Contains all necessary fields for processing in next steps
 		name -> name of the request (req1)
