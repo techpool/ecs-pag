@@ -574,11 +574,12 @@ function resolvePOST( request, response ) {
 	// body: reviewCount, ratingCount, totalRating
 	// headers: AccessToken, User-Id
 	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
-		var url = ECS_END_POINT + request.path.substr(4);
+		var url = ECS_END_POINT + request.path;
 		var headers = {
 			'Access-Token': request.headers.accesstoken,
 			'User-Id': request.headers["user-id"]
 		};
+		console.log( "REVIEW_DATA_PATCH :: " + url + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( request.body ) );
 		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
 		return;
 	}
@@ -595,6 +596,7 @@ function resolvePOST( request, response ) {
 			'Access-Token': request.headers.accesstoken,
 			'User-Id': request.headers["user-id"]
 		};
+		console.log( "FOLLOW_COUNT_PATCH :: " + url + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( request.body ) );
 		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
 		return;
 	}

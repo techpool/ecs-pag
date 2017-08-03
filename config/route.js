@@ -184,7 +184,8 @@ module.exports = {
 			'auth': true,
 			'requiredFields': [
 				{ 'authorId': null },
-				{ 'state': null }
+				{ 'state': null },
+				{ '_apiVer': 3 }
 			],
 			'copyParam': [
 				{ 'resultCount': 'limit' }
