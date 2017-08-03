@@ -33,8 +33,12 @@ const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
-const APPENGINE_ENDPOINT = mainConfig.APPENGINE_ENDPOINT;
 const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
+
+var _getAppengineEndpoint = function( request ) {
+	return ( request.headers.host === "temp.pratilipi.com" || request.headers.host === "android.pratilipi.com" ) ?
+		mainConfig.ANDROID_APPENGINE_ENDPOINT : mainConfig.WEB_APPENGINE_ENDPOINT;
+};
 
 function _isEmpty( obj ) {
 	if( ! obj ) return true;
@@ -105,7 +109,7 @@ function _forwardToGae( method, request, response ) {
 	params[ "accessToken" ] = response.locals[ "access-token" ];
 	if( params[ "requests" ] )
 		params[ "requests" ] = encodeURIComponent( params[ "requests" ] ); // Batch Requests -> encode string
-	var appengineUrl = APPENGINE_ENDPOINT + api + "?" + _formatParams( params );
+	var appengineUrl = _getAppengineEndpoint( request ) + api + "?" + _formatParams( params );
 	request.headers[ "ECS-HostName" ] = request.headers.host;
 
 	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( request.headers ) );
@@ -464,7 +468,7 @@ function resolveGETBatch( request, response ) {
 				if( req.isSupported ) {
 					promiseArray.push( _getService( "GET", req.url, request, response ) );
 				} else {
-					var uri = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
+					var uri = _getAppengineEndpoint( request ) + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
 					var headers = { "ECS-HostName": request.headers.host };
 					promiseArray.push( _getHttpPromise( uri, "GET", headers ) );
 				}
@@ -514,7 +518,7 @@ function resolveGETBatch( request, response ) {
 				if( req.isSupported ) {
 					promise = _getService( "GET", req.url, request, response );
 				} else {
-					var appengineUrl = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
+					var appengineUrl = _getAppengineEndpoint( request ) + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
 					var headers = { "ECS-HostName": request.headers.host };
 					promise = _getHttpPromise( appengineUrl, "GET", headers );
 				}
