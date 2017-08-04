@@ -580,6 +580,7 @@ function resolvePOST( request, response, next ) {
 		var url = ECS_END_POINT + request.path;
 		_getHttpPromise( url, "PATCH", request.headers, request.body )
 			.then( res => {
+				response.json( { "message": "OK" } );
 				next();
 			})
 			.catch( err => {
@@ -600,6 +601,7 @@ function resolvePOST( request, response, next ) {
 		var url = ECS_END_POINT + "/authors/" + authorId;
 		_getHttpPromise( url, "PATCH", request.headers, request.body )
 			.then( res => {
+				response.json( { "message": "OK" } );
 				next();
 			})
 			.catch( err => {
