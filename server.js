@@ -579,8 +579,8 @@ function resolvePOST( request, response, next ) {
 	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
 		var url = ECS_END_POINT + request.path;
 		console.log( "REVIEW_DATA_PATCH :: " + url + " :: " + JSON.stringify( request.headers ) + " :: " + JSON.stringify( request.body ) );
-		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response );
-		return next();
+		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response ).on( 'finish', function() { next(); });
+		return;
 	}
 
 	// TODO: Remove once everything is moved to ecs
@@ -592,8 +592,8 @@ function resolvePOST( request, response, next ) {
 		var authorId = arr[arr.length - 2];
 		var url = ECS_END_POINT + "/authors/" + authorId;
 		console.log( "FOLLOW_COUNT_PATCH :: " + url + " :: " + JSON.stringify( request.headers ) + " :: " + JSON.stringify( request.body ) );
-		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response );
-		return next();
+		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response ).on( 'finish', function() { next(); });
+		return;
 	}
 
 	/*
