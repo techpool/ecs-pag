@@ -578,7 +578,11 @@ function resolvePOST( request, response, next ) {
 	// headers: Access-Token, User-Id
 	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
 		var url = ECS_END_POINT + request.path;
-		_getHttpPromise( url, "PATCH", request.headers, request.body )
+		var headers = {
+			'User-Id': request.headers["user-id"],
+			'Access-Token': request.headers["access-token"]
+		};
+		_getHttpPromise( url, "PATCH", headers, request.body )
 			.then( res => {
 				response.json( { "message": "OK" } );
 				next();
@@ -599,7 +603,11 @@ function resolvePOST( request, response, next ) {
 		var arr = request.path.split( '/' );
 		var authorId = arr[arr.length - 2];
 		var url = ECS_END_POINT + "/authors/" + authorId;
-		_getHttpPromise( url, "PATCH", request.headers, request.body )
+		var headers = {
+			'User-Id': request.headers["user-id"],
+			'Access-Token': request.headers["access-token"]
+		};
+		_getHttpPromise( url, "PATCH", headers, request.body )
 			.then( res => {
 				response.json( { "message": "OK" } );
 				next();
