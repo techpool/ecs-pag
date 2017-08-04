@@ -575,33 +575,25 @@ function resolvePOST( request, response, next ) {
 	// TODO: Remove once everything is moved to ecs
 	// url: /pratilipis/12345/review-data
 	// body: reviewCount, ratingCount, totalRating
-	// headers: AccessToken, User-Id
+	// headers: Access-Token, User-Id
 	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
 		var url = ECS_END_POINT + request.path;
-		var headers = {
-			'Access-Token': request.headers.accesstoken,
-			'User-Id': request.headers["user-id"]
-		};
-		console.log( "REVIEW_DATA_PATCH :: " + url + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( request.body ) );
-		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
-		return next();
+		console.log( "REVIEW_DATA_PATCH :: " + url + " :: " + JSON.stringify( request.headers ) + " :: " + JSON.stringify( request.body ) );
+		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response );
+		return;
 	}
 
 	// TODO: Remove once everything is moved to ecs
 	// url: /authors/12345/follow-count
 	// body: followCount
-	// headers: AccessToken, User-Id
+	// headers: Access-Token, User-Id
 	if( request.path.startsWith( '/authors/' ) && request.path.endsWith( '/follow-count' ) ) {
 		var arr = request.path.split( '/' );
 		var authorId = arr[arr.length - 2];
 		var url = ECS_END_POINT + "/authors/" + authorId;
-		var headers = {
-			'Access-Token': request.headers.accesstoken,
-			'User-Id': request.headers["user-id"]
-		};
-		console.log( "FOLLOW_COUNT_PATCH :: " + url + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( request.body ) );
-		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
-		return next();
+		console.log( "FOLLOW_COUNT_PATCH :: " + url + " :: " + JSON.stringify( request.headers ) + " :: " + JSON.stringify( request.body ) );
+		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response );
+		return;
 	}
 
 	/*
