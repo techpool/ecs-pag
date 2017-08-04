@@ -578,8 +578,15 @@ function resolvePOST( request, response, next ) {
 	// headers: Access-Token, User-Id
 	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
 		var url = ECS_END_POINT + request.path;
-		console.log( "REVIEW_DATA_PATCH :: " + url + " :: " + JSON.stringify( request.headers ) + " :: " + JSON.stringify( request.body ) );
-		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response ).on( 'finish', function() { next(); });
+		_getHttpPromise( url, "PATCH", request.headers, request.body )
+			.then( res => {
+				next();
+			})
+			.catch( err => {
+				console.log( "REVIEW_DATA_PATCH_ERROR :: " + err.message );
+				next();
+			})
+		;
 		return;
 	}
 
@@ -591,8 +598,15 @@ function resolvePOST( request, response, next ) {
 		var arr = request.path.split( '/' );
 		var authorId = arr[arr.length - 2];
 		var url = ECS_END_POINT + "/authors/" + authorId;
-		console.log( "FOLLOW_COUNT_PATCH :: " + url + " :: " + JSON.stringify( request.headers ) + " :: " + JSON.stringify( request.body ) );
-		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response ).on( 'finish', function() { next(); });
+		_getHttpPromise( url, "PATCH", request.headers, request.body )
+			.then( res => {
+				next();
+			})
+			.catch( err => {
+				console.log( "AUTHOR_FOLLOW_COUNT_FOLLOW_ERROR :: " + err.message );
+				next();
+			})
+		;
 		return;
 	}
 
@@ -813,14 +827,14 @@ app.use( (request, response, next) => {
 			"/user/logout" ].indexOf( request.path ) > -1 ) {
 
 		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
-        		.then( authResponse => {
+				.then( authResponse => {
 				next();
-        		})
-        		.catch( authError => {
-        		    console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
-        		    next();
-        		})
-        	;
+				})
+				.catch( authError => {
+					console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
+					next();
+				})
+			;
 	}
 	next();
 });
