@@ -102,7 +102,7 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 
 }
 
-function _forwardToGae( method, request, response ) {
+function _forwardToGae( method, request, response, next ) {
 
 	var api = request.path;
 	var params = _getUrlParameters( request.url );
@@ -132,7 +132,7 @@ function _forwardToGae( method, request, response ) {
 			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
 			latencyMetric.write( Date.now() - request.startTimestamp );
 		})
-		.on('end', function() {
+		.on( 'end', function() {
 		  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
 		})
 		.pipe( response )
@@ -141,6 +141,9 @@ function _forwardToGae( method, request, response ) {
 			request.log.error( JSON.stringify( error ) );
 			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
 			latencyMetric.write( Date.now() - request.startTimestamp );
+		})
+		.on( 'end', function() {
+			next();
 		})
 	;
 }
@@ -161,8 +164,8 @@ function _getHttpPromise( uri, method, headers, body ) {
 		.then( response => {
 			console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR ${method} ${uri}` );
 			return response;
-		} )
-		;
+		})
+	;
 
 }
 
@@ -316,7 +319,7 @@ function _isGETApiSupported( url ) {
 	return isApiSupported;
 }
 
-function resolveGET( request, response ) {
+function resolveGET( request, response, next ) {
 
 	/*
 	*	3 cases:
@@ -391,7 +394,7 @@ function resolveGET( request, response ) {
 
 	// Forward to appengine
 	} else {
-		_forwardToGae( "GET", request, response );
+		_forwardToGae( "GET", request, response, next );
 	}
 
 }
@@ -450,7 +453,7 @@ function resolveGETBatch( request, response ) {
 
 
 	if( forwardAllToGAE ) {
-		_forwardToGae( "GET", request, response );
+		_forwardToGae( "GET", request, response, next );
 
 	} else { // Sequential or batch calls
 
@@ -567,7 +570,7 @@ function resolveGETBatch( request, response ) {
 	}
 }
 
-function resolvePOST( request, response ) {
+function resolvePOST( request, response, next ) {
 
 	// TODO: Remove once everything is moved to ecs
 	// url: /pratilipis/12345/review-data
@@ -581,7 +584,7 @@ function resolvePOST( request, response ) {
 		};
 		console.log( "REVIEW_DATA_PATCH :: " + url + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( request.body ) );
 		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
-		return;
+		return next();
 	}
 
 	// TODO: Remove once everything is moved to ecs
@@ -598,7 +601,7 @@ function resolvePOST( request, response ) {
 		};
 		console.log( "FOLLOW_COUNT_PATCH :: " + url + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( request.body ) );
 		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
-		return;
+		return next();
 	}
 
 	/*
@@ -679,7 +682,7 @@ function resolvePOST( request, response ) {
 
 	// Forward to appengine
 	} else {
-		_forwardToGae( "POST", request, response );
+		_forwardToGae( "POST", request, response, next );
 	}
 
 }
@@ -781,17 +784,17 @@ app.use( (request, response, next) => {
 // get
 app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
-		resolveGETBatch( request, response );
+		resolveGETBatch( request, response, next );
 	} else {
-		resolveGET( request, response );
+		resolveGET( request, response, next );
 	}
 });
 
 // post
 app.post( ['/*'], (request, response, next) => {
-	resolvePOST( request, response );
+	resolvePOST( request, response, next );
 	// TODO: Uncomment once Frontend makes all calls
-	// _resolvePostPatchDelete( "PATCH", request, response );
+	// _resolvePostPatchDelete( "POST", request, response );
 });
 
 // TODO: Uncomment once Frontend makes all calls
@@ -807,11 +810,34 @@ app.delete( ['/*'], (request, response, next) => {
 });
 */
 
+// Clear AccessToken
+app.use( (request, response, next) => {
+	if( [ "/user/login",
+			"/user/login/facebook",
+			"/user/login/google",
+			"/user/register",
+			"/user/passwordupdate",
+			"/user/verification",
+			"/user/logout" ].indexOf( request.path ) > -1 ) {
+
+		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
+        		.then( authResponse => {
+				next();
+        		})
+        		.catch( authError => {
+        		    console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
+        		    next();
+        		})
+        	;
+	}
+	next();
+});
+
 // Debugging
-app.use( function (err, req, res, next) {
-	console.error( JSON.stringify(err) );
-	console.error( err.stack );
-	res.status( err.code || 500 ).json( { "error": err.message } );
+app.use( (error, request, response, next) => {
+	console.error( JSON.stringify(error) );
+	console.error( error.stack );
+	response.status( error.code || 500 ).json( { "error": error.message } );
 });
 
 process.on( 'unhandledRejection', function( reason, p ) {
