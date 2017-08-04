@@ -580,7 +580,7 @@ function resolvePOST( request, response, next ) {
 		var url = ECS_END_POINT + request.path;
 		console.log( "REVIEW_DATA_PATCH :: " + url + " :: " + JSON.stringify( request.headers ) + " :: " + JSON.stringify( request.body ) );
 		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response );
-		return;
+		return next();
 	}
 
 	// TODO: Remove once everything is moved to ecs
@@ -593,7 +593,7 @@ function resolvePOST( request, response, next ) {
 		var url = ECS_END_POINT + "/authors/" + authorId;
 		console.log( "FOLLOW_COUNT_PATCH :: " + url + " :: " + JSON.stringify( request.headers ) + " :: " + JSON.stringify( request.body ) );
 		requestModule.patch( url, { form: request.body, headers: request.headers } ).pipe( response );
-		return;
+		return next();
 	}
 
 	/*
