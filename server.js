@@ -142,7 +142,7 @@ function _forwardToGae( method, request, response, next ) {
 			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
 			latencyMetric.write( Date.now() - request.startTimestamp );
 		})
-		.on( 'end', function() {
+		.on( 'finish', function() {
 			next();
 		})
 	;
