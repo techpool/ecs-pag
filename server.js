@@ -145,6 +145,8 @@ function _forwardToGae( method, request, response, next ) {
 				next();
 			})
 			.catch( err => {
+				var isJson = function(str) { if( typeof(str) === 'object' ) return true; try { JSON.parse(str); } catch (e) { return false; } return true; };
+				response.json( isJson( err.error ) ? err.error : UNEXPECTED_SERVER_EXCEPTION );
 				console.log( "GAE_POST_ERROR :: " + err.message );
 				next();
 			})
