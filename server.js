@@ -583,10 +583,14 @@ function resolveGETBatch( request, response, next ) {
 						return recursiveGET( reqArray, responseObject );
 					})
 					.catch( (err) => {
-						console.log( "ERROR_STATUS :: " + err.statusCode );
-						console.log( "ERROR_MESSAGE :: " + err.message );
-						_onRes( err.statusCode, err.error );
-						return recursiveGET( reqArray, responseObject );
+						if( err ) {
+							console.log( "ERROR_STATUS :: " + err.statusCode );
+							console.log( "ERROR_MESSAGE :: " + err.message );
+							_onRes( err.statusCode, err.error );
+							return recursiveGET( reqArray, responseObject );
+						} else {
+							response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
+						}
 					})
 				;
 			}
