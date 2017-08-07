@@ -109,6 +109,7 @@ function _forwardToGae( method, request, response, next ) {
 
 	// headers
 	var ECSHostName = request.headers.host;
+//	ECSHostName = "pr-hindi.ptlp.co";
 	var validHeaders = [ 'content-type', 'user-agent' ];
 	var _clean = function( headers ) {
 		for( var header in headers ) {
@@ -146,7 +147,10 @@ function _forwardToGae( method, request, response, next ) {
 			})
 			.catch( err => {
 				var isJson = function(str) { if( typeof(str) === 'object' ) return true; try { JSON.parse(str); } catch (e) { return false; } return true; };
-				response.json( isJson( err.error ) ? err.error : UNEXPECTED_SERVER_EXCEPTION );
+				if( isJson( err.error ) )
+					response.status( err.statusCode ).json(  err.error );
+				else
+					response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 				console.log( "GAE_POST_ERROR :: " + err.message );
 				next();
 			})
