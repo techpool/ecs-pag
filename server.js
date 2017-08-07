@@ -133,32 +133,11 @@ function _forwardToGae( method, request, response, next ) {
 
 	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( request.headers ) );
 
-	var reqModule;
-	var startTimestamp = Date.now();
-
-	if( method === "GET" ) {
-		reqModule = request.pipe( requestModule( appengineUrl ) );
-	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
-		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
-	} else {
-		_getHttpPromise( appengineUrl, "POST", request.headers, request.body )
-			.then( res => {
-				response.json( res.body );
-				next();
-			})
-			.catch( err => {
-				var isJson = function(str) { if( typeof(str) === 'object' ) return true; try { JSON.parse(str); } catch (e) { return false; } return true; };
-				if( isJson( err.error ) )
-					response.status( err.statusCode ).json(  err.error );
-				else
-					response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
-				console.log( "GAE_POST_ERROR :: " + err.message );
-				next();
-			})
-		;
-	}
-
-	if( reqModule ) {
+	if( api === "/pratilipi/content/image" || api === "/event/banner" ) {
+		var reqModule = method === "GET"
+			? request.pipe( requestModule( appengineUrl ) )
+			: request.pipe( requestModule.post( appengineUrl, request.body ) );
+		var startTimestamp = Date.now();
 		reqModule
 			.on( 'error', (error) => {
 				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
@@ -176,7 +155,20 @@ function _forwardToGae( method, request, response, next ) {
 				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
 				latencyMetric.write( Date.now() - request.startTimestamp );
 			})
-			.on( 'finish', function() {
+		;
+	} else {
+		_getHttpPromise( appengineUrl, method, request.headers, request.body )
+			.then( res => {
+				response.json( res.body );
+				next();
+			})
+			.catch( err => {
+				var isJson = function(str) { if( typeof(str) === 'object' ) return true; try { JSON.parse(str); } catch (e) { return false; } return true; };
+				if( isJson( err.error ) )
+					response.status( err.statusCode ).json(  err.error );
+				else
+					response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
+				console.log( "GAE_ERROR :: " + err.message );
 				next();
 			})
 		;
