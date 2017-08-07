@@ -8,6 +8,7 @@ var _ = require( 'lodash' );
 var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
 var urlModule = require( 'url' );
+var _normalizeHeaderCase = require( 'header-case-normalizer' ); // https://www.npmjs.com/package/header-case-normalizer
 
 var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
@@ -105,12 +106,28 @@ function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
 function _forwardToGae( method, request, response, next ) {
 
 	var api = request.path;
+
+	// headers
+	var ECSHostName = request.headers.host;
+	var validHeaders = [ 'content-type', 'content-length', 'user-agent' ];
+	var _clean = function( headers ) {
+		for( var header in headers ) {
+			headers[ _normalizeHeaderCase( header ) ] = headers[ header ];
+			delete headers[header];
+		}
+		return headers;
+	};
+	request.headers = _clean( _.pick( request.headers, validHeaders ) );
+	request.headers[ "ECS-HostName" ] = ECSHostName;
+
+	// params
 	var params = _getUrlParameters( request.url );
 	params[ "accessToken" ] = response.locals[ "access-token" ];
 	if( params[ "requests" ] )
 		params[ "requests" ] = encodeURIComponent( params[ "requests" ] ); // Batch Requests -> encode string
+
+	// url
 	var appengineUrl = _getAppengineEndpoint( request ) + api + "?" + _formatParams( params );
-	request.headers[ "ECS-HostName" ] = request.headers.host;
 
 	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( request.headers ) );
 
@@ -122,30 +139,41 @@ function _forwardToGae( method, request, response, next ) {
 	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
 		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
 	} else {
-		reqModule = requestModule.post( appengineUrl, { form: request.body } );
+		_getHttpPromise( appengineUrl, "POST", request.headers, request.body )
+			.then( res => {
+				response.json( res.body );
+				next();
+			})
+			.catch( err => {
+				console.log( "GAE_POST_ERROR :: " + err.message );
+				next();
+			})
+		;
 	}
 
-	reqModule
-		.on( 'error', (error) => {
-			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.error( JSON.stringify( error ) );
-			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-			latencyMetric.write( Date.now() - request.startTimestamp );
-		})
-		.on( 'end', function() {
-		  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
-		})
-		.pipe( response )
-		.on( 'error', (error) => {
-			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.error( JSON.stringify( error ) );
-			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-			latencyMetric.write( Date.now() - request.startTimestamp );
-		})
-		.on( 'finish', function() {
-			next();
-		})
-	;
+	if( reqModule ) {
+		reqModule
+			.on( 'error', (error) => {
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+			.on( 'end', function() {
+			  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
+			})
+			.pipe( response )
+			.on( 'error', (error) => {
+				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
+				request.log.error( JSON.stringify( error ) );
+				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
+				latencyMetric.write( Date.now() - request.startTimestamp );
+			})
+			.on( 'finish', function() {
+				next();
+			})
+		;
+	}
 }
 
 function _getHttpPromise( uri, method, headers, body ) {
