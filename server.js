@@ -399,7 +399,7 @@ function resolveGET( request, response, next ) {
 
 }
 
-function resolveGETBatch( request, response ) {
+function resolveGETBatch( request, response, next ) {
 
 	/*
 		Sample batch call request:
