@@ -192,7 +192,13 @@ function _getHttpPromise( uri, method, headers, body ) {
 	};
 	if( headers ) genericReqOptions.headers = headers;
 	if( body ) genericReqOptions.form = body;
-	console.log( 'HTTP :: ' + method + " :: " + uri + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( body ) );
+	var _hideSensitiveFields = function( obj ) {
+		if( ! obj ) return {};
+		var sensitiveFields = [ "password", "verificationToken" ];
+		for( var i = 0; i < sensitiveFields.length; i++ ) if( obj[sensitiveFields[i]] ) obj[sensitiveFields[i]] = "******";
+		return obj;
+	};
+	console.log( 'HTTP :: ' + method + " :: " + uri + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( _hideSensitiveFields( body ) ) );
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
