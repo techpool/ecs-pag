@@ -581,10 +581,11 @@ function resolveGETBatch( request, response, next ) {
 					.then( (res) => {
 						_onRes( res.statusCode, res.body );
 						return recursiveGET( reqArray, responseObject );
-					}, (error) => {
-						console.log( "ERROR_STATUS :: " + error.statusCode );
-						console.log( "ERROR_MESSAGE :: " + error.message );
-						_onRes( error.statusCode, error.message );
+					})
+					.catch( (err) => {
+						console.log( "ERROR_STATUS :: " + err.statusCode );
+						console.log( "ERROR_MESSAGE :: " + err.message );
+						_onRes( err.statusCode, err.error );
 						return recursiveGET( reqArray, responseObject );
 					})
 				;
