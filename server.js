@@ -161,11 +161,13 @@ function _forwardToGae( method, request, response, next ) {
 		_getHttpPromise( appengineUrl, method, request.headers, request.body )
 			.then( res => {
 				response.json( res.body );
+				request.log.submit( res.statusCode, JSON.stringify( res.body ).length );
 				next();
 			})
 			.catch( err => {
 				console.log( "GAE_ERROR :: " + err.message );
 				response.status( err.statusCode ).send( err.error );
+				request.log.submit( err.statusCode, JSON.stringify( res.error ).length );
 				next();
 			})
 		;
