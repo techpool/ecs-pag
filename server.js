@@ -107,6 +107,15 @@ function _forwardToGae( method, request, response, next ) {
 
 	var api = request.path;
 
+	// params
+	var params = _getUrlParameters( request.url );
+	params[ "accessToken" ] = response.locals[ "access-token" ];
+	if( params[ "requests" ] )
+		params[ "requests" ] = encodeURIComponent( params[ "requests" ] ); // Batch Requests -> encode string
+
+	// url - before changing request headers
+	var appengineUrl = _getAppengineEndpoint( request ) + api + "?" + _formatParams( params );
+
 	// headers
 	var ECSHostName = request.headers.host;
 //	ECSHostName = "pr-hindi.ptlp.co";
@@ -121,14 +130,6 @@ function _forwardToGae( method, request, response, next ) {
 	request.headers = _clean( _.pick( request.headers, validHeaders ) );
 	request.headers[ "ECS-HostName" ] = ECSHostName;
 
-	// params
-	var params = _getUrlParameters( request.url );
-	params[ "accessToken" ] = response.locals[ "access-token" ];
-	if( params[ "requests" ] )
-		params[ "requests" ] = encodeURIComponent( params[ "requests" ] ); // Batch Requests -> encode string
-
-	// url
-	var appengineUrl = _getAppengineEndpoint( request ) + api + "?" + _formatParams( params );
 
 	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( request.headers ) );
 
