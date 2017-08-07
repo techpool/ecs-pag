@@ -240,7 +240,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
 			var statusCode = authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
-				response.status( _getResponseCode( statusCode ) ).send( INSUFFICIENT_ACCESS_EXCEPTION );
+				response.status( _getResponseCode( statusCode ) ).send( ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
 				console.log( 'AUTHENTICATION_FAILED' );
 				request.log.submit( statusCode, JSON.stringify( authResponse.body ).length );
 				latencyMetric.write( Date.now() - request.startTimestamp );
