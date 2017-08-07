@@ -109,7 +109,8 @@ function _forwardToGae( method, request, response, next ) {
 
 	// params
 	var params = _getUrlParameters( request.url );
-	params[ "accessToken" ] = response.locals[ "access-token" ];
+	if( response.locals[ "access-token" ] )
+		params[ "accessToken" ] = response.locals[ "access-token" ];
 	if( params[ "requests" ] )
 		params[ "requests" ] = encodeURIComponent( params[ "requests" ] ); // Batch Requests -> encode string
 
@@ -163,12 +164,7 @@ function _forwardToGae( method, request, response, next ) {
 				next();
 			})
 			.catch( err => {
-				var isJson = function(str) { if( typeof(str) === 'object' ) return true; try { JSON.parse(str); } catch (e) { return false; } return true; };
-				if( isJson( err.error ) )
-					response.status( err.statusCode ).json(  err.error );
-				else
-					response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
-				console.log( "GAE_ERROR :: " + err.message );
+				response.status( err.statusCode ).send( err.error );
 				next();
 			})
 		;
