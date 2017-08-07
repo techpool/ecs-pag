@@ -164,6 +164,7 @@ function _forwardToGae( method, request, response, next ) {
 				next();
 			})
 			.catch( err => {
+				console.log( "GAE_ERROR :: " + err.message );
 				response.status( err.statusCode ).send( err.error );
 				next();
 			})
@@ -881,8 +882,7 @@ app.use( (request, response, next) => {
 
 // Debugging
 app.use( (error, request, response, next) => {
-	console.error( JSON.stringify(error) );
-	console.error( error.stack );
+	console.error( "ERROR_STACK :: " + error.stack );
 	response.status( error.code || 500 ).json( { "error": error.message } );
 });
 
