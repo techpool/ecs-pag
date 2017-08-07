@@ -109,7 +109,7 @@ function _forwardToGae( method, request, response, next ) {
 
 	// headers
 	var ECSHostName = request.headers.host;
-	var validHeaders = [ 'content-type', 'content-length', 'user-agent' ];
+	var validHeaders = [ 'content-type', 'user-agent' ];
 	var _clean = function( headers ) {
 		for( var header in headers ) {
 			headers[ _normalizeHeaderCase( header ) ] = headers[ header ];
@@ -867,14 +867,14 @@ app.use( (request, response, next) => {
 			"/user/logout" ].indexOf( request.path ) > -1 ) {
 
 		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
-				.then( authResponse => {
+			.then( authResponse => {
 				next();
-				})
-				.catch( authError => {
-					console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
-					next();
-				})
-			;
+			})
+			.catch( authError => {
+				console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
+				next();
+			})
+		;
 	}
 	next();
 });
