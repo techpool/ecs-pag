@@ -79,16 +79,20 @@ module.exports = {
 		}
 	},
 
+	'/search': {
+		'GET': { 'path': '/search/search', 'auth': false }
+	},
+
 	'/search/search': {
-		'GET': { 'path': '/search/search', 'auth': true }
+		'GET': { 'path': '/search/search', 'auth': false }
 	},
 
 	'/search/trending_search': {
-		'GET': { 'path': '/search/trending_search', 'auth': true }
+		'GET': { 'path': '/search/trending_search', 'auth': false }
 	},
 
 	'/recommendation/pratilipis': {
-		'GET': { 'path': '/recommendation/pratilipis', 'auth': true }
+		'GET': { 'path': '/recommendation/pratilipis', 'auth': false }
 	},
 
 	'/page': {
