@@ -889,9 +889,9 @@ app.use( (request, response, next) => {
 });
 
 // Debugging
-app.use( (error, request, response, next) => {
-	console.error( "ERROR_STACK :: " + error.stack );
-	response.status( error.code || 500 ).json( { "error": error.message } );
+app.use( (err, req, res, next) => {
+	console.error( "ERROR_STACK :: ", err.stack );
+	res.status(500).json( UNEXPECTED_SERVER_EXCEPTION );
 });
 
 process.on( 'unhandledRejection', function( reason, p ) {
