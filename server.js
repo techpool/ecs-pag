@@ -787,7 +787,7 @@ app.use( (request, response, next) => {
 
 //CORS middleware
 app.use( (request, response, next) => {
-	response.setHeader( 'Access-Control-Allow-Origin', request.headers.host ? request.headers.host : "*" ); //TODO: add only pratilipi origin
+	response.setHeader( 'Access-Control-Allow-Origin', "*" ); //TODO: add only pratilipi origin
 	response.setHeader( 'Access-Control-Allow-Credentials', true );
 	response.setHeader( 'Access-Control-Allow-Methods', 'GET, OPTIONS, POST' );
 	response.setHeader( 'Access-Control-Allow-Headers', 'Content-Type, Authorization, AccessToken, Origin, Version' );
