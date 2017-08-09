@@ -818,13 +818,24 @@ app.post( ['/*'], (request, response, next) => {
 	// _resolvePostPatchDelete( "POST", request, response );
 });
 
-// TODO: Uncomment once Frontend makes all calls
-/*
 // patch
 app.patch( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "PATCH", request, response );
+	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/stats' ) ) {
+		_getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body )
+			.then( res => {
+				response.json( res.body );
+				next();
+			})
+			.catch( err => {
+				response.status( err.statusCode ).send( err.error );
+				next();
+			})
+		;
+		return;
+	}
 });
 
+/*
 // delete
 app.delete( ['/*'], (request, response, next) => {
 	_resolvePostPatchDelete( "DELETE", request, response );
