@@ -17,6 +17,7 @@ const morgan = require( 'morgan' );
 const mainConfig = require( './config/main' )[ process.env.STAGE ];
 const routeConfig = require( './config/route' );
 const authConfig = require( './config/auth' );
+process.env.UV_THREADPOOL_SIZE = 128; // https://stackoverflow.com/questions/35387264/node-js-request-module-getting-etimedout-and-esockettimedout
 
 const Logging = require( './lib/LoggingGcp.js' ).init({
 	projectId: process.env.GCP_PROJ_ID,
