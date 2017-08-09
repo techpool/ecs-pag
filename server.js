@@ -86,10 +86,10 @@ function _sendResponseToClient( request, response, status, body ) {
 	var _getResponseBody = function( body, status, requestUrl ) {
 		var _getStatusCodeMessage = function( status ) {
 			// Response depends on status code
-            if( status === 200 ) return SUCCESS_MESSAGE;
-            else if( status === 400 || status === 404 ) return INVALID_ARGUMENT_EXCEPTION;
-            else if( status === 401 ) return INSUFFICIENT_ACCESS_EXCEPTION;
-            else return UNEXPECTED_SERVER_EXCEPTION;
+			if( status === 200 ) return SUCCESS_MESSAGE;
+			else if( status === 400 || status === 404 ) return INVALID_ARGUMENT_EXCEPTION;
+			else if( status === 401 ) return INSUFFICIENT_ACCESS_EXCEPTION;
+			else return UNEXPECTED_SERVER_EXCEPTION;
 		};
 		if( body ) {
 			if( typeof( body ) === "object" ) return body;
@@ -107,12 +107,12 @@ function _sendResponseToClient( request, response, status, body ) {
 	var resBody = _getResponseBody( body, resCode, request.url );
 
 	// Sending response to client
-    response.status( resCode ).json( resBody );
+	response.status( resCode ).json( resBody );
 
-    // Logging to gcp logs
-    request.log.submit( resCode, JSON.stringify( resBody ).length );
+	// Logging to gcp logs
+	request.log.submit( resCode, JSON.stringify( resBody ).length );
 
-    // Recording latency
+	// Recording latency
 //    latencyMetric.write( Date.now() - request.startTimestamp );
 
 }
@@ -821,13 +821,24 @@ app.post( ['/*'], (request, response, next) => {
 	// _resolvePostPatchDelete( "POST", request, response );
 });
 
-// TODO: Uncomment once Frontend makes all calls
-/*
 // patch
 app.patch( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "PATCH", request, response );
+	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/stats' ) ) {
+		_getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body )
+			.then( res => {
+				response.json( res.body );
+				next();
+			})
+			.catch( err => {
+				response.status( err.statusCode ).send( err.error );
+				next();
+			})
+		;
+		return;
+	}
 });
 
+/*
 // delete
 app.delete( ['/*'], (request, response, next) => {
 	_resolvePostPatchDelete( "DELETE", request, response );
