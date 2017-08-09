@@ -35,8 +35,8 @@ app.get( '/health', (request, response, next) => {
 	response.send( "healthy" );
 });
 
-app.get( '/test', (request, response, next) => {
-	var url = "https://devo-pratilipi.appspot.com/api" + request.url;
+app.get( '/api/test', (request, response, next) => {
+	var url = "https://devo-pratilipi.appspot.com" + request.url;
 	_getHttpPromise( url, "GET" )
 		.then( res => {
 			response.status( res.statusCode ).send( res.body );
