@@ -37,6 +37,8 @@ const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at ser
 
 const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
 
+process.env.UV_THREADPOOL_SIZE = 128;
+
 var _getAppengineEndpoint = function( request ) {
 	return ( request.headers.host === "temp.pratilipi.com" || request.headers.host === "android.pratilipi.com" ) ?
 		mainConfig.ANDROID_APPENGINE_ENDPOINT : mainConfig.WEB_APPENGINE_ENDPOINT;
@@ -183,7 +185,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		json: true,
 		simple: false,
-		timeout: 60000, // 60 seconds
+		timeout: 120000, // 120 seconds
 		resolveWithFullResponse: true
 	};
 	if( headers ) genericReqOptions.headers = headers;
