@@ -13,7 +13,7 @@ var _normalizeHeaderCase = require( 'header-case-normalizer' ); // https://www.n
 var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
-const morgan = require( 'morgan' );
+// const morgan = require( 'morgan' );
 const mainConfig = require( './config/main' )[ process.env.STAGE ];
 const routeConfig = require( './config/route' );
 const authConfig = require( './config/auth' );
@@ -742,7 +742,7 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 
 const app = express();
 
-app.use( morgan('short') );
+// app.use( morgan('short') );
 app.use( cookieParser() );
 app.use( bodyParser.json({ limit: "50mb" }) );
 app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
