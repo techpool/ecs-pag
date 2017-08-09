@@ -166,7 +166,7 @@ function _forwardToGae( method, request, response, next ) {
 			})
 			.catch( err => {
 				console.log( "GAE_ERROR :: " + err.message );
-				response.status( err.statusCode ).send( err.error );
+				response.status( err.statusCode || 500 ).send( err.error || UNEXPECTED_SERVER_EXCEPTION );
 				request.log.submit( err.statusCode, JSON.stringify( err.error ).length );
 				next();
 			})
