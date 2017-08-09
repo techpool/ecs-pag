@@ -31,7 +31,10 @@ function _getHttpPromise( uri, method, headers, body ) {
 
 const app = express();
 
-// get
+app.get( '/health', (request, response, next) => {
+	response.send( "healthy" );
+});
+
 app.get( '/test', (request, response, next) => {
 	var url = "https://devo-pratilipi.appspot.com/api" + request.url;
 	_getHttpPromise( url, "GET" )
