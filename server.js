@@ -24,12 +24,12 @@ const Logging = require( './lib/LoggingGcp.js' ).init({
 	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
 });
 
-const Metric = require( './lib/MetricGcp.js' ).init({
-	projectId: process.env.GCP_PROJ_ID,
-	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
-});
+//const Metric = require( './lib/MetricGcp.js' ).init({
+//	projectId: process.env.GCP_PROJ_ID,
+//	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
+//});
 
-const latencyMetric = new Metric( 'int64', 'Latency' );
+//const latencyMetric = new Metric( 'int64', 'Latency' );
 
 const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
@@ -113,7 +113,7 @@ function _sendResponseToClient( request, response, status, body ) {
     request.log.submit( resCode, JSON.stringify( resBody ).length );
 
     // Recording latency
-    latencyMetric.write( Date.now() - request.startTimestamp );
+//    latencyMetric.write( Date.now() - request.startTimestamp );
 
 }
 
