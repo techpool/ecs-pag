@@ -183,7 +183,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		json: true,
 		simple: false,
-//		timeout: 60000, // 60 seconds
+		timeout: 60000, // 60 seconds
 		resolveWithFullResponse: true
 	};
 	if( headers ) genericReqOptions.headers = headers;
