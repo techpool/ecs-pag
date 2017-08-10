@@ -5,8 +5,8 @@ var Promise = require( 'bluebird' );
 var express = require( 'express' );
 var timeout = require( 'connect-timeout' );
 
-var httpAgent = new http.Agent({ keepAlive : true });
-var httpsAgent = new https.Agent({ keepAlive : true });
+var httpAgent = new http.Agent({ keepAlive : true, keepAliveMsecs: 120000 });
+var httpsAgent = new https.Agent({ keepAlive : true, keepAliveMsecs: 120000 });
 
 const app = express();
 app.use( timeout( 120000 ) );
