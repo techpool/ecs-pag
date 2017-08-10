@@ -8,6 +8,8 @@ COPY config/main.js config/main.js
 COPY config/route.js config/route.js
 COPY config/auth.js config/auth.js
 
+COPY util/HttpUtil.js util/HttpUtil.js
+
 EXPOSE 80
 
 CMD [ "npm", "start" ]
