@@ -3,11 +3,13 @@ var https = require( 'https' );
 var httpPromise = require( 'request-promise' );
 var Promise = require( 'bluebird' );
 var express = require( 'express' );
+var timeout = require( 'connect-timeout' );
 
 var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 const app = express();
+app.use( timeout( 120000 ) );
 
 app.get( '/health', (request, response, next) => {
 	response.send( "healthy" );
@@ -37,5 +39,11 @@ app.get( '/api/test', (request, response, next) => {
 		})
 	;
 });
+
+app.use( haltOnTimedout );
+function haltOnTimedout( request, response, next ) {
+	if( ! request.timedout ) next();
+	else response.send( "Request timedout" );
+}
 
 app.listen(80);
