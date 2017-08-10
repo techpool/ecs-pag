@@ -1,5 +1,5 @@
-var HttpUtil = require( './util/HttpUtil' );
 var express = require( 'express' );
+var url = require('url');
 
 const app = express();
 
@@ -8,11 +8,11 @@ app.get( '/health', (request, response, next) => {
 });
 
 app.get( '/api/test', (request, response, next) => {
-	var url = "https://devo-pratilipi.appspot.com" + request.url;
-	var httpUtil = new HttpUtil();
-	httpUtil.get( url, null, null, function( res ) {
-		response.send( res );
-	});
+	var query = url.parse( request.url, true ).query;
+	var wait = query.wait ? parseInt(query.wait) : 1;
+	setTimeout(function() {
+		response.send( "hello" );
+	}, wait );
 });
 
 app.listen(80);
