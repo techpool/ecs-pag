@@ -1,10 +1,9 @@
+var http = require( 'http' );
 var express = require( 'express' );
 var url = require('url');
 var timeout = require('connect-timeout')
 
 const app = express();
-
-app.use(timeout(1200000))
 
 app.get( '/health', (request, response, next) => {
 	response.send( "healthy" );
@@ -18,4 +17,9 @@ app.get( '/api/test', (request, response, next) => {
 	}, wait );
 });
 
-app.listen(80);
+var server = http.createServer(app);
+server.setTimeout(11*60*1000); // 10 * 60 seconds * 1000 msecs
+server.listen(80, function () {
+    var logger = app.get('logger');
+    logger.info('**** STARTING SERVER ****');
+});
