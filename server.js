@@ -4,7 +4,7 @@ var timeout = require('connect-timeout')
 
 const app = express();
 
-app.use(timeout('1000s'))
+app.use(timeout('1200000'))
 
 app.get( '/health', (request, response, next) => {
 	response.send( "healthy" );
