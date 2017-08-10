@@ -1,7 +1,10 @@
 var express = require( 'express' );
 var url = require('url');
+var timeout = require('connect-timeout')
 
 const app = express();
+
+app.use(timeout('1000s'))
 
 app.get( '/health', (request, response, next) => {
 	response.send( "healthy" );
