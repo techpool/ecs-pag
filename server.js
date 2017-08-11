@@ -12,7 +12,8 @@ app.get( '/health', (request, response, next) => {
 app.get( '/api/test', (request, response, next) => {
 	var query = url.parse( request.url, true ).query;
 	var wait = query.wait ? parseInt(query.wait) : 1;
-	console.log('waiting for ' + wait + 'seconds ...');
+	console.log( 'waiting for ' + wait + 'seconds ...' );
+	if( query.id ) console.log( 'id :: ' + query.id );
 	setTimeout(function() {
 		response.send( "Yello!" );
 	}, wait );
