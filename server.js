@@ -6,6 +6,7 @@ var timeout = require('connect-timeout')
 const app = express();
 
 app.get( '/health', (request, response, next) => {
+	console.log( "health check ..." );
 	response.send( "healthy" );
 });
 
