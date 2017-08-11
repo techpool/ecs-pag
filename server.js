@@ -12,10 +12,14 @@ app.get( '/health', (request, response, next) => {
 app.get( '/api/test', (request, response, next) => {
 	var query = url.parse( request.url, true ).query;
 	var wait = query.wait ? parseInt(query.wait) : 1;
+	console.log('waiting for ' + wait + 'seconds ...');
 	setTimeout(function() {
 		response.send( "Yello!" );
 	}, wait );
 });
+
+
+app.listen(80);
 
 var server = http.createServer(app);
 server.setTimeout(11*60*1000); // 10 * 60 seconds * 1000 msecs
