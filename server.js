@@ -26,5 +26,5 @@ server.setTimeout(11*60*1000); // 10 * 60 seconds * 1000 msecs
 server.listen(80);
 server.on( 'connection', function(socket) {
 	console.log( "A new connection was made by a client." );
-	socket.setTimeout(30 * 1000); // 30 second timeout. Change this as you see fit.
+	socket.setTimeout(11*60*1000); // 30 second timeout. Change this as you see fit.
 });
