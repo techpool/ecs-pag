@@ -17,8 +17,7 @@
     "morgan": "1.8.2",
     "request": "2.81.0",
     "request-promise": "4.2.0",
-    "xmlhttprequest": "^1.8.0",
-    "connect-timeout":"1.9.0"
+    "xmlhttprequest": "^1.8.0"
   },
   "author": "Radhika",
   "license": "ISC"
