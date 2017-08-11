@@ -14,8 +14,11 @@ app.get( '/api/test', (request, response, next) => {
 	var query = url.parse( request.url, true ).query;
 	var wait = query.wait ? parseInt(query.wait) : 1;
 	console.log( 'waiting for ' + wait + 'seconds ...' );
-	if( query.id ) console.log( 'id :: ' + query.id );
+	if( query.id )
+		console.log( "id :: " + query.id + " :: REQUEST :: " + Date.now() )
 	setTimeout(function() {
+		if(query.id)
+			console.log( "id :: " + query.id + " :: RESPONSE :: " + Date.now() )
 		response.send( "Yello!" );
 	}, wait );
 });
