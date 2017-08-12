@@ -30,6 +30,7 @@ const Metric = require( './lib/MetricGcp.js' ).init({
 
 const latencyMetric = new Metric( 'int64', 'Latency' );
 
+const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
@@ -62,44 +63,56 @@ function _getUrlParameter( url, parameter ) {
 	return _getUrlParameters( url )[ parameter ];
 }
 
-function _addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
-	var pagHeaders = [ 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' ];
-	var serviceHeaders = _.omit( serviceReturnedHeaders, pagHeaders );
-	response.set( serviceHeaders );
-}
-
-function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
-
-	if( ! code ) {
-		console.log( "MISSING_RESPONSE_CODE" );
-		return 500;
-	}
-
-	code = parseInt( code );
-
-	Array.prototype.contains = function(obj) {
-		return this.indexOf(obj) > -1;
+function _sendResponseToClient( request, response, status, body ) {
+	var _getResponseCode = function( status, requestUrl ) {
+		if( ! status ) {
+			console.log( "MISSING_RESPONSE_CODE :: " + requestUrl );
+			return 500;
+		}
+		status = parseInt( status );
+		Array.prototype.contains = function(obj) { return this.indexOf(obj) > -1; };
+		// supportedCodesOnPag = [200, 207, 400, 401, 403, 404, 500, 502, 504];
+		var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
+		if( supportedCodesOnFrontend.contains( status ) ) return status;
+		else if( status === 207 ) return 200;
+		else if( status === 403 || status === 404 ) return 401;
+		else if( status === 502 || status === 504 ) return 500;
+		console.log( "INVALID_RESPONSE_CODE :: " + requestUrl );
+		if( status >= 200 && status < 300 ) return 200;
+		else if( status >= 400 && status < 500 ) return 400;
+		else return 500;
+	};
+	var _getResponseBody = function( body, status, requestUrl ) {
+		var _getStatusCodeMessage = function( status ) {
+			// Response depends on status code
+            if( status === 200 ) return SUCCESS_MESSAGE;
+            else if( status === 400 || status === 404 ) return INVALID_ARGUMENT_EXCEPTION;
+            else if( status === 401 ) return INSUFFICIENT_ACCESS_EXCEPTION;
+            else return UNEXPECTED_SERVER_EXCEPTION;
+		};
+		if( body ) {
+			if( typeof( body ) === "object" ) return body;
+			try {
+				return JSON.parse( body );
+			} catch(e) {
+				return _getStatusCodeMessage( status );
+			}
+		} else {
+			return _getStatusCodeMessage( status );
+		}
 	};
 
-	// supportedCodesOnPag = [200, 207, 400, 401, 403, 404, 500, 502, 504];
-	var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
-	if( supportedCodesOnFrontend.contains( code ) )
-		return code;
-	else if( code === 207 )
-		return 200;
-	else if( code === 403 || code === 404 )
-		return 401;
-	else if( code === 502 || code === 504 )
-		return 500;
+	var resCode = _getResponseCode( status, request.url );
+	var resBody = _getResponseBody( body, resCode, request.url );
 
-	console.log( "INVALID_RESPONSE_CODE :: " + code );
+	// Sending response to client
+    response.status( resCode ).json( resBody );
 
-	if( code >= 200 && code < 300 )
-		return 200;
-	else if( code >= 400 && code < 500 )
-		return 400;
-	else
-		return 500;
+    // Logging to gcp logs
+    request.log.submit( resCode, JSON.stringify( resBody ).length );
+
+    // Recording latency
+    latencyMetric.write( Date.now() - request.startTimestamp );
 
 }
 
@@ -140,34 +153,23 @@ function _forwardToGae( method, request, response, next ) {
 			: request.pipe( requestModule.post( appengineUrl, request.body ) );
 		var startTimestamp = Date.now();
 		reqModule
-			.on( 'error', (error) => {
-				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-				latencyMetric.write( Date.now() - request.startTimestamp );
-			})
 			.on( 'end', function() {
 			  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
 			})
 			.pipe( response )
 			.on( 'error', (error) => {
-				response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-				request.log.error( JSON.stringify( error ) );
-				request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 			})
 		;
 	} else {
 		_getHttpPromise( appengineUrl, method, request.headers, request.body )
 			.then( res => {
-				response.json( res.body );
-				request.log.submit( res.statusCode, JSON.stringify( res.body ).length );
+				_sendResponseToClient( request, response, res.statusCode, res.body );
 				next();
 			})
 			.catch( err => {
 				console.log( "GAE_ERROR :: " + err.message );
-				response.status( err.statusCode ).send( err.error );
-				request.log.submit( err.statusCode, JSON.stringify( err.error ).length );
+				_sendResponseToClient( request, response, err.statusCode, err.error );
 				next();
 			})
 		;
@@ -180,6 +182,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		method: method,
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		json: true,
+		timeout: 60000, // 60 seconds
 		resolveWithFullResponse: true
 	};
 	if( headers ) genericReqOptions.headers = headers;
@@ -187,7 +190,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	var _hideSensitiveFields = function( obj ) {
 		if( ! obj ) return {};
 		var copyObj = JSON.parse( JSON.stringify( obj ) );
-		var sensitiveFields = [ "password", "verificationToken" ];
+		var sensitiveFields = [ "password", "verificationToken", "googleIdToken", "fbUserAccessToken" ];
 		for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
 		return copyObj;
 	};
@@ -240,20 +243,15 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
 			var statusCode = authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
-				response.status( _getResponseCode( statusCode ) ).send( ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
 				console.log( 'AUTHENTICATION_FAILED' );
-				request.log.submit( statusCode, JSON.stringify( authResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_sendResponseToClient( request, response, statusCode, ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
 				return Promise.reject();
 			} else {
-				console.log( 'AUTHENTICATION_SUCCESSFUL' );
 				return authResponse.headers[ 'user-id' ];
 			}
 		}, (httpError) => {
 			console.log( "ERROR_MESSAGE :: " + httpError.message );
-			response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.submit( 500, httpError.message.length );
-			latencyMetric.write( Date.now() - request.startTimestamp );
+			_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
 			return Promise.reject();
 		});
 	;
@@ -382,21 +380,12 @@ function resolveGET( request, response, next ) {
 			.then( (userId) => {
 				var startTimestamp = Date.now();
 				request.pipe( requestModule( url ) )
-					.on( 'error', function( error ) {
-						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-						request.log.error( JSON.stringify( error ) );
-						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-						latencyMetric.write( Date.now() - request.startTimestamp );
-					})
-					.on('end', function() {
+					.on( 'end', function() {
 					  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE GET ${url}` );
 					})
 					.pipe( response )
 					.on( 'error', function( error ) {
-						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-						request.log.error( JSON.stringify( error ) );
-						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-						latencyMetric.write( Date.now() - request.startTimestamp );
+						_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 					})
 				;
 			});
@@ -408,19 +397,13 @@ function resolveGET( request, response, next ) {
 
 		_getService( "GET", requestUrl, request, response )
 			.then( (serviceResponse) => {
-				_addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
-				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
-					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( JSON.stringify( httpError.message ) );
-					request.log.submit( httpError.statusCode || 500, httpError.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
 				}
 			});
 		;
@@ -518,18 +501,12 @@ function resolveGETBatch( request, response, next ) {
 					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = { "status": responseArray[i].statusCode, "response": responseArray[i].body };
-					response.send( returnResponse );
-					request.log.submit( 200, JSON.stringify( returnResponse ).length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					_sendResponseToClient( request, response, 200, returnResponse );
 				}).catch( (error) => {
 					console.log( "ERROR_CAUSE :: Promise.all" );
 					console.log( "ERROR_STATUS :: " + error.statusCode );
 					console.log( "ERROR_MESSAGE :: " + error.message );
-					response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( error.statusCode ); // 'Bad Request'
-					request.log.error( error.message ); // Html
-					request.log.submit( 500, error.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 				})
 			;
 		} else {
@@ -589,7 +566,7 @@ function resolveGETBatch( request, response, next ) {
 							_onRes( err.statusCode, err.error );
 							return recursiveGET( reqArray, responseObject );
 						} else {
-							response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
+							_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 						}
 					})
 				;
@@ -597,11 +574,7 @@ function resolveGETBatch( request, response, next ) {
 
 			recursiveGET( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
 				.then( (res) => {
-					if( res ) {
-						response.send( res );
-						request.log.submit( 200, JSON.stringify( res ).length );
-						latencyMetric.write( Date.now() - request.startTimestamp );
-					}
+					_sendResponseToClient( request, response, 200, res );
 				})
 			;
 		}
@@ -622,7 +595,7 @@ function resolvePOST( request, response, next ) {
 		};
 		_getHttpPromise( url, "PATCH", headers, request.body )
 			.then( res => {
-				response.json( { "message": "OK" } );
+				response.json( SUCCESS_MESSAGE );
 				next();
 			})
 			.catch( err => {
@@ -647,7 +620,7 @@ function resolvePOST( request, response, next ) {
 		};
 		_getHttpPromise( url, "PATCH", headers, request.body )
 			.then( res => {
-				response.json( { "message": "OK" } );
+				response.json( SUCCESS_MESSAGE );
 				next();
 			})
 			.catch( err => {
@@ -750,19 +723,13 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 	if( isApiSupported ) {
 		_getService( methodName, null, request, response )
 			.then( (serviceResponse) => {
-				_addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
-				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
-					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( JSON.stringify( httpError.message ) );
-					request.log.submit( httpError.statusCode || 500, httpError.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
 				}
 			});
 		;
@@ -786,6 +753,7 @@ app.use( (request, response, next) => {
 });
 
 //CORS middleware
+app.enable( 'trust proxy' );
 app.use( (request, response, next) => {
 	response.setHeader( 'Access-Control-Allow-Origin', "*" ); //TODO: add only pratilipi origin
 	response.setHeader( 'Access-Control-Allow-Credentials', true );
@@ -835,36 +803,7 @@ app.use( (request, response, next) => {
 	next();
 });
 
-// get
-app.get( ['/*'], (request, response, next) => {
-	if( request.path === '/' ) {
-		resolveGETBatch( request, response, next );
-	} else {
-		resolveGET( request, response, next );
-	}
-});
-
-// post
-app.post( ['/*'], (request, response, next) => {
-	resolvePOST( request, response, next );
-	// TODO: Uncomment once Frontend makes all calls
-	// _resolvePostPatchDelete( "POST", request, response );
-});
-
-// TODO: Uncomment once Frontend makes all calls
-/*
-// patch
-app.patch( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "PATCH", request, response );
-});
-
-// delete
-app.delete( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "DELETE", request, response );
-});
-*/
-
-// Clear AccessToken
+// Clear AccessToken in case of login / register / password update / verification / logout
 app.use( (request, response, next) => {
 	if( [ "/user/login",
 			"/user/login/facebook",
@@ -883,14 +822,55 @@ app.use( (request, response, next) => {
 				next();
 			})
 		;
+	} else {
+		next();
 	}
-	next();
 });
 
+// get
+app.get( ['/*'], (request, response, next) => {
+	if( request.path === '/' ) {
+		resolveGETBatch( request, response, next );
+	} else {
+		resolveGET( request, response, next );
+	}
+});
+
+// post
+app.post( ['/*'], (request, response, next) => {
+	resolvePOST( request, response, next );
+	// TODO: Uncomment once Frontend makes all calls
+	// _resolvePostPatchDelete( "POST", request, response );
+});
+
+// patch
+app.patch( ['/*'], (request, response, next) => {
+	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/stats' ) ) {
+		_getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body )
+			.then( res => {
+				response.json( res.body );
+				next();
+			})
+			.catch( err => {
+				response.status( err.statusCode ).send( err.error );
+				next();
+			})
+		;
+		return;
+	}
+});
+
+/*
+// delete
+app.delete( ['/*'], (request, response, next) => {
+	_resolvePostPatchDelete( "DELETE", request, response );
+});
+*/
+
 // Debugging
-app.use( (error, request, response, next) => {
-	console.error( "ERROR_STACK :: " + error.stack );
-	response.status( error.code || 500 ).json( { "error": error.message } );
+app.use( (err, req, res, next) => {
+	console.error( "ERROR_STACK :: ", err.stack );
+	res.status(500).json( UNEXPECTED_SERVER_EXCEPTION );
 });
 
 process.on( 'unhandledRejection', function( reason, p ) {
