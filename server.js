@@ -182,6 +182,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		method: method,
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		json: true,
+		timeout: 60000, // 60 seconds
 		resolveWithFullResponse: true
 	};
 	if( headers ) genericReqOptions.headers = headers;
@@ -189,7 +190,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	var _hideSensitiveFields = function( obj ) {
 		if( ! obj ) return {};
 		var copyObj = JSON.parse( JSON.stringify( obj ) );
-		var sensitiveFields = [ "password", "verificationToken" ];
+		var sensitiveFields = [ "password", "verificationToken", "googleIdToken", "fbUserAccessToken" ];
 		for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
 		return copyObj;
 	};
