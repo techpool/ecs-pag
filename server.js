@@ -182,6 +182,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		method: method,
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		json: true,
+		timeout: 60000, // 60 seconds
 		resolveWithFullResponse: true
 	};
 	if( headers ) genericReqOptions.headers = headers;
@@ -189,7 +190,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	var _hideSensitiveFields = function( obj ) {
 		if( ! obj ) return {};
 		var copyObj = JSON.parse( JSON.stringify( obj ) );
-		var sensitiveFields = [ "password", "verificationToken" ];
+		var sensitiveFields = [ "password", "verificationToken", "googleIdToken", "fbUserAccessToken" ];
 		for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
 		return copyObj;
 	};
@@ -802,6 +803,30 @@ app.use( (request, response, next) => {
 	next();
 });
 
+// Clear AccessToken in case of login / register / password update / verification / logout
+app.use( (request, response, next) => {
+	if( [ "/user/login",
+			"/user/login/facebook",
+			"/user/login/google",
+			"/user/register",
+			"/user/passwordupdate",
+			"/user/verification",
+			"/user/logout" ].indexOf( request.path ) > -1 ) {
+
+		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
+			.then( authResponse => {
+				next();
+			})
+			.catch( authError => {
+				console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
+				next();
+			})
+		;
+	} else {
+		next();
+	}
+});
+
 // get
 app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
@@ -841,29 +866,6 @@ app.delete( ['/*'], (request, response, next) => {
 	_resolvePostPatchDelete( "DELETE", request, response );
 });
 */
-
-// Clear AccessToken
-app.use( (request, response, next) => {
-	if( [ "/user/login",
-			"/user/login/facebook",
-			"/user/login/google",
-			"/user/register",
-			"/user/passwordupdate",
-			"/user/verification",
-			"/user/logout" ].indexOf( request.path ) > -1 ) {
-
-		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
-			.then( authResponse => {
-				next();
-			})
-			.catch( authError => {
-				console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
-				next();
-			})
-		;
-	}
-	next();
-});
 
 // Debugging
 app.use( (err, req, res, next) => {
