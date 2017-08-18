@@ -183,6 +183,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		encoding: 'utf8',
 		json: true,
+		contentType: 'application/x-www-form-urlencoded',
 		simple: false,
 		time: true,
 		timeout: 60000, // 60 seconds
