@@ -182,6 +182,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		method: method,
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		json: true,
+		simple: false,
 		timeout: 60000, // 60 seconds
 		resolveWithFullResponse: true
 	};
