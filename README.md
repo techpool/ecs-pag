@@ -39,7 +39,7 @@ eg: /pratilipis/12345
 
 
 ## Response codes that are supported by PAG: 
-200, 207, 400, 401, 403, 404, 500, 502, 504
+200, 201, 207, 400, 401, 403, 404, 500, 502, 504
 
 ### List of HTTP Status codes:
 https://en.wikipedia.org/wiki/List_of_HTTP_status_codes

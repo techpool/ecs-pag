@@ -8,6 +8,7 @@ var _ = require( 'lodash' );
 var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
 var urlModule = require( 'url' );
+var qs = require( 'querystring' );
 var _normalizeHeaderCase = require( 'header-case-normalizer' ); // https://www.npmjs.com/package/header-case-normalizer
 
 var httpAgent = new http.Agent({ keepAlive : true });
@@ -71,10 +72,10 @@ function _sendResponseToClient( request, response, status, body ) {
 		}
 		status = parseInt( status );
 		Array.prototype.contains = function(obj) { return this.indexOf(obj) > -1; };
-		// supportedCodesOnPag = [200, 207, 400, 401, 403, 404, 500, 502, 504];
+		// supportedCodesOnPag = [200, 201, 207, 400, 401, 403, 404, 500, 502, 504];
 		var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
 		if( supportedCodesOnFrontend.contains( status ) ) return status;
-		else if( status === 207 ) return 200;
+		else if( status === 201 || status === 207 ) return 200;
 		else if( status === 403 || status === 404 ) return 401;
 		else if( status === 502 || status === 504 ) return 500;
 		console.log( "INVALID_RESPONSE_CODE :: " + requestUrl );
@@ -177,11 +178,20 @@ function _forwardToGae( method, request, response, next ) {
 }
 
 function _getHttpPromise( uri, method, headers, body ) {
+	var escapeUri = function( uri ) {
+		var params = _getUrlParameters( uri );
+		for( var key in params ) params[key] = qs.escape( params[key] );
+		return uri.split( "?" )[0] + "?" + _formatParams( params );
+	};
 	var genericReqOptions = {
-		uri: uri,
+		uri: escapeUri( uri ),
 		method: method,
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
+		encoding: 'utf8',
 		json: true,
+		contentType: 'application/x-www-form-urlencoded',
+		simple: false,
+		time: true,
 		timeout: 60000, // 60 seconds
 		resolveWithFullResponse: true
 	};
@@ -194,7 +204,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
 		return copyObj;
 	};
-	console.log( 'HTTP :: ' + method + " :: " + uri + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( _hideSensitiveFields( body ) ) );
+	console.log( 'HTTP :: ' + method + " :: " + genericReqOptions.uri + " :: " + JSON.stringify( genericReqOptions.headers ) + " :: " + JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) );
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
@@ -458,6 +468,33 @@ function resolveGETBatch( request, response, next ) {
 			});
 		}
 	}
+
+	// TODO: Remove hack: http://android.pratilipi.com/?requests=%7B%22req1%22%3A%22%5C%2Fpage%3Furi%3D%5C%2Fgdvh%3Futm_source%3Dandroid%26utm_campaign%3Dmyprofile_share%26%22%2C%22req2%22%3A%22%5C%2Fpratilipi%3FpratilipiId%3D%24req1.primaryContentId%26%22%7D&
+	if( requestArray.length === 2 &&
+		requestArray[0]["name"] === "req1" &&
+		requestArray[1]["name"] === "req2" &&
+		requestArray[0]["api"] === "/page" &&
+		requestArray[1]["api"] === "/pratilipi" ) {
+
+		String.prototype.count = function( s1 ) {
+			return ( this.length - this.replace( new RegExp(s1,"g"), '' ).length ) / s1.length;
+		};
+
+		var pageUri = _getUrlParameter( requestArray[0]["url"], "uri" ).split("?")[0];
+		if( pageUri.startsWith( "/author/" ) || ( pageUri.startsWith( "/" ) && pageUri.count( "/" ) == 1 ) ) {
+			// get page response and send 500 for next response
+			var pageServiceUrl = ECS_END_POINT + routeConfig["/page"]["GET"]["path"] + "?uri=" + pageUri;
+//			var pageServiceUrl = "http://gae-gamma.pratilipi.com/api/page?uri=" + pageUri;
+			_getHttpPromise( pageServiceUrl, "GET" )
+				.then( (res) => {
+					var hackyResponseBody = { "req1": { "status": res.statusCode, "response": res.body }, "req2": { "status": 500, "response": UNEXPECTED_SERVER_EXCEPTION } };
+					response.json( hackyResponseBody );
+				})
+			;
+			return;
+		}
+	}
+
 
 	var forwardAllToGAE = true;
 	for( var i = 0; i < requestArray.length; i++ ) {
