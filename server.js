@@ -8,6 +8,7 @@ var _ = require( 'lodash' );
 var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
 var urlModule = require( 'url' );
+var qs = require( 'querystring' );
 var _normalizeHeaderCase = require( 'header-case-normalizer' ); // https://www.npmjs.com/package/header-case-normalizer
 
 var httpAgent = new http.Agent({ keepAlive : true });
@@ -177,8 +178,13 @@ function _forwardToGae( method, request, response, next ) {
 }
 
 function _getHttpPromise( uri, method, headers, body ) {
+	var escapeUri = function( uri ) {
+		var params = _getUrlParameters( uri );
+		for( var key in params ) params[key] = qs.escape( params[key] );
+		return uri.split( "?" )[0] + "?" + _formatParams( params );
+	};
 	var genericReqOptions = {
-		uri: uri,
+		uri: escapeUri( uri ),
 		method: method,
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
 		encoding: 'utf8',
@@ -198,7 +204,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 		for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
 		return copyObj;
 	};
-	console.log( 'HTTP :: ' + method + " :: " + uri + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( _hideSensitiveFields( body ) ) );
+	console.log( 'HTTP :: ' + method + " :: " + genericReqOptions.uri + " :: " + JSON.stringify( genericReqOptions.headers ) + " :: " + JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) );
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
