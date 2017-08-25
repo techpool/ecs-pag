@@ -463,6 +463,33 @@ function resolveGETBatch( request, response, next ) {
 		}
 	}
 
+	// TODO: Remove hack: http://android.pratilipi.com/?requests=%7B%22req1%22%3A%22%5C%2Fpage%3Furi%3D%5C%2Fgdvh%3Futm_source%3Dandroid%26utm_campaign%3Dmyprofile_share%26%22%2C%22req2%22%3A%22%5C%2Fpratilipi%3FpratilipiId%3D%24req1.primaryContentId%26%22%7D&
+	if( requestArray.length === 2 &&
+		requestArray[0]["name"] === "req1" &&
+		requestArray[1]["name"] === "req2" &&
+		requestArray[0]["api"] === "/page" &&
+		requestArray[1]["api"] === "/pratilipi" ) {
+
+		String.prototype.count = function( s1 ) {
+			return ( this.length - this.replace( new RegExp(s1,"g"), '' ).length ) / s1.length;
+		};
+
+		var pageUri = _getUrlParameter( requestArray[0]["url"], "uri" ).split("?")[0];
+		if( pageUri.startsWith( "/author/" ) || ( pageUri.startsWith( "/" ) && pageUri.count( "/" ) == 1 ) ) {
+			// get page response and send 500 for next response
+			var pageServiceUrl = ECS_END_POINT + routeConfig["/page"]["GET"]["path"] + "?uri=" + pageUri;
+//			var pageServiceUrl = "http://gae-gamma.pratilipi.com/api/page?uri=" + pageUri;
+			_getHttpPromise( pageServiceUrl, "GET" )
+				.then( (res) => {
+					var hackyResponseBody = { "req1": { "status": res.statusCode, "response": res.body }, "req2": { "status": 500, "response": UNEXPECTED_SERVER_EXCEPTION } };
+					response.json( hackyResponseBody );
+				})
+			;
+			return;
+		}
+	}
+
+
 	var forwardAllToGAE = true;
 	for( var i = 0; i < requestArray.length; i++ ) {
 		if( requestArray[i]["isSupported"] ) {
