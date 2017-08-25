@@ -72,10 +72,10 @@ function _sendResponseToClient( request, response, status, body ) {
 		}
 		status = parseInt( status );
 		Array.prototype.contains = function(obj) { return this.indexOf(obj) > -1; };
-		// supportedCodesOnPag = [200, 207, 400, 401, 403, 404, 500, 502, 504];
+		// supportedCodesOnPag = [200, 201, 207, 400, 401, 403, 404, 500, 502, 504];
 		var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
 		if( supportedCodesOnFrontend.contains( status ) ) return status;
-		else if( status === 207 ) return 200;
+		else if( status === 201 || status === 207 ) return 200;
 		else if( status === 403 || status === 404 ) return 401;
 		else if( status === 502 || status === 504 ) return 500;
 		console.log( "INVALID_RESPONSE_CODE :: " + requestUrl );
