@@ -190,7 +190,7 @@ module.exports = {
 	},
 
 	'/pratilipi/list': {
-		'GET':{
+		'GET': {
 			'path': '/pratilipis',
 			'auth': true,
 			'requiredFields': [
@@ -202,6 +202,27 @@ module.exports = {
 				{ 'resultCount': 'limit' }
 			]
 		}
+	},
+
+	'/userauthor/follow': {
+		'GET': {
+			'path': '/userauthor/follow',
+			'auth': false
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/userauthor/follow',
+					'requiredFields': [
+						{ 'authorId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/userauthor/follow/list': {
+		'GET': { 'path': '/userauthor/follow/list', 'auth': false }
 	}
 
 };
