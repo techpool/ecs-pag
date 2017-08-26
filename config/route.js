@@ -133,6 +133,13 @@ module.exports = {
 		}
 	},
 
+	'/author-temp':{
+		'GET':{
+			'path': '/authors',
+			'auth': false
+		}
+	},
+
 	'/author':{
 		'GET':{
 			'path': '/authors/$primaryContentId',
