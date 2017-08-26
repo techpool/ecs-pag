@@ -134,10 +134,18 @@ function _forwardToGae( method, request, response, next ) {
 	// headers
 	var ECSHostName = request.headers.host;
 //	ECSHostName = "pr-hindi.ptlp.co";
-	var validHeaders = [ 'content-type', 'user-agent' ];
+	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname', 'androidversioncode' ];
 	var _clean = function( headers ) {
+		var _cleanHeader = function( header ) {
+			switch( header ) {
+				case "androidversion": return "AndroidVersion";
+				case "androidversionname": return "AndroidVersionName";
+				case "androidversioncode": return "AndroidVersionCode";
+				default: return _normalizeHeaderCase( header );
+			}
+		};
 		for( var header in headers ) {
-			headers[ _normalizeHeaderCase( header ) ] = headers[ header ];
+			headers[ _cleanHeader( header ) ] = headers[ header ];
 			delete headers[header];
 		}
 		return headers;
