@@ -223,6 +223,22 @@ module.exports = {
 
 	'/userauthor/follow/list': {
 		'GET': { 'path': '/userauthor/follow/list', 'auth': false }
+	},
+	
+	'/follows' : {
+		'GET' : {
+			'path' : '/follows', 'auth': false
+		},
+		'POST' : {
+			'methods': {
+				'POST' : {
+					'path': '/follows',
+					'requiredFields' : [
+						{'state': null}
+					]
+				}
+			}
+		}
 	}
 
 };
