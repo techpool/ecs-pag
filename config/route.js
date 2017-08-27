@@ -227,7 +227,8 @@ module.exports = {
 	
 	'/follows' : {
 		'GET' : {
-			'path' : '/follows', 'auth': false
+			'path' : '/follows', 
+			'auth': false
 		},
 		'POST' : {
 			'methods': {
