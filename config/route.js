@@ -205,10 +205,6 @@ module.exports = {
 	},
 
 	'/userauthor/follow': {
-		'GET': {
-			'path': '/userauthor/follow',
-			'auth': false
-		},
 		'POST': {
 			'methods': {
 				'POST': {
@@ -222,7 +218,7 @@ module.exports = {
 	},
 
 	'/userauthor/follow/list': {
-		'GET': { 'path': '/userauthor/follow/list', 'auth': false }
+		'GET': { 'path': '/userauthor/follow/list', 'auth': true }
 	},
 	
 	'/follows' : {

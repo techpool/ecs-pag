@@ -88,6 +88,12 @@ module.exports = {
 		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
+	},
+
+	'/userauthor/follow/list': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
 	}
 
 };
