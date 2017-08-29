@@ -133,12 +133,12 @@ module.exports = {
 		}
 	},
 
-	'/author-temp':{
-		'GET':{
-			'path': '/authors',
-			'auth': false
-		}
-	},
+	// '/author-temp':{
+	// 	'GET':{
+	// 		'path': '/authors',
+	// 		'auth': false
+	// 	}
+	// },
 
 	'/author':{
 		'GET':{
@@ -205,6 +205,13 @@ module.exports = {
 	},
 
 	'/userauthor/follow': {
+		'GET': {
+			'path': '/userauthor/follow', 
+			'auth': true,
+			'requiredFields': [
+				{ 'authorId': null }
+			]
+		},
 		'POST': {
 			'methods': {
 				'POST': {
@@ -218,23 +225,21 @@ module.exports = {
 	},
 
 	'/userauthor/follow/list': {
-		'GET': { 'path': '/userauthor/follow/list', 'auth': true }
+		'GET': { 
+			'path': '/userauthor/follow/list',
+			'auth': true 
+		}
 	},
 	
-	'/follows' : {
+	'/follows/isFollowing' : {
 		'GET' : {
-			'path' : '/follows', 
-			'auth': false
-		},
-		'POST' : {
-			'methods': {
-				'POST' : {
-					'path': '/follows',
-					'requiredFields' : [
-						{'state': null}
-					]
-				}
-			}
+			'path' : '/follows/isFollowing', 
+			'auth': true,
+			'requiredFields': [
+				{ 'referenceId': null },
+				{ 'referenceType': null },
+				{ 'userId': null }
+			]
 		}
 	}
 
