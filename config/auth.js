@@ -82,6 +82,27 @@ module.exports = {
 		'GET': {
 			'params': [ 'resource', 'method' ]
 		}
+	},
+
+	'/userauthor/follow': {
+		'GET': {
+			'params': [ 'resource', 'method', 'authorId' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method', 'authorId' ]
+		}
+	},
+
+	'/userauthor/follow/list': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/follows/isFollowing': {
+		'GET': {
+			'params': [ 'resource', 'method', 'referenceId' ]
+		}
 	}
 
 };
