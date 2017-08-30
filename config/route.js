@@ -133,12 +133,12 @@ module.exports = {
 		}
 	},
 
-	'/author-temp':{
-		'GET':{
-			'path': '/authors',
-			'auth': false
-		}
-	},
+	// '/author-temp':{
+	// 	'GET':{
+	// 		'path': '/authors',
+	// 		'auth': false
+	// 	}
+	// },
 
 	'/author':{
 		'GET':{
@@ -190,7 +190,7 @@ module.exports = {
 	},
 
 	'/pratilipi/list': {
-		'GET':{
+		'GET': {
 			'path': '/pratilipis',
 			'auth': true,
 			'requiredFields': [
@@ -203,14 +203,52 @@ module.exports = {
 			]
 		}
 	},
+
+	'/userauthor/follow/test': {
+		'GET': {
+			'path': '/userauthor/follow',
+			'auth': true,
+			'requiredFields': [
+				{ 'authorId': null }
+			]
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/userauthor/follow',
+					'requiredFields': [
+						{ 'authorId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/userauthor/follow/list/test': {
+		'GET': {
+			'path': '/userauthor/follow/list',
+			'auth': true
+		}
+	},
 	
+	'/follows/isFollowing' : {
+		'GET' : {
+			'path' : '/follows/isFollowing', 
+			'auth': true,
+			'requiredFields': [
+				{ 'referenceId': null },
+				{ 'referenceType': null },
+				{ 'userId': null }
+			]
+		}
+	},
+
 	'/ecs': {
 		'GET' : {
 			'path' : '/ecs',
 			'auth': false
 		},
 	},
-	
 	'/ecs/growth': {
 		'GET' : {
 			'path' : '/ecs/growth',
