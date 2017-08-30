@@ -71,7 +71,6 @@ function _sendResponseToClient( request, response, status, body ) {
 			return 500;
 		}
 		status = parseInt( status );
-		console.log("The status code from service is "+status);
 		Array.prototype.contains = function(obj) { return this.indexOf(obj) > -1; };
 		// supportedCodesOnPag = [200, 201, 207, 400, 401, 403, 404, 500, 502, 504];
 		var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
@@ -674,6 +673,13 @@ function resolvePOST( request, response, next ) {
 				next();
 			})
 		;
+		return;
+	}
+
+	// TODO: Remove hack
+	var STOP_FOLLOW_POST = false;
+	if( STOP_FOLLOW_POST && ( request.path === "/userauthor/follow" || request.path === "/userauthor/follow/test" ) ) {
+		response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
 		return;
 	}
 
