@@ -202,6 +202,13 @@ module.exports = {
 				{ 'resultCount': 'limit' }
 			]
 		}
+	},
+	
+	'/ecs': {
+		'GET' : {
+			'path' : '/ecs',
+			'auth': false
+		},
 	}
 
 };
