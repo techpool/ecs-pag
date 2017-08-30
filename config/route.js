@@ -133,12 +133,12 @@ module.exports = {
 		}
 	},
 
-	// '/author-temp':{
-	// 	'GET':{
-	// 		'path': '/authors',
-	// 		'auth': false
-	// 	}
-	// },
+	'/author-temp':{
+		'GET':{
+			'path': '/authors',
+			'auth': false
+		}
+	},
 
 	'/author':{
 		'GET':{
