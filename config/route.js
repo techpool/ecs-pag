@@ -133,12 +133,12 @@ module.exports = {
 		}
 	},
 
-	// '/author-temp':{
-	// 	'GET':{
-	// 		'path': '/authors',
-	// 		'auth': false
-	// 	}
-	// },
+	'/author-temp':{
+		'GET':{
+			'path': '/authors',
+			'auth': false
+		}
+	},
 
 	'/author':{
 		'GET':{
@@ -204,6 +204,7 @@ module.exports = {
 		}
 	},
 
+
 	'/userauthor/follow': {
 		'GET': {
 			'path': '/userauthor/follow', 
@@ -249,7 +250,7 @@ module.exports = {
 			'auth': false
 		},
 	},
-
+  
 	'/ecs/growth': {
 		'GET' : {
 			'path' : '/ecs/growth',

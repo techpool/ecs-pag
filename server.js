@@ -676,7 +676,6 @@ function resolvePOST( request, response, next ) {
 		return;
 	}
 
-
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
 	Approach
