@@ -224,16 +224,55 @@ module.exports = {
 		}
 	},
 
+	'/userauthor/follow/test': {
+		'GET': {
+			'path': '/userauthor/follow',
+			'auth': true,
+			'requiredFields': [
+				{ 'authorId': null }
+			]
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/userauthor/follow',
+					'requiredFields': [
+						{ 'authorId': null }
+					]
+				}
+			}
+		}
+	},
+
 	'/userauthor/follow/list': {
 		'GET': { 
 			'path': '/userauthor/follow/list',
 			'auth': true 
 		}
 	},
+
+	'/userauthor/follow/list/test': {
+		'GET': {
+			'path': '/userauthor/follow/list',
+			'auth': true
+		}
+	},
 	
 	'/follows/isFollowing' : {
 		'GET' : {
 			'path' : '/follows/isFollowing', 
+			'auth': true,
+			'requiredFields': [
+				{ 'referenceId': null },
+				{ 'referenceType': null },
+				{ 'userId': null }
+			]
+		}
+	},
+
+	'/follows/isFollowing/test' : {
+		'GET' : {
+			'path' : '/follows/isFollowing',
 			'auth': true,
 			'requiredFields': [
 				{ 'referenceId': null },
@@ -258,10 +297,10 @@ module.exports = {
 	},
 
 	'/ecs/product': {
-			'GET' : {
-				'path' : '/ecs/product',
-				'auth': false
-			},
-		}
+		'GET' : {
+			'path' : '/ecs/product',
+			'auth': false
+		},
+	}
 
 };
