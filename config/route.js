@@ -241,6 +241,13 @@ module.exports = {
 				{ 'userId': null }
 			]
 		}
+	},
+
+	'/ecs': {
+		'GET' : {
+			'path' : '/ecs',
+			'auth': false
+		},
 	}
 
 };
