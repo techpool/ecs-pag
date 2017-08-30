@@ -248,6 +248,20 @@ module.exports = {
 			'path' : '/ecs',
 			'auth': false
 		},
-	}
+	},
+
+	'/ecs/growth': {
+		'GET' : {
+			'path' : '/ecs/growth',
+			'auth': false
+		},
+	},
+
+	'/ecs/product': {
+			'GET' : {
+				'path' : '/ecs/product',
+				'auth': false
+			},
+		}
 
 };
