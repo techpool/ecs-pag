@@ -676,13 +676,6 @@ function resolvePOST( request, response, next ) {
 		return;
 	}
 
-	// TODO: Remove hack
-	var STOP_FOLLOW_POST = true;
-	if( STOP_FOLLOW_POST && ( request.path === "/userauthor/follow" || request.path === "/userauthor/follow/test" ) ) {
-		response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
-		return;
-	}
-
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
 	Approach

@@ -204,9 +204,10 @@ module.exports = {
 		}
 	},
 
-	'/userauthor/follow/test': {
+
+	'/userauthor/follow': {
 		'GET': {
-			'path': '/userauthor/follow',
+			'path': '/userauthor/follow', 
 			'auth': true,
 			'requiredFields': [
 				{ 'authorId': null }
@@ -224,13 +225,13 @@ module.exports = {
 		}
 	},
 
-	'/userauthor/follow/list/test': {
-		'GET': {
+	'/userauthor/follow/list': {
+		'GET': { 
 			'path': '/userauthor/follow/list',
-			'auth': true
+			'auth': true 
 		}
 	},
-	
+
 	'/follows/isFollowing' : {
 		'GET' : {
 			'path' : '/follows/isFollowing', 
@@ -249,6 +250,7 @@ module.exports = {
 			'auth': false
 		},
 	},
+  
 	'/ecs/growth': {
 		'GET' : {
 			'path' : '/ecs/growth',
