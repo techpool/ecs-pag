@@ -133,15 +133,8 @@ module.exports = {
 		}
 	},
 
-	'/author-temp':{
-		'GET':{
-			'path': '/authors',
-			'auth': false
-		}
-	},
-
-	'/author':{
-		'GET':{
+	'/author': {
+		'GET': {
 			'path': '/authors/$primaryContentId',
 			'auth': true,
 			'primaryKey': 'authorId'
@@ -168,11 +161,11 @@ module.exports = {
 	},
 
 	'/user-activity/is_add_to_lib': {
-		'GET':{ 'path': '/user-activity/is_add_to_lib', 'auth': false }
+		'GET': { 'path': '/user-activity/is_add_to_lib', 'auth': false }
 	},
 
 	'/user-activity/is_following_author': {
-		'GET':{ 'path': '/user-activity/is_following_author', 'auth': false }
+		'GET': { 'path': '/user-activity/is_following_author', 'auth': false }
 	},
 
 	'/pratilipi/tags/update': {
@@ -203,7 +196,6 @@ module.exports = {
 			]
 		}
 	},
-
 
 	'/userauthor/follow': {
 		'GET': {
@@ -245,24 +237,36 @@ module.exports = {
 	},
 
 	'/ecs': {
-		'GET' : {
-			'path' : '/ecs',
-			'auth': false
-		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/ecs',
+					'auth': false
+				}
+			}
+		}
 	},
-  
+
 	'/ecs/growth': {
-		'GET' : {
-			'path' : '/ecs/growth',
-			'auth': false
-		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/ecs/growth',
+					'auth': false
+				}
+			}
+		}
 	},
 
 	'/ecs/product': {
-		'GET' : {
-			'path' : '/ecs/product',
-			'auth': false
-		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/ecs/product',
+					'auth': false
+				}
+			}
+		}
 	}
 
 };
