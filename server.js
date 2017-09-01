@@ -313,7 +313,9 @@ function _getService( method, requestUrl, request, response ) {
 	// body
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
 
-	var isAuthRequired = isGETRequest ? routeConfig[api]["GET"].auth : true; // true for all non-GET requests
+	var isAuthRequired = ! isGETRequest; // Default => GET -> false, POST/PATCH/DELETE -> true
+	if( isGETRequest && routeConfig[api]["GET"].auth !== undefined ) isAuthRequired = routeConfig[api]["GET"].auth;
+	if( ! isGETRequest && routeConfig[api]["POST"]["methods"][method].auth !== undefined ) isAuthRequired = routeConfig[api]["POST"]["methods"][method].auth;
 
 	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
 
@@ -676,13 +678,6 @@ function resolvePOST( request, response, next ) {
 		return;
 	}
 
-	// TODO: Remove hack
-	var STOP_FOLLOW_POST = false;
-	if( STOP_FOLLOW_POST && ( request.path === "/userauthor/follow" || request.path === "/userauthor/follow/test" ) ) {
-		response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
-		return;
-	}
-
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
 	Approach
@@ -735,7 +730,7 @@ function resolvePOST( request, response, next ) {
 			loop1 :
 				for( var i = 0; i < methods.length; i++ ) {
 					methodName = methods[i];
-					var requiredFields = listMethods[ methodName ][ 'requiredFields' ];
+					var requiredFields = listMethods[ methodName ][ 'requiredFields' ] || [];
 					fieldsFlag = true;
 					loop2 :
 						for( var j = 0; j < requiredFields.length; j++ ) {
@@ -930,3 +925,4 @@ process.on( 'unhandledRejection', function( reason, p ) {
 });
 
 app.listen(80);
+
