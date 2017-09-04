@@ -267,6 +267,13 @@ module.exports = {
 				}
 			}
 		}
-	}
+	},
+	
+	'/author-temp':{
+		'GET':{
+			'path': '/authors',
+			'auth': false
+		}
+	},
 
 };
