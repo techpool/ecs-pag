@@ -274,6 +274,6 @@ module.exports = {
 			'path': '/authors',
 			'auth': false
 		}
-	},
+	}
 
 };
