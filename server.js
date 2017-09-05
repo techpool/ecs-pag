@@ -684,8 +684,6 @@ function resolvePOST( request, response, next ) {
 	if( request.path == '/pratilipi/content/batch' ) {
 		console.log("check=======================>");
 		console.log(request.body);
-		console.log(typeof request.body.jsonObject["ch-6030904451923968-1503991538222"].content);
-		console.log(request.body.jsonObject["ch-6030904451923968-1503991538222"].content);
 		var tempBody = JSON.stringify(request.body);
 		console.log("before replace" + tempBody);
 		tempBody = tempBody.replace(/\n/g,"");
