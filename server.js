@@ -686,7 +686,7 @@ function resolvePOST( request, response, next ) {
 		console.log(request.body);
 		var tempBody = JSON.stringify(request.body);
 		console.log("before replace" + tempBody);
-		tempBody = tempBody.replace(/\n/g,"");
+		tempBody = tempBody.replace(/\\n/g,"");
 		console.log("tempbody after replace"+tempBody);
 		request.body = JSON.parse(tempBody);
 		console.log(request.body);
