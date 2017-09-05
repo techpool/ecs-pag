@@ -677,7 +677,15 @@ function resolvePOST( request, response, next ) {
 		;
 		return;
 	}
-
+	// TODO: Remove once everything is fixed
+	// url: /pratilipi/content/batch
+	// body: content
+	// headers: Access-Token, User-Id
+	if( request.path == '/pratilipi/content/batch' ) {
+		var tempBody = JSON.stringify(request.body);
+		tempBody = tempBody.replace(/\n/g,"");
+		request.body = JSON.parse(tempBody);
+	}
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
 	Approach
