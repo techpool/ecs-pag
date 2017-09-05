@@ -681,16 +681,9 @@ function resolvePOST( request, response, next ) {
 	// url: /pratilipi/content/batch
 	// body: content
 	// headers: Access-Token, User-Id
-	if( request.path == '/pratilipi/content/batch' ) {
-		console.log("check=======================>");
-		console.log(request.body);
-		var tempBody = JSON.stringify(request.body);
-		console.log("before replace" + tempBody);
-		tempBody = tempBody.replace(/\\n/g,"");
-		console.log("tempbody after replace"+tempBody);
-		request.body = JSON.parse(tempBody);
-		console.log(request.body);
-	}
+	if( request.path === '/pratilipi/content/batch' )
+		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\\n/g,"" ) : "{}";
+
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
 	Approach
