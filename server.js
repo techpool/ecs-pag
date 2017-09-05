@@ -682,9 +682,16 @@ function resolvePOST( request, response, next ) {
 	// body: content
 	// headers: Access-Token, User-Id
 	if( request.path == '/pratilipi/content/batch' ) {
+		console.log("check=======================>");
+		console.log(request.body);
+		console.log(typeof req.body.jsonObject["ch-6030904451923968-1503991538222"].content);
+		console.log(req.body.jsonObject["ch-6030904451923968-1503991538222"].content);
 		var tempBody = JSON.stringify(request.body);
+		console.log("before replace" + tempBody);
 		tempBody = tempBody.replace(/\n/g,"");
+		console.log("tempbody after replace"+tempBody);
 		request.body = JSON.parse(tempBody);
+		console.log(request.body);
 	}
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
