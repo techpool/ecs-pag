@@ -683,8 +683,9 @@ function resolvePOST( request, response, next ) {
 	// headers: Access-Token, User-Id
 	if( request.path === '/pratilipi/content/batch' ) {
 		console.log("inside hack");
+		console.log(JSON.stringify(request.body.jsonObject));
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\\n/g,"" ) : "{}";
-		console.log(request.body["jsonObject"]);
+		console.log(request.body.jsonObject);
 	}
 
 	/*
