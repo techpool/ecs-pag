@@ -681,8 +681,11 @@ function resolvePOST( request, response, next ) {
 	// url: /pratilipi/content/batch
 	// body: content
 	// headers: Access-Token, User-Id
-	if( request.path === '/pratilipi/content/batch' )
+	if( request.path === '/pratilipi/content/batch' ) {
+		console.log("inside hack");
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\\n/g,"" ) : "{}";
+		console.log(request.body["jsonObject"]);
+	}
 
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
