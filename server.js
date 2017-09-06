@@ -685,7 +685,7 @@ function resolvePOST( request, response, next ) {
 		console.log("inside hack");
 		console.log(JSON.stringify(request.body.jsonObject));
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\\n/g,"" ) : "{}";
-		console.log(request.body.jsonObject);
+		console.log(request.body.jsonObject["ch-6030904451923968-1503991538222"]);
 	}
 
 	/*
