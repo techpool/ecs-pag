@@ -491,7 +491,7 @@ function resolveGETBatch( request, response, next ) {
 		};
 
 		var pageUri = _getUrlParameter( requestArray[0]["url"], "uri" ).split("?")[0];
-		if( pageUri.startsWith( "/author/" ) || ( pageUri.startsWith( "/" ) && pageUri.count( "/" ) == 1 ) ) {
+		if( pageUri.startsWith( "/author/" ) || ( pageUri.startsWith( "/" ) && pageUri.count( "/" ) == 1 ) || ( pageUri.startsWith( "/event/" ) && pageUri.count( "/" ) == 2 ) ) {
 			// get page response and send 500 for next response
 			var pageServiceUrl = ECS_END_POINT + routeConfig["/page"]["GET"]["path"] + "?uri=" + pageUri;
 //			var pageServiceUrl = "http://gae-gamma.pratilipi.com/api/page?uri=" + pageUri;
