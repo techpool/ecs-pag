@@ -684,7 +684,7 @@ function resolvePOST( request, response, next ) {
 	if( request.path === '/pratilipi/content/batch' ) {
 		console.log("inside hack");
 		console.log(JSON.stringify(request.body.jsonObject));
-		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\\n/g,"" ) : "{}";
+		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\n/g,"" ) : "{}";
 		console.log(JSON.stringify(request.body.jsonObject));
 		console.log(typeof request.body.jsonObject);
 
