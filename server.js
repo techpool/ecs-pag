@@ -37,9 +37,13 @@ const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for t
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
 const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
+const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
+
+
+Array.prototype.contains = function(obj) { return this.indexOf(obj) > -1; };
 
 var _getAppengineEndpoint = function( request ) {
-	return ( request.headers.host === "temp.pratilipi.com" || request.headers.host === "android.pratilipi.com" ) ?
+	return ANDROID_ENDPOINTS.contains( request.headers.host ) ?
 		mainConfig.ANDROID_APPENGINE_ENDPOINT : mainConfig.WEB_APPENGINE_ENDPOINT;
 };
 
@@ -71,7 +75,6 @@ function _sendResponseToClient( request, response, status, body ) {
 			return 500;
 		}
 		status = parseInt( status );
-		Array.prototype.contains = function(obj) { return this.indexOf(obj) > -1; };
 		// supportedCodesOnPag = [200, 201, 207, 400, 401, 403, 404, 500, 502, 504];
 		var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
 		if( supportedCodesOnFrontend.contains( status ) ) return status;
@@ -134,13 +137,12 @@ function _forwardToGae( method, request, response, next ) {
 	// headers
 	var ECSHostName = request.headers.host;
 //	ECSHostName = "pr-hindi.ptlp.co";
-	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname', 'androidversioncode' ];
+	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname' ];
 	var _clean = function( headers ) {
 		var _cleanHeader = function( header ) {
 			switch( header ) {
 				case "androidversion": return "AndroidVersion";
 				case "androidversionname": return "AndroidVersionName";
-				case "androidversioncode": return "AndroidVersionCode";
 				default: return _normalizeHeaderCase( header );
 			}
 		};
@@ -306,7 +308,11 @@ function _getService( method, requestUrl, request, response ) {
 	}
 
 	// headers
-	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+	var headers = {
+		'Access-Token': response.locals[ "access-token" ],
+		'Client-Type': response.locals[ "client-type" ],
+		'Client-Version': response.locals[ "client-version" ]
+	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
 
@@ -835,7 +841,16 @@ app.use( (request, response, next) => {
 	else if( _getUrlParameter( request.url, "accessToken" ) )
 		accessToken = _getUrlParameter( request.url, "accessToken" );
 
+	var clientType = ANDROID_ENDPOINTS.contains( request.headers.host ) ? "ANDROID" : "WEB";
+	var clientVersion = null;
+	if( clientType === "ANDROID" )
+		clientVersion = request.headers[ "androidversionname" ] || request.headers[ "androidversion" ] || null;
+	else
+		clientVersion = request.headers.host;
+
 	response.locals[ "access-token" ] = accessToken;
+	response.locals[ "client-type" ] = clientType;
+	response.locals[ "client-version" ] = clientVersion;
 	next();
 
 });
