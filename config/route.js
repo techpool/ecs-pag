@@ -236,13 +236,6 @@ module.exports = {
 		}
 	},
 
-	'/follows/v2.0/authors/followers/all': {
-		'GET': {
-			'auth': false,
-			'path': '/follows/v2.0/authors/followers/all'
-		}
-	},
-
 	'/ecs': {
 		'POST': {
 			'methods': {
