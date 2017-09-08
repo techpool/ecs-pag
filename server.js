@@ -88,11 +88,11 @@ function _sendResponseToClient( request, response, status, body ) {
 	};
 	var _getResponseBody = function( body, status, requestUrl ) {
 		var _getStatusCodeMessage = function( status ) {
-			// Response depends on status code
-            if( status === 200 ) return SUCCESS_MESSAGE;
-            else if( status === 400 || status === 404 ) return INVALID_ARGUMENT_EXCEPTION;
-            else if( status === 401 ) return INSUFFICIENT_ACCESS_EXCEPTION;
-            else return UNEXPECTED_SERVER_EXCEPTION;
+		// Response depends on status code
+		if( status === 200 ) return SUCCESS_MESSAGE;
+		else if( status === 400 || status === 404 ) return INVALID_ARGUMENT_EXCEPTION;
+		else if( status === 401 ) return INSUFFICIENT_ACCESS_EXCEPTION;
+		else return UNEXPECTED_SERVER_EXCEPTION;
 		};
 		if( body ) {
 			if( typeof( body ) === "object" ) return body;
@@ -110,13 +110,13 @@ function _sendResponseToClient( request, response, status, body ) {
 	var resBody = _getResponseBody( body, resCode, request.url );
 
 	// Sending response to client
-    response.status( resCode ).json( resBody );
+	response.status( resCode ).json( resBody );
 
-    // Logging to gcp logs
-    request.log.submit( resCode, JSON.stringify( resBody ).length );
+	// Logging to gcp logs
+	request.log.submit( resCode, JSON.stringify( resBody ).length );
 
-    // Recording latency
-    latencyMetric.write( Date.now() - request.startTimestamp );
+	// Recording latency
+	latencyMetric.write( Date.now() - request.startTimestamp );
 
 }
 
@@ -377,6 +377,23 @@ function _isGETApiSupported( url ) {
 }
 
 function resolveGET( request, response, next ) {
+
+	// TODO: Remove once everything is moved to ecs
+	// url: /follows/v2.0/authors/followers/all?referenceId=123456
+	if( request.path === '/follows/v2.0/authors/followers/all' ) {
+		_getHttpPromise( ECS_END_POINT + request.url, "GET", { 'User-Id': 0 } )
+			.then( res => {
+				response.json( res );
+				next();
+			})
+			.catch( err => {
+				console.log( "AUTHOR_FOLLOWERS_ALL_ERROR :: " + err.message );
+				next();
+			})
+		;
+		return;
+	}
+
 
 	/*
 	*	3 cases:
