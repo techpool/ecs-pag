@@ -383,6 +383,7 @@ function resolveGET( request, response, next ) {
 	if( request.path === '/follows/v2.0/authors/followers/all' ) {
 		_getHttpPromise( ECS_END_POINT + request.url, "GET", { 'User-Id': 0 } )
 			.then( res => {
+				console.log( "AUTHOR_FOLLOWERS_ALL_RESPONSE :: ", res );
 				response.json( res );
 				next();
 			})
