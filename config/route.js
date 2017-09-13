@@ -267,6 +267,60 @@ module.exports = {
 				}
 			}
 		}
+	},
+
+
+
+	// UserPratilipi Service
+	'/userpratilipi/review/list': {
+		'GET': {
+			'path': '/userauthor/follow/list',
+			'auth': true
+		}
+	},
+
+	'/userpratilipi/review': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/userpratilipi/review'
+				}
+			}
+		}
+	},
+
+	'/userpratilipi': {
+		'GET': {
+			'path': '/userpratilipi',
+			'auth': true
+		}
+	},
+
+	'/comment': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/comment'
+				}
+			}
+		}
+	},
+
+	'/comment/list': {
+		'GET': {
+			'path': '/comment/list',
+			'auth': true
+		}
+	},
+
+	'/vote': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/vote'
+				}
+			}
+		}
 	}
 
 };
