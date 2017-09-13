@@ -260,6 +260,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
+			console.log(`DEBUGGING: ${JSON.stringify(authResponse)}`);
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
 			var statusCode = authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
