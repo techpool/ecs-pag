@@ -676,30 +676,6 @@ function resolvePOST( request, response, next ) {
 		return;
 	}
 
-	// TODO: Remove once everything is moved to ecs
-	// url: /authors/12345/follow-count
-	// body: followCount
-	// headers: Access-Token, User-Id
-	if( request.path.startsWith( '/authors/' ) && request.path.endsWith( '/follow-count' ) ) {
-		var arr = request.path.split( '/' );
-		var authorId = arr[arr.length - 2];
-		var url = ECS_END_POINT + "/authors/" + authorId;
-		var headers = {
-			'User-Id': request.headers["user-id"],
-			'Access-Token': request.headers["access-token"]
-		};
-		_getHttpPromise( url, "PATCH", headers, request.body )
-			.then( res => {
-				response.json( SUCCESS_MESSAGE );
-				next();
-			})
-			.catch( err => {
-				console.log( "AUTHOR_FOLLOW_COUNT_FOLLOW_ERROR :: " + err.message );
-				next();
-			})
-		;
-		return;
-	}
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
 	// body: content
