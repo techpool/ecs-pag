@@ -274,7 +274,7 @@ module.exports = {
 	// UserPratilipi Service
 	'/userpratilipi/review/list': {
 		'GET': {
-			'path': '/userauthor/follow/list',
+			'path': '/userpratilipi/review/list',
 			'auth': true
 		}
 	},
