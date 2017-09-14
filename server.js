@@ -244,18 +244,6 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 	authParams[ "resource" ] = encodeURIComponent( resource );
 	authParams[ "method" ] = method;
 
-	if(resource === '/userpratilipi/review/list') {
-		authParams[ "id" ] = authParams["pratilipiId"];
-	}
-
-	if(resource === '/userpratilipi/review') {
-		authParams[ "id" ] = authParams["pratilipiId"];
-	}
-
-	if(resource === '/comment/list') {
-		authParams[ "id" ] = authParams["parentId"];
-	}
-
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
 	var headers = { 'Access-Token': response.locals[ "access-token" ] };
