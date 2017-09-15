@@ -15,28 +15,21 @@ var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 const morgan = require( 'morgan' );
-const mainConfig = require( './config/main' )[ process.env.STAGE ];
+const mainConfig = require( './config/main' )[ process.env.STAGE || 'local' ];
 const routeConfig = require( './config/route' );
 const authConfig = require( './config/auth' );
 
 const Logging = require( './lib/LoggingGcp.js' ).init({
-	projectId: process.env.GCP_PROJ_ID,
-	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
+    projectId: mainConfig.GCP_PROJ_ID,
+    service: mainConfig.LOGGING_SERVICE_NAME
 });
-
-const Metric = require( './lib/MetricGcp.js' ).init({
-	projectId: process.env.GCP_PROJ_ID,
-	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
-});
-
-const latencyMetric = new Metric( 'int64', 'Latency' );
 
 const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
-const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
+const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
 
 
@@ -114,9 +107,6 @@ function _sendResponseToClient( request, response, status, body ) {
 
 	// Logging to gcp logs
 	request.log.submit( resCode, JSON.stringify( resBody ).length );
-
-	// Recording latency
-	latencyMetric.write( Date.now() - request.startTimestamp );
 
 }
 
@@ -260,6 +250,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
+			console.log(`DEBUGGING: ${JSON.stringify(authResponse)}`);
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
 			var statusCode = authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
@@ -476,7 +467,7 @@ function resolveGETBatch( request, response, next ) {
 
 	// Hitting on /
 	if( ! requestsObject )
-		response.status( 400 ).send( "Well, Hello!" );
+		return response.status( 400 ).send( INVALID_ARGUMENT_EXCEPTION );
 
 	var requests = JSON.parse( requestsObject );
 
@@ -653,16 +644,6 @@ function resolveGETBatch( request, response, next ) {
 
 function resolvePOST( request, response, next ) {
 
-	var stopSocialCalls = ( request.path === "/userpratilipi/review" ||
-							request.path === "/comment" ||
-							request.path === "/vote" ||
-							request.path === "/userpratilipi/library" ); // Remove false flag when needed
-
-	if( stopSocialCalls ) {
-		response.status(500).json(UNEXPECTED_SERVER_EXCEPTION);
-		return;
-	}
-
 	// TODO: Remove once everything is moved to ecs
 	// url: /pratilipis/12345/review-data
 	// body: reviewCount, ratingCount, totalRating
@@ -686,30 +667,6 @@ function resolvePOST( request, response, next ) {
 		return;
 	}
 
-	// TODO: Remove once everything is moved to ecs
-	// url: /authors/12345/follow-count
-	// body: followCount
-	// headers: Access-Token, User-Id
-	if( request.path.startsWith( '/authors/' ) && request.path.endsWith( '/follow-count' ) ) {
-		var arr = request.path.split( '/' );
-		var authorId = arr[arr.length - 2];
-		var url = ECS_END_POINT + "/authors/" + authorId;
-		var headers = {
-			'User-Id': request.headers["user-id"],
-			'Access-Token': request.headers["access-token"]
-		};
-		_getHttpPromise( url, "PATCH", headers, request.body )
-			.then( res => {
-				response.json( SUCCESS_MESSAGE );
-				next();
-			})
-			.catch( err => {
-				console.log( "AUTHOR_FOLLOW_COUNT_FOLLOW_ERROR :: " + err.message );
-				next();
-			})
-		;
-		return;
-	}
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
 	// body: content
@@ -854,7 +811,7 @@ app.options( "/*", (request, response, next) => {
 });
 
 app.get( "/health", (request, response, next) => {
-	response.send( 'Pag ' + process.env.STAGE + ' is healthy !' );
+	response.send( 'Pag is healthy !' );
 });
 
 // Setting access-token in response.locals
@@ -973,5 +930,6 @@ process.on( 'unhandledRejection', function( reason, p ) {
 	console.info( "Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason );
 });
 
-app.listen(80);
+app.listen( mainConfig.SERVICE_PORT );
 
+console.log(`PAG Service successfully running on port ${mainConfig.SERVICE_PORT}`);

@@ -268,11 +268,57 @@ module.exports = {
 			}
 		}
 	},
-	
-	'/author-temp':{
-		'GET':{
-			'path': '/authors',
-			'auth': false
+
+
+	// UserPratilipi Service
+	'/userpratilipi/review/list': {
+		'GET': {
+			'path': '/userpratilipi/review/list',
+			'auth': true
+		}
+	},
+
+	'/userpratilipi/review': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/userpratilipi/review'
+				}
+			}
+		}
+	},
+
+	'/userpratilipi': {
+		'GET': {
+			'path': '/userpratilipi',
+			'auth': true
+		}
+	},
+
+	'/comment': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/comment'
+				}
+			}
+		}
+	},
+
+	'/comment/list': {
+		'GET': {
+			'path': '/comment/list',
+			'auth': true
+		}
+	},
+
+	'/vote': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/vote'
+				}
+			}
 		}
 	}
 
