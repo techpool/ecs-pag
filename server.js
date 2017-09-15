@@ -644,39 +644,6 @@ function resolveGETBatch( request, response, next ) {
 
 function resolvePOST( request, response, next ) {
 
-	var stopSocialCalls = process.env.STAGE === "prod" &&
-							( request.path === "/userpratilipi/review" ||
-							request.path === "/comment" ||
-							request.path === "/vote" ) && false; // Remove false flag when needed
-
-	if( stopSocialCalls ) {
-		response.status(500).json(UNEXPECTED_SERVER_EXCEPTION);
-		return;
-	}
-
-	// TODO: Remove once everything is moved to ecs
-	// url: /pratilipis/12345/review-data
-	// body: reviewCount, ratingCount, totalRating
-	// headers: Access-Token, User-Id
-	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
-		var url = ECS_END_POINT + request.path;
-		var headers = {
-			'User-Id': request.headers["user-id"],
-			'Access-Token': request.headers["access-token"]
-		};
-		_getHttpPromise( url, "PATCH", headers, request.body )
-			.then( res => {
-				response.json( SUCCESS_MESSAGE );
-				next();
-			})
-			.catch( err => {
-				console.log( "REVIEW_DATA_PATCH_ERROR :: " + err.message );
-				next();
-			})
-		;
-		return;
-	}
-
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
 	// body: content
