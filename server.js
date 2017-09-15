@@ -644,18 +644,6 @@ function resolveGETBatch( request, response, next ) {
 
 function resolvePOST( request, response, next ) {
 
-	var migrateMySQLDB = ( request.path === "/userpratilipi/review" ||
-			request.path === "/comment" ||
-			request.path === "/vote" ||
-			request.path === "/pratilipi" ||
-			request.path === "/pratilipi/tags/update" ||
-			request.path === "/userauthor/follow" );
-
-	if( migrateMySQLDB ) {
-		response.status(500).json(UNEXPECTED_SERVER_EXCEPTION);
-		return;
-	}
-
 	// TODO: Remove once everything is moved to ecs
 	// url: /pratilipis/12345/review-data
 	// body: reviewCount, ratingCount, totalRating
