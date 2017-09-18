@@ -321,6 +321,13 @@ module.exports = {
 				}
 			}
 		}
-	}
+	},
+
+	'/pratilipi/v2/categories': {
+		'GET': {
+			'path': '/pratilipi/v2/categories',
+			'auth': false
+		}
+	}	
 
 };
