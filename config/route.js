@@ -247,22 +247,11 @@ module.exports = {
 		}
 	},
 
-	'/ecs/growth': {
+	'/ecs-gr': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/ecs/growth',
-					'auth': false
-				}
-			}
-		}
-	},
-
-	'/ecs/product': {
-		'POST': {
-			'methods': {
-				'POST': {
-					'path': '/ecs/product',
+					'path': '/ecs-gr',
 					'auth': false
 				}
 			}
