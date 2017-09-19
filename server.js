@@ -8,33 +8,37 @@ var _ = require( 'lodash' );
 var cookieParser = require( 'cookie-parser' );
 var bodyParser = require( 'body-parser' );
 var urlModule = require( 'url' );
+var qs = require( 'querystring' );
+var _normalizeHeaderCase = require( 'header-case-normalizer' ); // https://www.npmjs.com/package/header-case-normalizer
 
 var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 const morgan = require( 'morgan' );
-const mainConfig = require( './config/main' )[ process.env.STAGE ];
+const mainConfig = require( './config/main' )[ process.env.STAGE || 'local' ];
 const routeConfig = require( './config/route' );
 const authConfig = require( './config/auth' );
 
 const Logging = require( './lib/LoggingGcp.js' ).init({
-	projectId: process.env.GCP_PROJ_ID,
-	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
+    projectId: mainConfig.GCP_PROJ_ID,
+    service: mainConfig.LOGGING_SERVICE_NAME
 });
 
-const Metric = require( './lib/MetricGcp.js' ).init({
-	projectId: process.env.GCP_PROJ_ID,
-	service: mainConfig.LOGGING_METRIC_SERVICE_NAME
-});
-
-const latencyMetric = new Metric( 'int64', 'Latency' );
-
+const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
-const APPENGINE_ENDPOINT = mainConfig.APPENGINE_ENDPOINT;
-const ECS_END_POINT = process.env.API_END_POINT.indexOf( "http" ) === 0 ? process.env.API_END_POINT : ( "http://" + process.env.API_END_POINT );
+const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
+const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
+
+
+Array.prototype.contains = function(obj) { return this.indexOf(obj) > -1; };
+
+var _getAppengineEndpoint = function( request ) {
+	return ANDROID_ENDPOINTS.contains( request.headers.host ) ?
+		mainConfig.ANDROID_APPENGINE_ENDPOINT : mainConfig.WEB_APPENGINE_ENDPOINT;
+};
 
 function _isEmpty( obj ) {
 	if( ! obj ) return true;
@@ -57,108 +61,157 @@ function _getUrlParameter( url, parameter ) {
 	return _getUrlParameters( url )[ parameter ];
 }
 
-function _addRespectiveServiceHeaders( response, serviceReturnedHeaders ) {
-	var pagHeaders = [ 'Access-Control-Allow-Origin', 'Access-Control-Allow-Credentials', 'Access-Control-Allow-Methods', 'Access-Control-Allow-Headers' ];
-	var serviceHeaders = _.omit( serviceReturnedHeaders, pagHeaders );
-	response.set( serviceHeaders );
-}
-
-function _getResponseCode( code ) { // TODO: Track service -> Logging purpose
-
-	if( ! code ) {
-		console.log( "MISSING_RESPONSE_CODE" );
-		return 500;
-	}
-
-	code = parseInt( code );
-
-	Array.prototype.contains = function(obj) {
-		return this.indexOf(obj) > -1;
+function _sendResponseToClient( request, response, status, body ) {
+	var _getResponseCode = function( status, requestUrl ) {
+		if( ! status ) {
+			console.log( "MISSING_RESPONSE_CODE :: " + requestUrl );
+			return 500;
+		}
+		status = parseInt( status );
+		// supportedCodesOnPag = [200, 201, 207, 400, 401, 403, 404, 500, 502, 504];
+		var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
+		if( supportedCodesOnFrontend.contains( status ) ) return status;
+		else if( status === 201 || status === 207 ) return 200;
+		else if( status === 403 || status === 404 ) return 401;
+		else if( status === 502 || status === 504 ) return 500;
+		console.log( "INVALID_RESPONSE_CODE :: " + requestUrl );
+		if( status >= 200 && status < 300 ) return 200;
+		else if( status >= 400 && status < 500 ) return 400;
+		else return 500;
+	};
+	var _getResponseBody = function( body, status, requestUrl ) {
+		var _getStatusCodeMessage = function( status ) {
+		// Response depends on status code
+		if( status === 200 ) return SUCCESS_MESSAGE;
+		else if( status === 400 || status === 404 ) return INVALID_ARGUMENT_EXCEPTION;
+		else if( status === 401 ) return INSUFFICIENT_ACCESS_EXCEPTION;
+		else return UNEXPECTED_SERVER_EXCEPTION;
+		};
+		if( body ) {
+			if( typeof( body ) === "object" ) return body;
+			try {
+				return JSON.parse( body );
+			} catch(e) {
+				return _getStatusCodeMessage( status );
+			}
+		} else {
+			return _getStatusCodeMessage( status );
+		}
 	};
 
-	// supportedCodesOnPag = [200, 207, 400, 401, 403, 404, 500, 502, 504];
-	var supportedCodesOnFrontend = [ 200, 400, 401, 404, 500 ];
-	if( supportedCodesOnFrontend.contains( code ) )
-		return code;
-	else if( code === 207 )
-		return 200;
-	else if( code === 403 || code === 404 )
-		return 401;
-	else if( code === 502 || code === 504 )
-		return 500;
+	var resCode = _getResponseCode( status, request.url );
+	var resBody = _getResponseBody( body, resCode, request.url );
 
-	console.log( "INVALID_RESPONSE_CODE :: " + code );
+	// Sending response to client
+	response.status( resCode ).json( resBody );
 
-	if( code >= 200 && code < 300 )
-		return 200;
-	else if( code >= 400 && code < 500 )
-		return 400;
-	else
-		return 500;
+	// Logging to gcp logs
+	request.log.submit( resCode, JSON.stringify( resBody ).length );
 
 }
 
-function _forwardToGae( method, request, response ) {
+function _forwardToGae( method, request, response, next ) {
 
-	var api = request.path.startsWith( "/api" ) ? request.path.substr(4) : request.path;
+	var api = request.path;
+
+	// params
 	var params = _getUrlParameters( request.url );
-	params[ "accessToken" ] = response.locals[ "access-token" ];
+	if( response.locals[ "access-token" ] )
+		params[ "accessToken" ] = response.locals[ "access-token" ];
 	if( params[ "requests" ] )
 		params[ "requests" ] = encodeURIComponent( params[ "requests" ] ); // Batch Requests -> encode string
-	var appengineUrl = APPENGINE_ENDPOINT + api + "?" + _formatParams( params );
-	request.headers[ "ECS-HostName" ] = request.headers.host;
+
+	// url - before changing request headers
+	var appengineUrl = _getAppengineEndpoint( request ) + api + "?" + _formatParams( params );
+
+	// headers
+	var ECSHostName = request.headers.host;
+//	ECSHostName = "pr-hindi.ptlp.co";
+	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname' ];
+	var _clean = function( headers ) {
+		var _cleanHeader = function( header ) {
+			switch( header ) {
+				case "androidversion": return "AndroidVersion";
+				case "androidversionname": return "AndroidVersionName";
+				default: return _normalizeHeaderCase( header );
+			}
+		};
+		for( var header in headers ) {
+			headers[ _cleanHeader( header ) ] = headers[ header ];
+			delete headers[header];
+		}
+		return headers;
+	};
+	request.headers = _clean( _.pick( request.headers, validHeaders ) );
+	request.headers[ "ECS-HostName" ] = ECSHostName;
+
 
 	console.log( "GAE :: " + method + " :: " + appengineUrl + " :: " + JSON.stringify( request.headers ) );
 
-	var reqModule;
-	var startTimestamp = Date.now();
-
-	if( method === "GET" ) {
-		reqModule = request.pipe( requestModule( appengineUrl ) );
-	} else if( method === "POST" && ( api === "/pratilipi/content/image" || api === "/event/banner" ) ) {
-		reqModule = request.pipe( requestModule.post( appengineUrl, request.body ) );
+	if( api === "/pratilipi/content/image" || api === "/event/banner" ) {
+		var reqModule = method === "GET"
+			? request.pipe( requestModule( appengineUrl ) )
+			: request.pipe( requestModule.post( appengineUrl, request.body ) );
+		var startTimestamp = Date.now();
+		reqModule
+			.on( 'end', function() {
+			  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
+			})
+			.pipe( response )
+			.on( 'error', (error) => {
+				_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+			})
+		;
 	} else {
-		reqModule = requestModule.post( appengineUrl, { form: request.body } );
+		_getHttpPromise( appengineUrl, method, request.headers, request.body )
+			.then( res => {
+				_sendResponseToClient( request, response, res.statusCode, res.body );
+				next();
+			})
+			.catch( err => {
+				console.log( "GAE_ERROR :: " + err.message );
+				_sendResponseToClient( request, response, err.statusCode, err.error );
+				next();
+			})
+		;
 	}
-
-	reqModule
-		.on( 'error', (error) => {
-			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.error( JSON.stringify( error ) );
-			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-			latencyMetric.write( Date.now() - request.startTimestamp );
-		})
-		.on('end', function() {
-		  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
-		})
-		.pipe( response )
-		.on( 'error', (error) => {
-			response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.error( JSON.stringify( error ) );
-			request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-			latencyMetric.write( Date.now() - request.startTimestamp );
-		})
-	;
 }
 
 function _getHttpPromise( uri, method, headers, body ) {
+	var escapeUri = function( uri ) {
+		var params = _getUrlParameters( uri );
+		for( var key in params ) params[key] = qs.escape( params[key] );
+		return uri.split( "?" )[0] + "?" + _formatParams( params );
+	};
 	var genericReqOptions = {
-		uri: uri,
+		uri: escapeUri( uri ),
 		method: method,
 		agent : uri.indexOf( "https://" ) >= 0 ? httpsAgent : httpAgent,
+		encoding: 'utf8',
 		json: true,
+		contentType: 'application/x-www-form-urlencoded',
+		simple: false,
+		time: true,
+		timeout: 60000, // 60 seconds
 		resolveWithFullResponse: true
 	};
 	if( headers ) genericReqOptions.headers = headers;
 	if( body ) genericReqOptions.form = body;
-	console.log( 'HTTP :: ' + method + " :: " + uri + " :: " + JSON.stringify( headers ) + " :: " + JSON.stringify( body ) );
+	var _hideSensitiveFields = function( obj ) {
+		if( ! obj ) return {};
+		var copyObj = JSON.parse( JSON.stringify( obj ) );
+		var sensitiveFields = [ "password", "verificationToken", "googleIdToken", "fbUserAccessToken" ];
+		for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
+		return copyObj;
+	};
+	console.log( 'HTTP :: ' + method + " :: " + genericReqOptions.uri + " :: " + JSON.stringify( genericReqOptions.headers ) + " :: " + JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) );
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
 			console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR ${method} ${uri}` );
 			return response;
-		} )
-		;
+		})
+	;
 
 }
 
@@ -197,23 +250,19 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
+			console.log(`DEBUGGING: ${JSON.stringify(authResponse)}`);
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
 			var statusCode = authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
-				response.status( _getResponseCode( statusCode ) ).send( INSUFFICIENT_ACCESS_EXCEPTION );
 				console.log( 'AUTHENTICATION_FAILED' );
-				request.log.submit( statusCode, JSON.stringify( authResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_sendResponseToClient( request, response, statusCode, ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
 				return Promise.reject();
 			} else {
-				console.log( 'AUTHENTICATION_SUCCESSFUL' );
 				return authResponse.headers[ 'user-id' ];
 			}
 		}, (httpError) => {
 			console.log( "ERROR_MESSAGE :: " + httpError.message );
-			response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-			request.log.submit( 500, httpError.message.length );
-			latencyMetric.write( Date.now() - request.startTimestamp );
+			_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
 			return Promise.reject();
 		});
 	;
@@ -230,7 +279,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 function _getService( method, requestUrl, request, response ) {
 
 	if( requestUrl == null )
-		requestUrl = request.url.startsWith( '/api' ) ? request.url.substr(4) : request.url;
+		requestUrl = request.url;
 
 	var api = requestUrl.split( "?" )[0];
 	var urlQueryParams = _getUrlParameters( requestUrl );
@@ -250,14 +299,20 @@ function _getService( method, requestUrl, request, response ) {
 	}
 
 	// headers
-	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+	var headers = {
+		'Access-Token': response.locals[ "access-token" ],
+		'Client-Type': response.locals[ "client-type" ],
+		'Client-Version': response.locals[ "client-version" ]
+	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
 
 	// body
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
 
-	var isAuthRequired = isGETRequest ? routeConfig[api]["GET"].auth : true; // true for all non-GET requests
+	var isAuthRequired = ! isGETRequest; // Default => GET -> false, POST/PATCH/DELETE -> true
+	if( isGETRequest && routeConfig[api]["GET"].auth !== undefined ) isAuthRequired = routeConfig[api]["GET"].auth;
+	if( ! isGETRequest && routeConfig[api]["POST"]["methods"][method].auth !== undefined ) isAuthRequired = routeConfig[api]["POST"]["methods"][method].auth;
 
 	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
 
@@ -296,8 +351,6 @@ function _getService( method, requestUrl, request, response ) {
 
 function _isGETApiSupported( url ) {
 	var api = url.split("?")[0];
-	if( api.startsWith( '/api' ) )
-		api = api.substr(4);
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
 	if( isApiSupported && routeConfig[api].GET.requiredFields ) {
 		var requiredFields = routeConfig[api].GET.requiredFields;
@@ -314,7 +367,24 @@ function _isGETApiSupported( url ) {
 	return isApiSupported;
 }
 
-function resolveGET( request, response ) {
+function resolveGET( request, response, next ) {
+
+	// TODO: Remove once everything is moved to ecs
+	// url: /follows/v2.0/authors/followers/all?referenceId=123456
+	if( request.path === '/follows/v2.0/authors/followers/all' ) {
+		_getHttpPromise( ECS_END_POINT + request.url, "GET", { 'User-Id': 0 } )
+			.then( res => {
+				response.json( res.body );
+				next();
+			})
+			.catch( err => {
+				console.log( "AUTHOR_FOLLOWERS_ALL_ERROR :: " + err.message );
+				next();
+			})
+		;
+		return;
+	}
+
 
 	/*
 	*	3 cases:
@@ -323,8 +393,8 @@ function resolveGET( request, response ) {
 	*	3. not supported in ecs && devo environment -> Send 'not supported'
 	*/
 
-	// request.path will be /api/xxx or /xxx (android)
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	// request.path will be /xxx
+	var api = request.path;
 	var isApiSupported = _isGETApiSupported( request.url );
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
@@ -344,21 +414,12 @@ function resolveGET( request, response ) {
 			.then( (userId) => {
 				var startTimestamp = Date.now();
 				request.pipe( requestModule( url ) )
-					.on( 'error', function( error ) {
-						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-						request.log.error( JSON.stringify( error ) );
-						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the request!' );
-						latencyMetric.write( Date.now() - request.startTimestamp );
-					})
-					.on('end', function() {
+					.on( 'end', function() {
 					  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE GET ${url}` );
 					})
 					.pipe( response )
 					.on( 'error', function( error ) {
-						response.status( _getResponseCode( error.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-						request.log.error( JSON.stringify( error ) );
-						request.log.submit( error.statusCode || 500, error.message || 'There was an error forwarding the response!' );
-						latencyMetric.write( Date.now() - request.startTimestamp );
+						_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 					})
 				;
 			});
@@ -370,35 +431,29 @@ function resolveGET( request, response ) {
 
 		_getService( "GET", requestUrl, request, response )
 			.then( (serviceResponse) => {
-				_addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
-				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
-					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( JSON.stringify( httpError.message ) );
-					request.log.submit( httpError.statusCode || 500, httpError.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
 				}
 			});
 		;
 
 	// Forward to appengine
 	} else {
-		_forwardToGae( "GET", request, response );
+		_forwardToGae( "GET", request, response, next );
 	}
 
 }
 
-function resolveGETBatch( request, response ) {
+function resolveGETBatch( request, response, next ) {
 
 	/*
 		Sample batch call request:
-		/api?requests={"req1":"/page?uri=/k-billa-ramesh/en-kanmani","req2":"/pratilipi?_apiVer=2&pratilipiId=$req1.primaryContentId"}
+		/?requests={"req1":"/page?uri=/k-billa-ramesh/en-kanmani","req2":"/pratilipi?_apiVer=2&pratilipiId=$req1.primaryContentId"}
 
 		Cases - Environment:
 		1. If all requests are not supported -> Forward Request to appengine
@@ -408,11 +463,13 @@ function resolveGETBatch( request, response ) {
 		2. Else use sequential promises
 	*/
 
-	var requests = JSON.parse( _getUrlParameter( request.url, "requests" ) );
+	var requestsObject = _getUrlParameter( request.url, "requests" );
 
-	// Just another bad request
-	if( ! requests )
-		response.status( 400 ).send( "Bad Request !" );
+	// Hitting on /
+	if( ! requestsObject )
+		return response.status( 400 ).send( INVALID_ARGUMENT_EXCEPTION );
+
+	var requests = JSON.parse( requestsObject );
 
 	/* requestArray -> Contains all necessary fields for processing in next steps
 		name -> name of the request (req1)
@@ -436,6 +493,33 @@ function resolveGETBatch( request, response ) {
 		}
 	}
 
+	// TODO: Remove hack: http://android.pratilipi.com/?requests=%7B%22req1%22%3A%22%5C%2Fpage%3Furi%3D%5C%2Fgdvh%3Futm_source%3Dandroid%26utm_campaign%3Dmyprofile_share%26%22%2C%22req2%22%3A%22%5C%2Fpratilipi%3FpratilipiId%3D%24req1.primaryContentId%26%22%7D&
+	if( requestArray.length === 2 &&
+		requestArray[0]["name"] === "req1" &&
+		requestArray[1]["name"] === "req2" &&
+		requestArray[0]["api"] === "/page" &&
+		requestArray[1]["api"] === "/pratilipi" ) {
+
+		String.prototype.count = function( s1 ) {
+			return ( this.length - this.replace( new RegExp(s1,"g"), '' ).length ) / s1.length;
+		};
+
+		var pageUri = _getUrlParameter( requestArray[0]["url"], "uri" ).split("?")[0];
+		if( pageUri.startsWith( "/author/" ) || ( pageUri.startsWith( "/" ) && pageUri.count( "/" ) == 1 ) || ( pageUri.startsWith( "/event/" ) && pageUri.count( "/" ) == 2 ) ) {
+			// get page response and send 500 for next response
+			var pageServiceUrl = ECS_END_POINT + routeConfig["/page"]["GET"]["path"] + "?uri=" + pageUri;
+//			var pageServiceUrl = "http://gae-gamma.pratilipi.com/api/page?uri=" + pageUri;
+			_getHttpPromise( pageServiceUrl, "GET" )
+				.then( (res) => {
+					var hackyResponseBody = { "req1": { "status": res.statusCode, "response": res.body }, "req2": { "status": 500, "response": UNEXPECTED_SERVER_EXCEPTION } };
+					response.json( hackyResponseBody );
+				})
+			;
+			return;
+		}
+	}
+
+
 	var forwardAllToGAE = true;
 	for( var i = 0; i < requestArray.length; i++ ) {
 		if( requestArray[i]["isSupported"] ) {
@@ -446,7 +530,7 @@ function resolveGETBatch( request, response ) {
 
 
 	if( forwardAllToGAE ) {
-		_forwardToGae( "GET", request, response );
+		_forwardToGae( "GET", request, response, next );
 
 	} else { // Sequential or batch calls
 
@@ -466,7 +550,7 @@ function resolveGETBatch( request, response ) {
 				if( req.isSupported ) {
 					promiseArray.push( _getService( "GET", req.url, request, response ) );
 				} else {
-					var uri = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
+					var uri = _getAppengineEndpoint( request ) + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
 					var headers = { "ECS-HostName": request.headers.host };
 					promiseArray.push( _getHttpPromise( uri, "GET", headers ) );
 				}
@@ -478,18 +562,12 @@ function resolveGETBatch( request, response ) {
 					var returnResponse = {}; // To be sent to client
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = { "status": responseArray[i].statusCode, "response": responseArray[i].body };
-					response.send( returnResponse );
-					request.log.submit( 200, JSON.stringify( returnResponse ).length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					_sendResponseToClient( request, response, 200, returnResponse );
 				}).catch( (error) => {
 					console.log( "ERROR_CAUSE :: Promise.all" );
 					console.log( "ERROR_STATUS :: " + error.statusCode );
 					console.log( "ERROR_MESSAGE :: " + error.message );
-					response.status(500).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( error.statusCode ); // 'Bad Request'
-					request.log.error( error.message ); // Html
-					request.log.submit( 500, error.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 				})
 			;
 		} else {
@@ -516,7 +594,7 @@ function resolveGETBatch( request, response ) {
 				if( req.isSupported ) {
 					promise = _getService( "GET", req.url, request, response );
 				} else {
-					var appengineUrl = APPENGINE_ENDPOINT + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
+					var appengineUrl = _getAppengineEndpoint( request ) + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
 					var headers = { "ECS-HostName": request.headers.host };
 					promise = _getHttpPromise( appengineUrl, "GET", headers );
 				}
@@ -541,58 +619,60 @@ function resolveGETBatch( request, response ) {
 					.then( (res) => {
 						_onRes( res.statusCode, res.body );
 						return recursiveGET( reqArray, responseObject );
-					}, (error) => {
-						console.log( "ERROR_STATUS :: " + error.statusCode );
-						console.log( "ERROR_MESSAGE :: " + error.message );
-						_onRes( error.statusCode, error.message );
-						return recursiveGET( reqArray, responseObject );
+					})
+					.catch( (err) => {
+						if( err ) {
+							console.log( "ERROR_STATUS :: " + err.statusCode );
+							console.log( "ERROR_MESSAGE :: " + err.message );
+							_onRes( err.statusCode, err.error );
+							return recursiveGET( reqArray, responseObject );
+						} else {
+							_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+						}
 					})
 				;
 			}
 
 			recursiveGET( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
 				.then( (res) => {
-					if( res ) {
-						response.send( res );
-						request.log.submit( 200, JSON.stringify( res ).length );
-						latencyMetric.write( Date.now() - request.startTimestamp );
-					}
+					_sendResponseToClient( request, response, 200, res );
 				})
 			;
 		}
 	}
 }
 
-function resolvePOST( request, response ) {
+function resolvePOST( request, response, next ) {
 
 	// TODO: Remove once everything is moved to ecs
-	// url: /api/pratilipis/12345/review-data
+	// url: /pratilipis/12345/review-data
 	// body: reviewCount, ratingCount, totalRating
-	// headers: AccessToken, User-Id
-	if( request.path.startsWith( '/api/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
-		var url = ECS_END_POINT + request.path.substr(4);
+	// headers: Access-Token, User-Id
+	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
+		var url = ECS_END_POINT + request.path;
 		var headers = {
-			'Access-Token': request.headers.accesstoken,
-			'User-Id': request.headers["user-id"]
+			'User-Id': request.headers["user-id"],
+			'Access-Token': request.headers["access-token"]
 		};
-		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
+		_getHttpPromise( url, "PATCH", headers, request.body )
+			.then( res => {
+				response.json( SUCCESS_MESSAGE );
+				next();
+			})
+			.catch( err => {
+				console.log( "REVIEW_DATA_PATCH_ERROR :: " + err.message );
+				next();
+			})
+		;
 		return;
 	}
 
-	// TODO: Remove once everything is moved to ecs
-	// url: /api/authors/12345/follow-count
-	// body: followCount
-	// headers: AccessToken, User-Id
-	if( request.path.startsWith( '/api/authors/' ) && request.path.endsWith( '/follow-count' ) ) {
-		var arr = request.path.split( '/' );
-		var authorId = arr[arr.length - 2];
-		var url = ECS_END_POINT + "/authors/" + authorId;
-		var headers = {
-			'Access-Token': request.headers.accesstoken,
-			'User-Id': request.headers["user-id"]
-		};
-		requestModule.patch( url, { form: request.body, headers: headers } ).pipe( response );
-		return;
+	// TODO: Remove once everything is fixed
+	// url: /pratilipi/content/batch
+	// body: content
+	// headers: Access-Token, User-Id
+	if( request.path === '/pratilipi/content/batch' ) {
+		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\n/g,"" ) : "{}";
 	}
 
 	/*
@@ -606,7 +686,7 @@ function resolvePOST( request, response ) {
 	3. pipe is required for image requests
 	*/
 
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	var api = request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
 	if( isApiSupported ) {
 		var isPipeRequired = routeConfig[api].POST.shouldPipe;
@@ -647,7 +727,7 @@ function resolvePOST( request, response ) {
 			loop1 :
 				for( var i = 0; i < methods.length; i++ ) {
 					methodName = methods[i];
-					var requiredFields = listMethods[ methodName ][ 'requiredFields' ];
+					var requiredFields = listMethods[ methodName ][ 'requiredFields' ] || [];
 					fieldsFlag = true;
 					loop2 :
 						for( var j = 0; j < requiredFields.length; j++ ) {
@@ -673,7 +753,7 @@ function resolvePOST( request, response ) {
 
 	// Forward to appengine
 	} else {
-		_forwardToGae( "POST", request, response );
+		_forwardToGae( "POST", request, response, next );
 	}
 
 }
@@ -681,25 +761,19 @@ function resolvePOST( request, response ) {
 function _resolvePostPatchDelete( methodName, request, response ) {
 
 	// Sanity check -> direct request from frontend
-	var api = request.path.startsWith( '/api' ) ? request.path.substr(4) : request.path;
+	var api = request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api]["POST"]["methods"][methodName];
 
 	if( isApiSupported ) {
 		_getService( methodName, null, request, response )
 			.then( (serviceResponse) => {
-				_addRespectiveServiceHeaders( response, serviceResponse.headers );
-				response.status( _getResponseCode( serviceResponse.statusCode ) ).send( serviceResponse.body );
-				request.log.submit( serviceResponse.statusCode, JSON.stringify( serviceResponse.body ).length );
-				latencyMetric.write( Date.now() - request.startTimestamp );
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
-					response.status( _getResponseCode( httpError.statusCode ) ).send( UNEXPECTED_SERVER_EXCEPTION );
-					request.log.error( JSON.stringify( httpError.message ) );
-					request.log.submit( httpError.statusCode || 500, httpError.message.length );
-					latencyMetric.write( Date.now() - request.startTimestamp );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
 				}
 			});
 		;
@@ -723,6 +797,7 @@ app.use( (request, response, next) => {
 });
 
 //CORS middleware
+app.enable( 'trust proxy' );
 app.use( (request, response, next) => {
 	response.setHeader( 'Access-Control-Allow-Origin', "*" ); //TODO: add only pratilipi origin
 	response.setHeader( 'Access-Control-Allow-Credentials', true );
@@ -736,7 +811,7 @@ app.options( "/*", (request, response, next) => {
 });
 
 app.get( "/health", (request, response, next) => {
-	response.send( 'Pag ' + process.env.STAGE + ' is healthy !' );
+	response.send( 'Pag is healthy !' );
 });
 
 // Setting access-token in response.locals
@@ -750,34 +825,95 @@ app.use( (request, response, next) => {
 	else if( _getUrlParameter( request.url, "accessToken" ) )
 		accessToken = _getUrlParameter( request.url, "accessToken" );
 
+	var clientType = ANDROID_ENDPOINTS.contains( request.headers.host ) ? "ANDROID" : "WEB";
+	var clientVersion = null;
+	if( clientType === "ANDROID" )
+		clientVersion = request.headers[ "androidversionname" ] || request.headers[ "androidversion" ] || null;
+	else
+		clientVersion = request.headers.host;
+
 	response.locals[ "access-token" ] = accessToken;
+	response.locals[ "client-type" ] = clientType;
+	response.locals[ "client-version" ] = clientVersion;
 	next();
 
 });
 
+// Remove /api in the beginning
+app.use( (request, response, next) => {
+	// /api?requests=
+	if( request.url.startsWith( '/api?' ) ) {
+		request.path = "/";
+		request.url = request.url.substr(4);
+		request.url = "/" + request.url;
+
+	// /api/?requests=
+	// /api/xyz?param1=
+	} else if( request.url.startsWith( '/api' ) ) {
+		request.path = request.path.substr(4);
+		request.url = request.url.substr(4);
+	}
+	next();
+});
+
+// Clear AccessToken in case of login / register / password update / verification / logout
+app.use( (request, response, next) => {
+	if( [ "/user/login",
+			"/user/login/facebook",
+			"/user/login/google",
+			"/user/register",
+			"/user/passwordupdate",
+			"/user/verification",
+			"/user/logout" ].indexOf( request.path ) > -1 ) {
+
+		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
+			.then( authResponse => {
+				next();
+			})
+			.catch( authError => {
+				console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
+				next();
+			})
+		;
+	} else {
+		next();
+	}
+});
+
 // get
 app.get( ['/*'], (request, response, next) => {
-	if( request.path === '/api' ) {
-		resolveGETBatch( request, response );
-	} else if( request.path.startsWith( '/api/' ) ) {
-		resolveGET( request, response );
+	if( request.path === '/' ) {
+		resolveGETBatch( request, response, next );
+	} else {
+		resolveGET( request, response, next );
 	}
 });
 
 // post
 app.post( ['/*'], (request, response, next) => {
-	resolvePOST( request, response );
+	resolvePOST( request, response, next );
 	// TODO: Uncomment once Frontend makes all calls
-	// _resolvePostPatchDelete( "PATCH", request, response );
+	// _resolvePostPatchDelete( "POST", request, response );
 });
 
-// TODO: Uncomment once Frontend makes all calls
-/*
 // patch
 app.patch( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "PATCH", request, response );
+	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/stats' ) ) {
+		_getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body )
+			.then( res => {
+				response.json( res.body );
+				next();
+			})
+			.catch( err => {
+				response.status( err.statusCode ).send( err.error );
+				next();
+			})
+		;
+		return;
+	}
 });
 
+/*
 // delete
 app.delete( ['/*'], (request, response, next) => {
 	_resolvePostPatchDelete( "DELETE", request, response );
@@ -785,14 +921,15 @@ app.delete( ['/*'], (request, response, next) => {
 */
 
 // Debugging
-app.use( function (err, req, res, next) {
-	console.error( JSON.stringify(err) );
-	console.error( err.stack );
-	res.status( err.code || 500 ).json( { "error": err.message } );
+app.use( (err, req, res, next) => {
+	console.error( "ERROR_STACK :: ", err.stack );
+	res.status(500).json( UNEXPECTED_SERVER_EXCEPTION );
 });
 
 process.on( 'unhandledRejection', function( reason, p ) {
 	console.info( "Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason );
 });
 
-app.listen(80);
+app.listen( mainConfig.SERVICE_PORT );
+
+console.log(`PAG Service successfully running on port ${mainConfig.SERVICE_PORT}`);

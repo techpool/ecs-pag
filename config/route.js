@@ -79,16 +79,20 @@ module.exports = {
 		}
 	},
 
+	'/search': {
+		'GET': { 'path': '/search/search', 'auth': false }
+	},
+
 	'/search/search': {
-		'GET': { 'path': '/search/search', 'auth': true }
+		'GET': { 'path': '/search/search', 'auth': false }
 	},
 
 	'/search/trending_search': {
-		'GET': { 'path': '/search/trending_search', 'auth': true }
+		'GET': { 'path': '/search/trending_search', 'auth': false }
 	},
 
 	'/recommendation/pratilipis': {
-		'GET': { 'path': '/recommendation/pratilipis', 'auth': true }
+		'GET': { 'path': '/recommendation/pratilipis', 'auth': false }
 	},
 
 	'/page': {
@@ -129,8 +133,8 @@ module.exports = {
 		}
 	},
 
-	'/author':{
-		'GET':{
+	'/author': {
+		'GET': {
 			'path': '/authors/$primaryContentId',
 			'auth': true,
 			'primaryKey': 'authorId'
@@ -157,11 +161,11 @@ module.exports = {
 	},
 
 	'/user-activity/is_add_to_lib': {
-		'GET':{ 'path': '/user-activity/is_add_to_lib', 'auth': false }
+		'GET': { 'path': '/user-activity/is_add_to_lib', 'auth': false }
 	},
 
 	'/user-activity/is_following_author': {
-		'GET':{ 'path': '/user-activity/is_following_author', 'auth': false }
+		'GET': { 'path': '/user-activity/is_following_author', 'auth': false }
 	},
 
 	'/pratilipi/tags/update': {
@@ -179,16 +183,142 @@ module.exports = {
 	},
 
 	'/pratilipi/list': {
-		'GET':{
+		'GET': {
 			'path': '/pratilipis',
 			'auth': true,
 			'requiredFields': [
 				{ 'authorId': null },
-				{ 'state': null }
+				{ 'state': null },
+				{ '_apiVer': "3" }
 			],
 			'copyParam': [
 				{ 'resultCount': 'limit' }
 			]
+		}
+	},
+
+	'/userauthor/follow': {
+		'GET': {
+			'path': '/userauthor/follow', 
+			'auth': true,
+			'requiredFields': [
+				{ 'authorId': null }
+			]
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/userauthor/follow',
+					'requiredFields': [
+						{ 'authorId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/userauthor/follow/list': {
+		'GET': { 
+			'path': '/userauthor/follow/list',
+			'auth': true 
+		}
+	},
+
+	'/follows/isFollowing' : {
+		'GET' : {
+			'path' : '/follows/isFollowing', 
+			'auth': true,
+			'requiredFields': [
+				{ 'referenceId': null },
+				{ 'referenceType': null },
+				{ 'userId': null }
+			]
+		}
+	},
+
+	'/ecs': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/ecs',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/ecs/growth': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/ecs/growth',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/ecs/product': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/ecs/product',
+					'auth': false
+				}
+			}
+		}
+	},
+
+
+	// UserPratilipi Service
+	'/userpratilipi/review/list': {
+		'GET': {
+			'path': '/userpratilipi/review/list',
+			'auth': true
+		}
+	},
+
+	'/userpratilipi/review': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/userpratilipi/review'
+				}
+			}
+		}
+	},
+
+	'/userpratilipi': {
+		'GET': {
+			'path': '/userpratilipi',
+			'auth': true
+		}
+	},
+
+	'/comment': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/comment'
+				}
+			}
+		}
+	},
+
+	'/comment/list': {
+		'GET': {
+			'path': '/comment/list',
+			'auth': true
+		}
+	},
+
+	'/vote': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/vote'
+				}
+			}
 		}
 	}
 

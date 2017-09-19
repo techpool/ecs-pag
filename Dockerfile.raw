@@ -1,12 +1,11 @@
-FROM $DOCKER_REPO/node:8.0.0
+FROM $DOCKER_REPO/node:8.3.0
 
 COPY package.json .
 RUN npm install
 
 COPY server.js .
-COPY config/main.js config/main.js
-COPY config/route.js config/route.js
-COPY config/auth.js config/auth.js
+COPY config config
+COPY util util
 
 EXPOSE 80
 
