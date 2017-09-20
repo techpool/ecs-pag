@@ -258,8 +258,6 @@ module.exports = {
 		}
 	},
 
-
-
 	// UserPratilipi Service
 	'/userpratilipi/review/list': {
 		'GET': {
