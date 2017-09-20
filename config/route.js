@@ -247,28 +247,16 @@ module.exports = {
 		}
 	},
 
-	'/ecs/growth': {
+	'/ecs-gr': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/ecs/growth',
+					'path': '/ecs-gr',
 					'auth': false
 				}
 			}
 		}
 	},
-
-	'/ecs/product': {
-		'POST': {
-			'methods': {
-				'POST': {
-					'path': '/ecs/product',
-					'auth': false
-				}
-			}
-		}
-	},
-
 
 	// UserPratilipi Service
 	'/userpratilipi/review/list': {
@@ -320,6 +308,13 @@ module.exports = {
 				}
 			}
 		}
-	}
+	},
+
+	'/pratilipi/v2/categories/system': {
+		'GET': {
+			'path': '/pratilipi/v2/categories/system',
+			'auth': false
+		}
+	}	
 
 };
