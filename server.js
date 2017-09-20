@@ -307,6 +307,10 @@ function _getService( method, requestUrl, request, response ) {
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
 
+  if( response.locals[ "user-agent" ] ) {
+    headers[ "User-Agent" ] = response.locals[ "user-agent" ];
+  }
+
 	// body
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
 
@@ -644,29 +648,6 @@ function resolveGETBatch( request, response, next ) {
 
 function resolvePOST( request, response, next ) {
 
-	// TODO: Remove once everything is moved to ecs
-	// url: /pratilipis/12345/review-data
-	// body: reviewCount, ratingCount, totalRating
-	// headers: Access-Token, User-Id
-	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/review-data' ) ) {
-		var url = ECS_END_POINT + request.path;
-		var headers = {
-			'User-Id': request.headers["user-id"],
-			'Access-Token': request.headers["access-token"]
-		};
-		_getHttpPromise( url, "PATCH", headers, request.body )
-			.then( res => {
-				response.json( SUCCESS_MESSAGE );
-				next();
-			})
-			.catch( err => {
-				console.log( "REVIEW_DATA_PATCH_ERROR :: " + err.message );
-				next();
-			})
-		;
-		return;
-	}
-
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
 	// body: content
@@ -835,6 +816,9 @@ app.use( (request, response, next) => {
 	response.locals[ "access-token" ] = accessToken;
 	response.locals[ "client-type" ] = clientType;
 	response.locals[ "client-version" ] = clientVersion;
+  if(request.headers["user-agent"]) {
+    response.locals["user-agent"] = request.headers["user-agent"];
+  }
 	next();
 
 });

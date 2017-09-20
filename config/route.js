@@ -258,7 +258,6 @@ module.exports = {
 		}
 	},
 
-
 	// UserPratilipi Service
 	'/userpratilipi/review/list': {
 		'GET': {
@@ -309,6 +308,13 @@ module.exports = {
 				}
 			}
 		}
-	}
+	},
+
+	'/pratilipi/v2/categories/system': {
+		'GET': {
+			'path': '/pratilipi/v2/categories/system',
+			'auth': false
+		}
+	}	
 
 };
