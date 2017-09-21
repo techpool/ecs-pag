@@ -486,6 +486,7 @@ function resolveGET( request, response, next ) {
 				}
 			});
 		;
+		return ;
 	}
 
 
