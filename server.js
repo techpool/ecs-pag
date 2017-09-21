@@ -790,6 +790,7 @@ function resolvePOST( request, response, next ) {
 				}
 			});
 		;
+		return;
 	}
 
 	/*
