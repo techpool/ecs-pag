@@ -269,6 +269,39 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 }
 
+function _getRegexAuth( resource, method, request, response ) {
+
+	var authParams = {};
+
+	authParams[ "resource" ] = encodeURIComponent( resource );
+	authParams[ "method" ] = method;
+	authParams[ "id" ] = request.path.match(/\d\d+/g) ? request.path.match(/\d\d+/g)[0] : "0";
+
+	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
+
+	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+
+	return _getHttpPromise( authEndpoint, "GET", headers )
+		.then( authResponse => {
+			console.log(`DEBUGGING: ${JSON.stringify(authResponse)}`);
+			var isAuthorized = authResponse.body.data[0].isAuthorized;
+			var statusCode = authResponse.body.data[0].code;
+			if( ! isAuthorized ) {
+				console.log( 'AUTHENTICATION_FAILED' );
+				_sendResponseToClient( request, response, statusCode, ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+				return Promise.reject();
+			} else {
+				return authResponse.headers[ 'user-id' ];
+			}
+		}, (httpError) => {
+			console.log( "ERROR_MESSAGE :: " + httpError.message );
+			_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
+			return Promise.reject();
+		});
+	;
+
+}
+
 
 /*
 	_getService() -> Generic function returning a httpPromise
@@ -353,6 +386,41 @@ function _getService( method, requestUrl, request, response ) {
 
 }
 
+function _getRegexService( method, request, response ) {
+
+	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
+
+
+	// headers
+	var headers = {
+		'Access-Token': response.locals[ "access-token" ],
+		'Client-Type': response.locals[ "client-type" ],
+		'Client-Version': response.locals[ "client-version" ]
+	};
+	if( request.headers.version )
+		headers[ "Version" ] = request.headers.version;
+
+  if( response.locals[ "user-agent" ] ) {
+    headers[ "User-Agent" ] = response.locals[ "user-agent" ];
+  }
+
+  		var servicePath = ""
+  	 if (request.path.startsWith('/follows' ))
+  	 	servicePath = "/follows";
+	var authPromise = _getRegexAuth( servicePath, method, request, response );
+
+
+	var serviceUrl = ECS_END_POINT + request.url;
+
+	return authPromise
+		.then( (userId) => {
+			if( userId !== -1 ) headers[ "User-Id" ] = userId;
+			return _getHttpPromise( serviceUrl, method, headers, body );
+		})
+	;
+
+}
+
 function _isGETApiSupported( url ) {
 	var api = url.split("?")[0];
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
@@ -370,6 +438,18 @@ function _isGETApiSupported( url ) {
 	}
 	return isApiSupported;
 }
+
+// function isRegex(url) {
+// 	var regex = Object.keys(regexConfig);
+// 	var flag = false;
+// 	for(var i = 0; i < regex.length; i++ ) {
+// 		if(regex[i].test(url)){
+// 			flag = true;
+// 			break;
+// 		}
+// 	}
+// 	return flag;
+// }
 
 function resolveGET( request, response, next ) {
 
@@ -390,6 +470,25 @@ function resolveGET( request, response, next ) {
 	}
 
 
+
+	if( request.path.startsWith('/follows' ) ) {
+
+		console.log("inside follow");
+		_getRegexService("GET",request,response)
+		.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+				}
+			});
+		;
+	}
+
+
 	/*
 	*	3 cases:
 	*	1. images -> With or without authentication
@@ -400,6 +499,7 @@ function resolveGET( request, response, next ) {
 	// request.path will be /xxx
 	var api = request.path;
 	var isApiSupported = _isGETApiSupported( request.url );
+	// var isRegexSupported = isRegex(request.url);
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
 	// For image requests
@@ -446,8 +546,27 @@ function resolveGET( request, response, next ) {
 			});
 		;
 
-	// Forward to appengine
-	} else {
+	}
+	 // else if( isRegexSupported ) {
+
+	// 	var requestUrl = null;
+
+	// 	_getRegexService( "GET", requestUrl, request, response )
+	// 		.then( (serviceResponse) => {
+	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+	// 		}, (httpError) => {
+	// 			// httpError will be null if Auth has rejected Promise
+	// 			if( httpError ) {
+	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
+	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
+	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+	// 			}
+	// 		});
+	// 	;
+
+	// // Forward to appengine
+	// } 
+	else {
 		_forwardToGae( "GET", request, response, next );
 	}
 
@@ -654,6 +773,22 @@ function resolvePOST( request, response, next ) {
 	// headers: Access-Token, User-Id
 	if( request.path === '/pratilipi/content/batch' ) {
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\n/g,"" ) : "{}";
+	}
+
+	if( request.path.startsWith( '/follows' ) ) {
+
+		_getRegexService("POST",request,response)
+		.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+				}
+			});
+		;
 	}
 
 	/*
