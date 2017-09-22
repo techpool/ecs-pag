@@ -654,6 +654,9 @@ function resolvePOST( request, response, next ) {
 	// headers: Access-Token, User-Id
 	if( request.path === '/pratilipi/content/batch' ) {
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /\n/g,"" ) : "{}";
+		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /<\/?left>/g,"" ) : "{}";
+		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /<\/?right>/g,"" ) : "{}";
+		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /<\/?center>/g,"" ) : "{}";
 	}
 
 	/*
