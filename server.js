@@ -931,7 +931,7 @@ app.get( "/health", (request, response, next) => {
 	response.send( 'Pag is healthy !' );
 });
 
-// Setting access-token in response.locals
+// Setting response.locals
 app.use( (request, response, next) => {
 
 	// Setting response.locals[ "access-token" ]
@@ -976,30 +976,6 @@ app.use( (request, response, next) => {
 		request.url = request.url.substr(4);
 	}
 	next();
-});
-
-// Clear AccessToken in case of login / register / password update / verification / logout
-app.use( (request, response, next) => {
-	if( [ "/user/login",
-			"/user/login/facebook",
-			"/user/login/google",
-			"/user/register",
-			"/user/passwordupdate",
-			"/user/verification",
-			"/user/logout" ].indexOf( request.path ) > -1 ) {
-
-		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
-			.then( authResponse => {
-				next();
-			})
-			.catch( authError => {
-				console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
-				next();
-			})
-		;
-	} else {
-		next();
-	}
 });
 
 // get
