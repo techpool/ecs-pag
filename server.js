@@ -994,7 +994,7 @@ app.post( ['/*'], (request, response, next) => {
 	// _resolvePostPatchDelete( "POST", request, response );
 });
 
-// patch
+// patch - read count
 app.patch( ['/*'], (request, response, next) => {
 	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/stats' ) ) {
 		_getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body )
@@ -1028,6 +1028,6 @@ process.on( 'unhandledRejection', function( reason, p ) {
 	console.info( "Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason );
 });
 
-app.listen( mainConfig.SERVICE_PORT );
-
-console.log(`PAG Service successfully running on port ${mainConfig.SERVICE_PORT}`);
+app.listen( mainConfig.SERVICE_PORT, function(err) {
+	console.log( `PAG Service successfully running on port ${mainConfig.SERVICE_PORT}` );
+});
