@@ -269,7 +269,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 }
 
-function _getRegexAuth( resource, method, request, response ) {
+function _getHackyAuth( resource, method, request, response ) {
 
 	var authParams = {};
 
@@ -386,7 +386,7 @@ function _getService( method, requestUrl, request, response ) {
 
 }
 
-function _getRegexService( method, request, response ) {
+function _getHackyService( method, request, response ) {
 
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
 
@@ -404,13 +404,15 @@ function _getRegexService( method, request, response ) {
     headers[ "User-Agent" ] = response.locals[ "user-agent" ];
   }
 
-  		var servicePath = ""
-  	 if (request.path.startsWith('/follows' ))
-  	 	servicePath = "/follows";
-	var authPromise = _getRegexAuth( servicePath, method, request, response );
+  var servicePath = "";
+  if (request.path.startsWith('/follows' )) {
+  	servicePath = "/follows";
+  }
+
+  var authPromise = _getHackyAuth( servicePath, method, request, response );
 
 
-	var serviceUrl = ECS_END_POINT + request.url;
+  var serviceUrl = ECS_END_POINT + request.url;
 
 	return authPromise
 		.then( (userId) => {
@@ -474,7 +476,7 @@ function resolveGET( request, response, next ) {
 	if( request.path.startsWith('/follows' ) ) {
 
 		console.log("inside follow");
-		_getRegexService("GET",request,response)
+		_getHackyService("GET",request,response)
 		.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
 			}, (httpError) => {
@@ -781,7 +783,7 @@ function resolvePOST( request, response, next ) {
 
 	if( request.path.startsWith( '/follows' ) ) {
 
-		_getRegexService("POST",request,response)
+		_getHackyService("POST",request,response)
 		.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
 			}, (httpError) => {
