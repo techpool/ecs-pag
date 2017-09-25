@@ -80,11 +80,11 @@ module.exports = {
 	},
 
 	'/search': {
-		'GET': { 'path': '/search/search', 'auth': false }
+		'GET': { 'path': '/search/search', 'auth': true }
 	},
 
 	'/search/search': {
-		'GET': { 'path': '/search/search', 'auth': false }
+		'GET': { 'path': '/search/search', 'auth': true }
 	},
 
 	'/search/trending_search': {
