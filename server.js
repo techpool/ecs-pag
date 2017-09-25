@@ -337,13 +337,11 @@ function _getService( method, requestUrl, request, response ) {
 	var headers = {
 		'Access-Token': response.locals[ "access-token" ],
 		'Client-Type': response.locals[ "client-type" ],
-		'Client-Version': response.locals[ "client-version" ]
+		'Client-Version': response.locals[ "client-version" ],
+		'User-Agent': response.locals[ "user-agent" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
-
-	if( response.locals[ "user-agent" ] )
-		headers[ "User-Agent" ] = response.locals[ "user-agent" ];
 
 	// body
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
@@ -395,12 +393,11 @@ function _getHackyService( method, request, response ) {
 	var headers = {
 		'Access-Token': response.locals[ "access-token" ],
 		'Client-Type': response.locals[ "client-type" ],
-		'Client-Version': response.locals[ "client-version" ]
+		'Client-Version': response.locals[ "client-version" ],
+		'User-Agent': response.locals[ "user-agent" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
-	if( response.locals[ "user-agent" ] )
-		headers[ "User-Agent" ] = response.locals[ "user-agent" ];
 
 	var servicePath;
 	if( request.path.startsWith( '/follows' ) ) {
