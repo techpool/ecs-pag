@@ -315,6 +315,114 @@ module.exports = {
 			'path': '/pratilipi/v2/categories/system',
 			'auth': false
 		}
-	}	
+	},
+
+
+	// User Apis
+	'/user': {
+		'GET': {
+			'path': '/user',
+			'auth': false
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/register': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/register',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/login': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/login',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/login/facebook': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/login/facebook',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/login/google': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/login/google',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/logout': {
+		'GET': {
+			'path': '/user/logout',
+			'auth': false
+		}
+	},
+
+	'/user/email': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/email',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/passwordupdate': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/passwordupdate',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/verification': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/verification',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/accesstoken': {
+		'GET': {
+			'path': '/user/accesstoken',
+			'auth': false
+		}
+	}
 
 };

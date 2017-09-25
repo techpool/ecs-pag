@@ -20,8 +20,8 @@ const routeConfig = require( './config/route' );
 const authConfig = require( './config/auth' );
 
 const Logging = require( './lib/LoggingGcp.js' ).init({
-    projectId: mainConfig.GCP_PROJ_ID,
-    service: mainConfig.LOGGING_SERVICE_NAME
+	projectId: mainConfig.GCP_PROJ_ID,
+	service: mainConfig.LOGGING_SERVICE_NAME
 });
 
 const SUCCESS_MESSAGE = { "message": "OK" };
@@ -269,13 +269,15 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 }
 
-function _getRegexAuth( resource, method, request, response ) {
+function _getHackyAuth( resource, method, request, response ) {
 
 	var authParams = {};
 
 	authParams[ "resource" ] = encodeURIComponent( resource );
 	authParams[ "method" ] = method;
-	authParams[ "id" ] = request.path.match(/\d\d+/g) ? request.path.match(/\d\d+/g)[0] : "0";
+
+	if( request.path.match(/\d\d+/g) )
+		authParams[ "id" ] = request.path.match(/\d\d+/g)[0];
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
@@ -340,9 +342,8 @@ function _getService( method, requestUrl, request, response ) {
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
 
-  if( response.locals[ "user-agent" ] ) {
-    headers[ "User-Agent" ] = response.locals[ "user-agent" ];
-  }
+	if( response.locals[ "user-agent" ] )
+		headers[ "User-Agent" ] = response.locals[ "user-agent" ];
 
 	// body
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
@@ -386,10 +387,9 @@ function _getService( method, requestUrl, request, response ) {
 
 }
 
-function _getRegexService( method, request, response ) {
+function _getHackyService( method, request, response ) {
 
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
-
 
 	// headers
 	var headers = {
@@ -399,16 +399,15 @@ function _getRegexService( method, request, response ) {
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
+	if( response.locals[ "user-agent" ] )
+		headers[ "User-Agent" ] = response.locals[ "user-agent" ];
 
-  if( response.locals[ "user-agent" ] ) {
-    headers[ "User-Agent" ] = response.locals[ "user-agent" ];
-  }
+	var servicePath;
+	if( request.path.startsWith( '/follows' ) ) {
+		servicePath = "/follows";
+	}
 
-  		var servicePath = ""
-  	 if (request.path.startsWith('/follows' ))
-  	 	servicePath = "/follows";
-	var authPromise = _getRegexAuth( servicePath, method, request, response );
-
+	var authPromise = _getHackyAuth( servicePath, method, request, response );
 
 	var serviceUrl = ECS_END_POINT + request.url;
 
@@ -472,10 +471,8 @@ function resolveGET( request, response, next ) {
 
 
 	if( request.path.startsWith('/follows' ) ) {
-
-		console.log("inside follow");
-		_getRegexService("GET",request,response)
-		.then( (serviceResponse) => {
+		_getHackyService( "GET", request, response )
+			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
@@ -780,9 +777,8 @@ function resolvePOST( request, response, next ) {
 	}
 
 	if( request.path.startsWith( '/follows' ) ) {
-
-		_getRegexService("POST",request,response)
-		.then( (serviceResponse) => {
+		_getHackyService( "POST", request, response )
+			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
@@ -935,9 +931,10 @@ app.get( "/health", (request, response, next) => {
 	response.send( 'Pag is healthy !' );
 });
 
-// Setting access-token in response.locals
+// Setting response.locals
 app.use( (request, response, next) => {
 
+	// Setting response.locals[ "access-token" ]
 	var accessToken = null;
 	if( request.headers.accesstoken )
 		accessToken = request.headers.accesstoken;
@@ -945,20 +942,21 @@ app.use( (request, response, next) => {
 		accessToken = request.cookies[ "access_token" ];
 	else if( _getUrlParameter( request.url, "accessToken" ) )
 		accessToken = _getUrlParameter( request.url, "accessToken" );
+	response.locals[ "access-token" ] = accessToken;
 
+	// Setting Client Type and Client Version
 	var clientType = ANDROID_ENDPOINTS.contains( request.headers.host ) ? "ANDROID" : "WEB";
 	var clientVersion = null;
 	if( clientType === "ANDROID" )
 		clientVersion = request.headers[ "androidversionname" ] || request.headers[ "androidversion" ] || null;
 	else
 		clientVersion = request.headers.host;
-
-	response.locals[ "access-token" ] = accessToken;
 	response.locals[ "client-type" ] = clientType;
 	response.locals[ "client-version" ] = clientVersion;
-  if(request.headers["user-agent"]) {
-    response.locals["user-agent"] = request.headers["user-agent"];
-  }
+
+	// Setting User Agent
+	response.locals[ "user-agent" ] = request.headers[ "user-agent" ] || null;
+
 	next();
 
 });
@@ -980,30 +978,6 @@ app.use( (request, response, next) => {
 	next();
 });
 
-// Clear AccessToken in case of login / register / password update / verification / logout
-app.use( (request, response, next) => {
-	if( [ "/user/login",
-			"/user/login/facebook",
-			"/user/login/google",
-			"/user/register",
-			"/user/passwordupdate",
-			"/user/verification",
-			"/user/logout" ].indexOf( request.path ) > -1 ) {
-
-		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
-			.then( authResponse => {
-				next();
-			})
-			.catch( authError => {
-				console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
-				next();
-			})
-		;
-	} else {
-		next();
-	}
-});
-
 // get
 app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
@@ -1020,7 +994,7 @@ app.post( ['/*'], (request, response, next) => {
 	// _resolvePostPatchDelete( "POST", request, response );
 });
 
-// patch
+// patch - read count
 app.patch( ['/*'], (request, response, next) => {
 	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/stats' ) ) {
 		_getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body )
@@ -1054,6 +1028,6 @@ process.on( 'unhandledRejection', function( reason, p ) {
 	console.info( "Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason );
 });
 
-app.listen( mainConfig.SERVICE_PORT );
-
-console.log(`PAG Service successfully running on port ${mainConfig.SERVICE_PORT}`);
+app.listen( mainConfig.SERVICE_PORT, function(err) {
+	console.log( `PAG Service successfully running on port ${mainConfig.SERVICE_PORT}` );
+});
