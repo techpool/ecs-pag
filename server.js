@@ -20,8 +20,8 @@ const routeConfig = require( './config/route' );
 const authConfig = require( './config/auth' );
 
 const Logging = require( './lib/LoggingGcp.js' ).init({
-    projectId: mainConfig.GCP_PROJ_ID,
-    service: mainConfig.LOGGING_SERVICE_NAME
+	projectId: mainConfig.GCP_PROJ_ID,
+	service: mainConfig.LOGGING_SERVICE_NAME
 });
 
 const SUCCESS_MESSAGE = { "message": "OK" };
@@ -269,6 +269,41 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 }
 
+function _getHackyAuth( resource, method, request, response ) {
+
+	var authParams = {};
+
+	authParams[ "resource" ] = encodeURIComponent( resource );
+	authParams[ "method" ] = method;
+
+	if( request.path.match(/\d\d+/g) )
+		authParams[ "id" ] = request.path.match(/\d\d+/g)[0];
+
+	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
+
+	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+
+	return _getHttpPromise( authEndpoint, "GET", headers )
+		.then( authResponse => {
+			console.log(`DEBUGGING: ${JSON.stringify(authResponse)}`);
+			var isAuthorized = authResponse.body.data[0].isAuthorized;
+			var statusCode = authResponse.body.data[0].code;
+			if( ! isAuthorized ) {
+				console.log( 'AUTHENTICATION_FAILED' );
+				_sendResponseToClient( request, response, statusCode, ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+				return Promise.reject();
+			} else {
+				return authResponse.headers[ 'user-id' ];
+			}
+		}, (httpError) => {
+			console.log( "ERROR_MESSAGE :: " + httpError.message );
+			_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
+			return Promise.reject();
+		});
+	;
+
+}
+
 
 /*
 	_getService() -> Generic function returning a httpPromise
@@ -302,14 +337,11 @@ function _getService( method, requestUrl, request, response ) {
 	var headers = {
 		'Access-Token': response.locals[ "access-token" ],
 		'Client-Type': response.locals[ "client-type" ],
-		'Client-Version': response.locals[ "client-version" ]
+		'Client-Version': response.locals[ "client-version" ],
+		'User-Agent': response.locals[ "user-agent" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
-
-  if( response.locals[ "user-agent" ] ) {
-    headers[ "User-Agent" ] = response.locals[ "user-agent" ];
-  }
 
 	// body
 	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
@@ -353,6 +385,38 @@ function _getService( method, requestUrl, request, response ) {
 
 }
 
+function _getHackyService( method, request, response ) {
+
+	var body = ( ( method === "POST" || method === "PATCH" ) && request.body ) ? request.body : null;
+
+	// headers
+	var headers = {
+		'Access-Token': response.locals[ "access-token" ],
+		'Client-Type': response.locals[ "client-type" ],
+		'Client-Version': response.locals[ "client-version" ],
+		'User-Agent': response.locals[ "user-agent" ]
+	};
+	if( request.headers.version )
+		headers[ "Version" ] = request.headers.version;
+
+	var servicePath;
+	if( request.path.startsWith( '/follows' ) ) {
+		servicePath = "/follows";
+	}
+
+	var authPromise = _getHackyAuth( servicePath, method, request, response );
+
+	var serviceUrl = ECS_END_POINT + request.url;
+
+	return authPromise
+		.then( (userId) => {
+			if( userId !== -1 ) headers[ "User-Id" ] = userId;
+			return _getHttpPromise( serviceUrl, method, headers, body );
+		})
+	;
+
+}
+
 function _isGETApiSupported( url ) {
 	var api = url.split("?")[0];
 	var isApiSupported = routeConfig[api] && routeConfig[api].GET;
@@ -370,6 +434,18 @@ function _isGETApiSupported( url ) {
 	}
 	return isApiSupported;
 }
+
+// function isRegex(url) {
+// 	var regex = Object.keys(regexConfig);
+// 	var flag = false;
+// 	for(var i = 0; i < regex.length; i++ ) {
+// 		if(regex[i].test(url)){
+// 			flag = true;
+// 			break;
+// 		}
+// 	}
+// 	return flag;
+// }
 
 function resolveGET( request, response, next ) {
 
@@ -390,6 +466,24 @@ function resolveGET( request, response, next ) {
 	}
 
 
+
+	if( request.path.startsWith('/follows' ) ) {
+		_getHackyService( "GET", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+				}
+			});
+		;
+		return ;
+	}
+
+
 	/*
 	*	3 cases:
 	*	1. images -> With or without authentication
@@ -400,6 +494,7 @@ function resolveGET( request, response, next ) {
 	// request.path will be /xxx
 	var api = request.path;
 	var isApiSupported = _isGETApiSupported( request.url );
+	// var isRegexSupported = isRegex(request.url);
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
 	// For image requests
@@ -446,8 +541,27 @@ function resolveGET( request, response, next ) {
 			});
 		;
 
-	// Forward to appengine
-	} else {
+	}
+	 // else if( isRegexSupported ) {
+
+	// 	var requestUrl = null;
+
+	// 	_getRegexService( "GET", requestUrl, request, response )
+	// 		.then( (serviceResponse) => {
+	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+	// 		}, (httpError) => {
+	// 			// httpError will be null if Auth has rejected Promise
+	// 			if( httpError ) {
+	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
+	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
+	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+	// 			}
+	// 		});
+	// 	;
+
+	// // Forward to appengine
+	// } 
+	else {
 		_forwardToGae( "GET", request, response, next );
 	}
 
@@ -659,6 +773,22 @@ function resolvePOST( request, response, next ) {
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /<\/?center>/g,"" ) : "{}";
 	}
 
+	if( request.path.startsWith( '/follows' ) ) {
+		_getHackyService( "POST", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+				}
+			});
+		;
+		return;
+	}
+
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
 	Approach
@@ -798,9 +928,10 @@ app.get( "/health", (request, response, next) => {
 	response.send( 'Pag is healthy !' );
 });
 
-// Setting access-token in response.locals
+// Setting response.locals
 app.use( (request, response, next) => {
 
+	// Setting response.locals[ "access-token" ]
 	var accessToken = null;
 	if( request.headers.accesstoken )
 		accessToken = request.headers.accesstoken;
@@ -808,20 +939,21 @@ app.use( (request, response, next) => {
 		accessToken = request.cookies[ "access_token" ];
 	else if( _getUrlParameter( request.url, "accessToken" ) )
 		accessToken = _getUrlParameter( request.url, "accessToken" );
+	response.locals[ "access-token" ] = accessToken;
 
+	// Setting Client Type and Client Version
 	var clientType = ANDROID_ENDPOINTS.contains( request.headers.host ) ? "ANDROID" : "WEB";
 	var clientVersion = null;
 	if( clientType === "ANDROID" )
 		clientVersion = request.headers[ "androidversionname" ] || request.headers[ "androidversion" ] || null;
 	else
 		clientVersion = request.headers.host;
-
-	response.locals[ "access-token" ] = accessToken;
 	response.locals[ "client-type" ] = clientType;
 	response.locals[ "client-version" ] = clientVersion;
-  if(request.headers["user-agent"]) {
-    response.locals["user-agent"] = request.headers["user-agent"];
-  }
+
+	// Setting User Agent
+	response.locals[ "user-agent" ] = request.headers[ "user-agent" ] || null;
+
 	next();
 
 });
@@ -843,30 +975,6 @@ app.use( (request, response, next) => {
 	next();
 });
 
-// Clear AccessToken in case of login / register / password update / verification / logout
-app.use( (request, response, next) => {
-	if( [ "/user/login",
-			"/user/login/facebook",
-			"/user/login/google",
-			"/user/register",
-			"/user/passwordupdate",
-			"/user/verification",
-			"/user/logout" ].indexOf( request.path ) > -1 ) {
-
-		_getHttpPromise( ECS_END_POINT + "/auth/accessToken", "DELETE", { "Access-Token": response.locals[ "access-token" ] } )
-			.then( authResponse => {
-				next();
-			})
-			.catch( authError => {
-				console.log( "DELETE_ACCESS_TOKEN_ERROR :: " + authError.message );
-				next();
-			})
-		;
-	} else {
-		next();
-	}
-});
-
 // get
 app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
@@ -883,7 +991,7 @@ app.post( ['/*'], (request, response, next) => {
 	// _resolvePostPatchDelete( "POST", request, response );
 });
 
-// patch
+// patch - read count
 app.patch( ['/*'], (request, response, next) => {
 	if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/stats' ) ) {
 		_getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body )
@@ -917,6 +1025,6 @@ process.on( 'unhandledRejection', function( reason, p ) {
 	console.info( "Possibly Unhandled Rejection at: Promise ", p, " reason: ", reason );
 });
 
-app.listen( mainConfig.SERVICE_PORT );
-
-console.log(`PAG Service successfully running on port ${mainConfig.SERVICE_PORT}`);
+app.listen( mainConfig.SERVICE_PORT, function(err) {
+	console.log( `PAG Service successfully running on port ${mainConfig.SERVICE_PORT}` );
+});
