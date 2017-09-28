@@ -570,7 +570,7 @@ app.use( bodyParser.json() );
 app.use( bodyParser.urlencoded({ extended: false }) );
 // for initializing log object
 app.use( (request, response, next) => {
-	var log = request.log = new Logging( request );
+	request.log = new Logging( request );
 	request.startTimestamp = Date.now();
 	next();
 });

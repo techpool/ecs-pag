@@ -33,7 +33,16 @@ const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainCon
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
 
 
-Array.prototype.contains = function(obj) { return this.indexOf(obj) > -1; };
+const consoleLogger = require('./util/Console').init({
+    project: mainConfig.BIGQUERY_PROJECT,
+    dataset: mainConfig.BIGQUERY_DATASET,
+    table: mainConfig.LOGGING_TABLE
+});
+
+const console = new consoleLogger();
+Array.prototype.contains = function (obj) {
+    return this.indexOf(obj) > -1;
+};
 
 var _getAppengineEndpoint = function( request ) {
 	return ANDROID_ENDPOINTS.contains( request.headers.host ) ?
@@ -1056,4 +1065,6 @@ process.on( 'unhandledRejection', function( reason, p ) {
 
 app.listen( mainConfig.SERVICE_PORT );
 
+var logId = console.getUid();
+console.log(`PAG Service successfully running on port ${mainConfig.SERVICE_PORT}`, 200, logId, 'SERVER START', 'ANDROID', 102.12234);
 console.log(`PAG Service successfully running on port ${mainConfig.SERVICE_PORT}`);
