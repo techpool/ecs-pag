@@ -429,7 +429,7 @@ module.exports = {
 	'/blog-scrapper/search': {
 		'GET': {
 			'path': '/blog-scrapper/search',
-			'auth': true
+			'auth': false
 		}
 	},
 	
@@ -438,20 +438,16 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/blog-scrapper',
-					'auth': true
+					'auth': false
 				}
 			}
-		},
-		'GET': {
-			'path': '/blog-scrapper',
-			'auth': true
 		}
 	},
 
-	'/blog-scrapper/blogposts': {
+	'/blog-scrapper/blogpost/list': {
 		'GET': {
 			'path': '/blog-scrapper/$primaryContentId',
-			'auth': true,
+			'auth': false,
 			'primaryKey': 'blogId',
 			'requiredFields': [
 				{ 'blogId': null }
@@ -459,12 +455,12 @@ module.exports = {
 		}
 	},
 	
-	'/blog-scrapper/scrap': {
+	'/blog-scrapper/blogpost/scrape': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/blog-scrapper/$primaryContentId/scrap',
-					'auth': true,
+					'path': '/blog-scrapper/$primaryContentId/scrape',
+					'auth': false,
 					'primaryKey': 'blogId',
 					'requiredFields': [
 						{ 'blogId': null }
@@ -474,12 +470,12 @@ module.exports = {
 		}
 	},
 	
-	'/blog-scrapper/blogposts/publish': {
+	'/blog-scrapper/blogpost/publish': {
 		'POST': {
 			'methods': {
 				'POST': {
 					'path': '/blog-scrapper/$primaryContentId/publish',
-					'auth': true,
+					'auth': false,
 					'primaryKey': 'blogId',
 					'requiredFields': [
 						{ 'blogId': null }
@@ -489,12 +485,12 @@ module.exports = {
 		}
 	},
 	
-	'/blog-scrapper/blogposts/create': {
+	'/blog-scrapper/blogpost/create': {
 		'POST': {
 			'methods': {
 				'POST': {
 					'path': '/blog-scrapper/$primaryContentId/create',
-					'auth': true,
+					'auth': false,
 					'primaryKey': 'blogId',
 					'requiredFields': [
 						{ 'blogId': null }
