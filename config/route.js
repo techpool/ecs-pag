@@ -423,6 +423,80 @@ module.exports = {
 			'path': '/user/accesstoken',
 			'auth': false
 		}
-	}
+	},
+	
+	
+	'/blog-scrapper/search': {
+		'GET': {
+			'path': '/blog-scrapper/search',
+			'auth': false
+		}
+	},
+	
+	'/blog-scrapper': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scrapper',
+					'auth': false
+				}
+			}
+		}
+	},
 
+	'/blog-scrapper/blogpost/list': {
+		'GET': {
+			'path': '/blog-scrapper/$primaryContentId',
+			'auth': false,
+			'primaryKey': 'blogId',
+			'requiredFields': [
+				{ 'blogId': null }
+			]
+		}
+	},
+	
+	'/blog-scrapper/blogpost/scrape': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scrapper/$primaryContentId/scrape',
+					'auth': false,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	},
+	
+	'/blog-scrapper/blogpost/publish': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scrapper/$primaryContentId/publish',
+					'auth': false,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	},
+	
+	'/blog-scrapper/blogpost/create': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scrapper/$primaryContentId/create',
+					'auth': false,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	}
 };

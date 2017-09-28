@@ -139,6 +139,44 @@ module.exports = {
 		'POST': {
 			'params': [ 'resource', 'method', 'parentId' ]
 		}
-	}
-
+	},
+	
+	'/blog-scrapper/search': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
+	'/blog-scrapper': {
+		'POST': {
+			'params': [ 'resource', 'method', 'language' ]
+		},
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
+	'/blog-scrapper/$primaryContentId': {
+		'GET': {
+			'params': [ 'resource', 'method', 'language' ]
+		}
+	},
+	
+	'/blog-scrapper/$primaryContentId/scrap': {
+		'GET': {
+			'params': [ 'resource', 'method', 'language' ]
+		}
+	},
+	
+	'/blog-scrapper/$primaryContentId/publish': {
+		'GET': {
+			'params': [ 'resource', 'method', 'language' ]
+		}
+	},
+	
+	'/blog-scrapper/$primaryContentId/create': {
+		'GET': {
+			'params': [ 'resource', 'method', 'language' ]
+		}
+	},
 };
