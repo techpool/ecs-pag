@@ -156,12 +156,6 @@ module.exports = {
 		}
 	},
 	
-	'/blog-scrapper/search': {
-		'POST': {
-			'params': [ 'resource', 'method', 'language' ]
-		}
-	},
-	
 	'/blog-scrapper/$primaryContentId': {
 		'GET': {
 			'params': [ 'resource', 'method', 'language' ]
