@@ -426,27 +426,27 @@ module.exports = {
 	},
 	
 	
-	'/blog-scrapper/search': {
+	'/blog-scraper/search': {
 		'GET': {
-			'path': '/blog-scrapper/search',
+			'path': '/blog-scraper/search',
 			'auth': false
 		}
 	},
 	
-	'/blog-scrapper': {
+	'/blog-scraper': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/blog-scrapper',
+					'path': '/blog-scraper',
 					'auth': false
 				}
 			}
 		}
 	},
 
-	'/blog-scrapper/blogpost/list': {
+	'/blog-scraper/blogpost/list': {
 		'GET': {
-			'path': '/blog-scrapper/$primaryContentId',
+			'path': '/blog-scraper/$primaryContentId',
 			'auth': false,
 			'primaryKey': 'blogId',
 			'requiredFields': [
@@ -455,11 +455,11 @@ module.exports = {
 		}
 	},
 	
-	'/blog-scrapper/blogpost/scrape': {
+	'/blog-scraper/blogpost/scrape': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/blog-scrapper/$primaryContentId/scrape',
+					'path': '/blog-scraper/$primaryContentId/scrape',
 					'auth': false,
 					'primaryKey': 'blogId',
 					'requiredFields': [
@@ -470,11 +470,11 @@ module.exports = {
 		}
 	},
 	
-	'/blog-scrapper/blogpost/publish': {
+	'/blog-scraper/blogpost/publish': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/blog-scrapper/$primaryContentId/publish',
+					'path': '/blog-scraper/$primaryContentId/publish',
 					'auth': false,
 					'primaryKey': 'blogId',
 					'requiredFields': [
@@ -485,11 +485,11 @@ module.exports = {
 		}
 	},
 	
-	'/blog-scrapper/blogpost/create': {
+	'/blog-scraper/blogpost/create': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/blog-scrapper/$primaryContentId/create',
+					'path': '/blog-scraper/$primaryContentId/create',
 					'auth': false,
 					'primaryKey': 'blogId',
 					'requiredFields': [
