@@ -441,6 +441,10 @@ module.exports = {
 					'auth': true
 				}
 			}
+		},
+		'GET': {
+			'path': '/blog-scraper',
+			'auth': true
 		}
 	},
 
