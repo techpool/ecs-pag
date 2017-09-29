@@ -12,12 +12,6 @@ class Console {
         return this;
     }
 
-    // used only by PAG to create new log id
-    getUid() {
-        return uniqid();
-    }
-
-
     log(response, reponseCode ,id, request, agent, time) {
 
         console.log(response);

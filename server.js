@@ -987,9 +987,10 @@ app.use( (request, response, next) => {
 // get
 app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
-		resolveGETBatch( request, response, next );
+        resolveGETBatch( request, response, next );
 	} else {
-		resolveGET( request, response, next );
+        console.log("message - sachin", 200, request.headers["X-Amzn-Trace-Id"], 'SERVER START', 'ANDROID', 102.12234);
+        resolveGET( request, response, next );
 	}
 });
 
@@ -1037,6 +1038,3 @@ process.on( 'unhandledRejection', function( reason, p ) {
 app.listen( mainConfig.SERVICE_PORT, function(err) {
 	console.log( `PAG Service successfully running on port ${mainConfig.SERVICE_PORT}` );
 });
-
-var logId = console.getUid();
-console.log(`PAG Service successfully running on port ${mainConfig.SERVICE_PORT}`, 200, logId, 'SERVER START', 'ANDROID', 102.12234);
