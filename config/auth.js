@@ -141,42 +141,42 @@ module.exports = {
 		}
 	},
 	
-	'/blog-scrapper/search': {
+	'/blog-scraper/search': {
 		'GET': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
 	
-	'/blog-scrapper': {
+	'/blog-scraper': {
 		'POST': {
-			'params': [ 'resource', 'method', 'language' ]
+			'params': [ 'resource', 'method' ]
 		},
 		'GET': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
 	
-	'/blog-scrapper/$primaryContentId': {
+	'/blog-scraper/$primaryContentId': {
 		'GET': {
-			'params': [ 'resource', 'method', 'language' ]
+			'params': [ 'resource', 'method' ]
 		}
 	},
 	
-	'/blog-scrapper/$primaryContentId/scrap': {
+	'/blog-scraper/$primaryContentId/scrape': {
 		'GET': {
-			'params': [ 'resource', 'method', 'language' ]
+			'params': [ 'resource', 'method' ]
 		}
 	},
 	
-	'/blog-scrapper/$primaryContentId/publish': {
+	'/blog-scraper/$primaryContentId/publish': {
 		'GET': {
-			'params': [ 'resource', 'method', 'language' ]
+			'params': [ 'resource', 'method' ]
 		}
 	},
 	
-	'/blog-scrapper/$primaryContentId/create': {
+	'/blog-scraper/$primaryContentId/create': {
 		'GET': {
-			'params': [ 'resource', 'method', 'language' ]
+			'params': [ 'resource', 'method' ]
 		}
 	},
 };
