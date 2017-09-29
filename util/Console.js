@@ -1,4 +1,3 @@
-const uniqid = require('uniqid');
 const bigqueryClient = require( '@google-cloud/bigquery' );
 
 var bigquery;
