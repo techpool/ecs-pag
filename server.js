@@ -33,13 +33,13 @@ const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainCon
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
 
 
-const consoleLogger = require('./util/Console').init({
-    project: mainConfig.BIGQUERY_PROJECT,
-    dataset: mainConfig.BIGQUERY_DATASET,
-    table: mainConfig.LOGGING_TABLE
-});
+// const consoleLogger = require('./util/Console').init({
+//     project: mainConfig.BIGQUERY_PROJECT,
+//     dataset: mainConfig.BIGQUERY_DATASET,
+//     table: mainConfig.LOGGING_TABLE
+// });
 
-const console = new consoleLogger();
+// const console = new consoleLogger();
 Array.prototype.contains = function (obj) {
     return this.indexOf(obj) > -1;
 };
@@ -631,7 +631,7 @@ function resolveGETBatch( request, response, next ) {
 			return ( this.length - this.replace( new RegExp(s1,"g"), '' ).length ) / s1.length;
 		};
 
-		var pageUri = _getUrlParameter( requestArray[0]["url"], "uri" ).split("?")[0];
+		var pageUri = _getUrlParameter( requestArray[0]["url"], "uri" );
 		if( pageUri.startsWith( "/author/" ) || ( pageUri.startsWith( "/" ) && pageUri.count( "/" ) == 1 ) || ( pageUri.startsWith( "/event/" ) && pageUri.count( "/" ) == 2 ) ) {
 			// get page response and send 500 for next response
 			var pageServiceUrl = ECS_END_POINT + routeConfig["/page"]["GET"]["path"] + "?uri=" + pageUri;
@@ -989,7 +989,7 @@ app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
         resolveGETBatch( request, response, next );
 	} else {
-        console.log("message - sachin", 200, request.headers["X-Amzn-Trace-Id"], 'SERVER START', 'ANDROID', 102.12234);
+        // console.log("message - sachin", 200, request.headers["X-Amzn-Trace-Id"], 'SERVER START', 'ANDROID', 102.12234);
         resolveGET( request, response, next );
 	}
 });
