@@ -33,13 +33,16 @@ const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainCon
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
 
 
-// const consoleLogger = require('./util/Console').init({
-//     project: mainConfig.BIGQUERY_PROJECT,
-//     dataset: mainConfig.BIGQUERY_DATASET,
-//     table: mainConfig.LOGGING_TABLE
-// });
+/*  TODO: Sachin
+const consoleLogger = require('./util/Console').init({
+	project: mainConfig.BIGQUERY_PROJECT,
+	dataset: mainConfig.BIGQUERY_DATASET,
+	table: mainConfig.LOGGING_TABLE
+});
 
 // const console = new consoleLogger();
+*/
+
 Array.prototype.contains = function (obj) {
     return this.indexOf(obj) > -1;
 };
@@ -444,18 +447,6 @@ function _isGETApiSupported( url ) {
 	return isApiSupported;
 }
 
-// function isRegex(url) {
-// 	var regex = Object.keys(regexConfig);
-// 	var flag = false;
-// 	for(var i = 0; i < regex.length; i++ ) {
-// 		if(regex[i].test(url)){
-// 			flag = true;
-// 			break;
-// 		}
-// 	}
-// 	return flag;
-// }
-
 function resolveGET( request, response, next ) {
 
 	// TODO: Remove once everything is moved to ecs
@@ -503,7 +494,6 @@ function resolveGET( request, response, next ) {
 	// request.path will be /xxx
 	var api = request.path;
 	var isApiSupported = _isGETApiSupported( request.url );
-	// var isRegexSupported = isRegex(request.url);
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
 	// For image requests
@@ -550,27 +540,8 @@ function resolveGET( request, response, next ) {
 			});
 		;
 
-	}
-	 // else if( isRegexSupported ) {
-
-	// 	var requestUrl = null;
-
-	// 	_getRegexService( "GET", requestUrl, request, response )
-	// 		.then( (serviceResponse) => {
-	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-	// 		}, (httpError) => {
-	// 			// httpError will be null if Auth has rejected Promise
-	// 			if( httpError ) {
-	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
-	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
-	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-	// 			}
-	// 		});
-	// 	;
-
-	// // Forward to appengine
-	// } 
-	else {
+	} else {
+		// Forward to appengine
 		_forwardToGae( "GET", request, response, next );
 	}
 
@@ -625,17 +596,19 @@ function resolveGETBatch( request, response, next ) {
 		requestArray[0]["name"] === "req1" &&
 		requestArray[1]["name"] === "req2" &&
 		requestArray[0]["api"] === "/page" &&
-		requestArray[1]["api"] === "/pratilipi" ) {
+		requestArray[1]["api"] === "/pratilipi" &&
+		// Excluding reader and writer urls
+		! requestArray[0]["url"].startsWith( "/page?uri=/read" ) &&
+		! requestArray[0]["url"].startsWith( "/page?uri=/pratilipi-write" ) ) {
 
 		String.prototype.count = function( s1 ) {
 			return ( this.length - this.replace( new RegExp(s1,"g"), '' ).length ) / s1.length;
 		};
 
-		var pageUri = _getUrlParameter( requestArray[0]["url"], "uri" );
+		var pageUri = _getUrlParameter( requestArray[0]["url"], "uri" ).split("?")[0];
 		if( pageUri.startsWith( "/author/" ) || ( pageUri.startsWith( "/" ) && pageUri.count( "/" ) == 1 ) || ( pageUri.startsWith( "/event/" ) && pageUri.count( "/" ) == 2 ) ) {
 			// get page response and send 500 for next response
 			var pageServiceUrl = ECS_END_POINT + routeConfig["/page"]["GET"]["path"] + "?uri=" + pageUri;
-//			var pageServiceUrl = "http://gae-gamma.pratilipi.com/api/page?uri=" + pageUri;
 			_getHttpPromise( pageServiceUrl, "GET" )
 				.then( (res) => {
 					var hackyResponseBody = { "req1": { "status": res.statusCode, "response": res.body }, "req2": { "status": 500, "response": UNEXPECTED_SERVER_EXCEPTION } };
@@ -989,7 +962,6 @@ app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
         resolveGETBatch( request, response, next );
 	} else {
-        // console.log("message - sachin", 200, request.headers["X-Amzn-Trace-Id"], 'SERVER START', 'ANDROID', 102.12234);
         resolveGET( request, response, next );
 	}
 });
