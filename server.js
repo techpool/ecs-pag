@@ -142,6 +142,7 @@ function _forwardToGae( method, request, response, next ) {
 			switch( header ) {
 				case "androidversion": return "AndroidVersion";
 				case "androidversionname": return "AndroidVersionName";
+				case "x-amzn-trace-id": return "x-amzn-trace-id";
 				default: return _normalizeHeaderCase( header );
 			}
 		};
