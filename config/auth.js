@@ -163,19 +163,19 @@ module.exports = {
 	},
 	
 	'/blog-scraper/$primaryContentId/scrape': {
-		'GET': {
+		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
 	
 	'/blog-scraper/$primaryContentId/publish': {
-		'GET': {
+		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
 	
 	'/blog-scraper/$primaryContentId/create': {
-		'GET': {
+		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
