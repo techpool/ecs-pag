@@ -16,7 +16,7 @@ class Console {
     }
 
     submit(request, response) {
-        console.log(request.headers["x-amzn-trace-id"]);
+        console.log( "x-amzn-trace-id :: " + request.headers["x-amzn-trace-id"]);
 
         var id = request.headers["x-amzn-trace-id"];
         var insertId = (new Date()).getTime().toString();
