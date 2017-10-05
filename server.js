@@ -911,6 +911,7 @@ app.get( "/health", (request, response, next) => {
 // TODO: Remove -> Test middleware
 app.use( (request, response, next) => {
 	console.log( "AMAZON_TRACE_ID_1 :: " + request.headers["x-amzn-trace-id"] );
+	next();
 });
 
 // Setting response.locals
