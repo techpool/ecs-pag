@@ -32,14 +32,12 @@ const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at ser
 const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
 
-
-const consoleLogger = require('./util/Console').init({
+const Logger = require('./util/Console').init({
     project: mainConfig.BIGQUERY_PROJECT,
     dataset: mainConfig.BIGQUERY_DATASET,
     table: mainConfig.LOGGING_TABLE
 });
 
-const console = new consoleLogger();
 Array.prototype.contains = function (obj) {
     return this.indexOf(obj) > -1;
 };
@@ -115,7 +113,9 @@ function _sendResponseToClient( request, response, status, body ) {
 	response.status( resCode ).json( resBody );
 
 	// Logging to gcp logs
-	request.log.submit( resCode, JSON.stringify( resBody ).length );
+	// TODO : remove later .. sachin
+	request.log.changeAgent(request,"PAG");
+	request.log.submit(request,response);
 
 }
 
@@ -914,7 +914,7 @@ app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
 
 // for initializing log object
 app.use( (request, response, next) => {
-	var log = request.log = new Logging( request );
+	request.log = new Logger();
 	request.startTimestamp = Date.now();
 	next();
 });
@@ -989,7 +989,6 @@ app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
         resolveGETBatch( request, response, next );
 	} else {
-        console.log("message - sachin", 200, request.headers["X-Amzn-Trace-Id"], 'SERVER START', 'ANDROID', 102.12234);
         resolveGET( request, response, next );
 	}
 });
@@ -1011,7 +1010,7 @@ app.patch( ['/*'], (request, response, next) => {
 			})
 			.catch( err => {
 				response.status( err.statusCode ).send( err.error );
-				next();
+                next();
 			})
 		;
 		return;

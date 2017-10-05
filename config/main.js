@@ -9,7 +9,7 @@ config.devo = {
     'WEB_APPENGINE_ENDPOINT': 'https://devo-pratilipi.appspot.com/api',
     'ANDROID_APPENGINE_ENDPOINT': 'https://devo-pratilipi.appspot.com/api',
     'BIGQUERY_PROJECT': 'devo-pratilipi',
-    'BIGQUERY_DATASET': 'Sachin',
+    'BIGQUERY_DATASET': 'SACHIN',
     'LOGGING_TABLE':'PRATILIPI_LOGS'
 };
 
