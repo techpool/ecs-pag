@@ -136,7 +136,7 @@ function _forwardToGae( method, request, response, next ) {
 	// headers
 	var ECSHostName = request.headers.host;
 //	ECSHostName = "pr-hindi.ptlp.co";
-	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname' ];
+	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname', 'x-amzn-trace-id' ];
 	var _clean = function( headers ) {
 		var _cleanHeader = function( header ) {
 			switch( header ) {
