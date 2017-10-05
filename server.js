@@ -147,8 +147,10 @@ function _forwardToGae( method, request, response, next ) {
 			}
 		};
 		for( var header in headers ) {
-			headers[ _cleanHeader( header ) ] = headers[ header ];
-			delete headers[header];
+			if( headers[ _cleanHeader( header ) ] !== headers[ header ] ) {
+				headers[ _cleanHeader( header ) ] = headers[ header ];
+				delete headers[header];
+			}
 		}
 		return headers;
 	};
