@@ -25,6 +25,7 @@ class Console {
             id = insertId;
         }
 
+        console.log(JSON.stringify(request.headers));
         var row = {
             insertId: insertId,
             json: {
