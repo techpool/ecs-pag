@@ -22,7 +22,7 @@ config.gamma = {
     'WEB_APPENGINE_ENDPOINT': 'https://gae-gamma.pratilipi.com/api',
     'ANDROID_APPENGINE_ENDPOINT': 'https://gae-android.pratilipi.com',
     'BIGQUERY_PROJECT': 'pratilipi-157910',
-    'BIGQUERY_DATASET': 'Sachin',
+    'BIGQUERY_DATASET': 'SACHIN',
     'LOGGING_TABLE':'PRATILIPI_LOGS'
 };
 
@@ -35,7 +35,7 @@ config.prod = {
     'WEB_APPENGINE_ENDPOINT': 'https://api.pratilipi.com',
     'ANDROID_APPENGINE_ENDPOINT': 'https://gae-android.pratilipi.com',
     'BIGQUERY_PROJECT': 'pratilipi-157910',
-    'BIGQUERY_DATASET': 'Sachin',
+    'BIGQUERY_DATASET': 'SACHIN',
     'LOGGING_TABLE':'PRATILIPI_LOGS'
 };
 

@@ -12,12 +12,10 @@ class Console {
     }
 
     changeAgent(request, service) {
-        request.headers[ "User-Agent" ] = service;
+        request.headers[ "calling-agent" ] = service;
     }
 
     submit(request, response) {
-        console.log( "x-amzn-trace-id :: " + request.headers["x-amzn-trace-id"]);
-
         var id = request.headers["x-amzn-trace-id"];
         var insertId = (new Date()).getTime().toString();
 
@@ -25,14 +23,18 @@ class Console {
             id = insertId;
         }
 
-        console.log(JSON.stringify(request.headers));
+        var agent = request.headers[ "calling-agent" ];
+        if (!agent){
+            agent = request.headers["User-Agent"];
+        }
+
         var row = {
             insertId: insertId,
             json: {
                 ID: id,
-                AGENT: JSON.stringify(request.headers["User-Agent"]),
+                AGENT: agent,
                 RESPONSE_CODE: response.statusCode,
-                RESPONSE: response.body,
+                RESPONSE: JSON.stringify(response.body),
                 LATENCY: new Date() - request.startTimestamp,
                 REQUEST: request.originalUrl,
                 REQUEST_BODY: JSON.stringify(request.body),

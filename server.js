@@ -113,8 +113,6 @@ function _sendResponseToClient( request, response, status, body ) {
 	response.status( resCode ).json( resBody );
 
 	// Logging to gcp logs
-	// TODO : remove later .. sachin
-	request.log.changeAgent(request,"PAG");
 	request.log.submit(request,response);
 
 }
@@ -911,11 +909,6 @@ app.get( "/health", (request, response, next) => {
 	response.send( 'Pag is healthy !' );
 });
 
-// TODO: Remove -> Test middleware
-app.use( (request, response, next) => {
-	console.log( "AMAZON_TRACE_ID_1 :: " + request.headers["x-amzn-trace-id"] );
-	next();
-});
 
 // Setting response.locals
 app.use( (request, response, next) => {
