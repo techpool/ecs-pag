@@ -112,9 +112,6 @@ function _sendResponseToClient( request, response, status, body ) {
 	// Sending response to client
 	response.status( resCode ).json( resBody );
 
-	// Logging to gcp logs
-	request.log.submit(request,response);
-
 }
 
 function _forwardToGae( method, request, response, next ) {
@@ -133,7 +130,7 @@ function _forwardToGae( method, request, response, next ) {
 
 	// headers
 	var ECSHostName = request.headers.host;
-//	ECSHostName = "pr-hindi.ptlp.co";
+//	ECSHostName = "hindi-devo.ptlp.co";
 	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname', 'x-amzn-trace-id' ];
 	var _clean = function( headers ) {
 		var _cleanHeader = function( header ) {
@@ -165,7 +162,8 @@ function _forwardToGae( method, request, response, next ) {
 		var startTimestamp = Date.now();
 		reqModule
 			.on( 'end', function() {
-			  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
+				console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
+				next();
 			})
 			.pipe( response )
 			.on( 'error', (error) => {
@@ -469,12 +467,14 @@ function resolveGET( request, response, next ) {
 		_getHackyService( "GET", request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
 				}
 			});
 		;
@@ -512,7 +512,8 @@ function resolveGET( request, response, next ) {
 				var startTimestamp = Date.now();
 				request.pipe( requestModule( url ) )
 					.on( 'end', function() {
-					  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE GET ${url}` );
+						console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE GET ${url}` );
+						next();
 					})
 					.pipe( response )
 					.on( 'error', function( error ) {
@@ -529,12 +530,14 @@ function resolveGET( request, response, next ) {
 		_getService( "GET", requestUrl, request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
 				}
 			});
 		;
@@ -611,7 +614,8 @@ function resolveGETBatch( request, response, next ) {
 			_getHttpPromise( pageServiceUrl, "GET" )
 				.then( (res) => {
 					var hackyResponseBody = { "req1": { "status": res.statusCode, "response": res.body }, "req2": { "status": 500, "response": UNEXPECTED_SERVER_EXCEPTION } };
-					response.json( hackyResponseBody );
+					response.status(200).json( hackyResponseBody );
+					next();
 				})
 			;
 			return;
@@ -662,11 +666,13 @@ function resolveGETBatch( request, response, next ) {
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = { "status": responseArray[i].statusCode, "response": responseArray[i].body };
 					_sendResponseToClient( request, response, 200, returnResponse );
+					next();
 				}).catch( (error) => {
 					console.log( "ERROR_CAUSE :: Promise.all" );
 					console.log( "ERROR_STATUS :: " + error.statusCode );
 					console.log( "ERROR_MESSAGE :: " + error.message );
 					_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+					next();
 				})
 			;
 		} else {
@@ -727,6 +733,7 @@ function resolveGETBatch( request, response, next ) {
 							return recursiveGET( reqArray, responseObject );
 						} else {
 							_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+							next();
 						}
 					})
 				;
@@ -735,6 +742,7 @@ function resolveGETBatch( request, response, next ) {
 			recursiveGET( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
 				.then( (res) => {
 					_sendResponseToClient( request, response, 200, res );
+					next();
 				})
 			;
 		}
@@ -754,16 +762,19 @@ function resolvePOST( request, response, next ) {
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /<\/?center>/g,"" ) : "{}";
 	}
 
+	// TODO: Remove Hack
 	if( request.path.startsWith( '/follows' ) ) {
 		_getHackyService( "POST", request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
 				}
 			});
 		;
@@ -798,12 +809,9 @@ function resolvePOST( request, response, next ) {
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					var startTimestamp = Date.now();
 					request.pipe( requestModule.post( url, request.body ) )
-						.on( 'error', (error) => {
-							console.log( "ERROR_MESSAGE :: " + JSON.stringify(error) );
-							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
-						})
 						.on('end', function() {
-						  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE POST ${url}` );
+							console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE POST ${url}` );
+							next();
 						})
 						.pipe( response )
 						.on( 'error', function(error) {
@@ -840,7 +848,7 @@ function resolvePOST( request, response, next ) {
 				}
 
 			if( fieldsFlag ) {
-				_resolvePostPatchDelete( methodName, request, response );
+				_resolvePostPatchDelete( methodName, request, response, next );
 			} else {
 				response.send( "Method not yet supported!" );
 			}
@@ -853,7 +861,7 @@ function resolvePOST( request, response, next ) {
 
 }
 
-function _resolvePostPatchDelete( methodName, request, response ) {
+function _resolvePostPatchDelete( methodName, request, response, next ) {
 
 	// Sanity check -> direct request from frontend
 	var api = request.path;
@@ -863,12 +871,14 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 		_getService( methodName, null, request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
+					next();
 				}
 			});
 		;
@@ -970,7 +980,7 @@ app.get( ['/*'], (request, response, next) => {
 app.post( ['/*'], (request, response, next) => {
 	resolvePOST( request, response, next );
 	// TODO: Uncomment once Frontend makes all calls
-	// _resolvePostPatchDelete( "POST", request, response );
+	// _resolvePostPatchDelete( "POST", request, response, next );
 });
 
 // patch
@@ -993,9 +1003,16 @@ app.patch( ['/*'], (request, response, next) => {
 /*
 // delete
 app.delete( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "DELETE", request, response );
+	_resolvePostPatchDelete( "DELETE", request, response, next );
 });
 */
+
+// Bigquery logs
+app.use( (request, response, next ) => {
+	// Logging to bigquery logs
+	request.log.submit( request, response );
+	next();
+});
 
 // Debugging
 app.use( (err, req, res, next) => {
