@@ -32,7 +32,7 @@ const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at ser
 const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
 
-const Logger = require('./util/Console').init();
+const Logger = require('./util/Console').init(mainConfig);
 
 Array.prototype.contains = function (obj) {
     return this.indexOf(obj) > -1;

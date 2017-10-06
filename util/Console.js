@@ -1,4 +1,3 @@
-const mainConfig = require( './../config/main' )[ process.env.STAGE || 'local' ];
 const bigqueryClient = require('@google-cloud/bigquery');
 
 var bigquery;
@@ -7,7 +6,7 @@ var startTimestamp;
 
 class Console {
 
-    static init(config) {
+    static init(mainConfig) {
         bigquery = bigqueryClient({projectId: mainConfig.BIGQUERY_PROJECT}).dataset(mainConfig.BIGQUERY_DATASET);
         table = bigquery.table(mainConfig.LOGGING_TABLE);
         return this;
@@ -78,8 +77,8 @@ class Console {
     getIstTime(){
         var UTC = new Date();
         var IST = new Date(UTC.getTime()); // Clone UTC Timestamp
-        IST.setHours(IST.getHours() + 5); // set Hours to 5 hours later
-        IST.setMinutes(IST.getMinutes() + 30); // set Minutes to be 30 minutes later
+        // IST.setHours(IST.getHours() + 5);
+        // IST.setMinutes(IST.getMinutes() + 30);
         var istTime = IST.toString('dddd MMM yyyy h:mm:ss');
         return istTime;
     }
