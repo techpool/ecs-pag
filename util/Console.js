@@ -13,8 +13,20 @@ class Console {
         return this;
     }
 
-    constructor(){
+    constructor(request, response){
         startTimestamp = new Date();
+        var oldSend = response.send;
+        var oldJson = response.json;
+
+        response.send = function(data){
+            response.body = data;
+            oldSend.apply(response, arguments);
+        };
+
+        response.json = function(data){
+            response.body = data;
+            oldJson.apply(response, arguments);
+        };
     }
 
     changeAgent(request) {
@@ -40,7 +52,7 @@ class Console {
                 ID: id,
                 AGENT: agent,
                 RESPONSE_CODE: response.statusCode,
-                RESPONSE: JSON.stringify(response.body),
+                RESPONSE: response.body,
                 LATENCY: new Date() - startTimestamp,
                 REQUEST: request.originalUrl,
                 REQUEST_BODY: JSON.stringify(request.body),

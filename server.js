@@ -892,16 +892,7 @@ app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
 
 // for initializing log object
 app.use( (request, response, next) => {
-	request.log = new Logger();
-
-    response.send = function(data){
-        response.body = data;
-    };
-
-    response.json = function(data){
-        response.body = data;
-    };
-	
+	request.log = new Logger(request,response);
     next();
 });
 
