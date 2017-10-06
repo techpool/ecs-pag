@@ -127,13 +127,14 @@ function _forwardToGae( method, request, response, next ) {
 	// headers
 	var ECSHostName = request.headers.host;
 //	ECSHostName = "hindi-devo.ptlp.co";
-	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname', 'x-amzn-trace-id' ];
+	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname', 'x-amzn-trace-id', 'calling-agent' ];
 	var _clean = function( headers ) {
 		var _cleanHeader = function( header ) {
 			switch( header ) {
 				case "androidversion": return "AndroidVersion";
 				case "androidversionname": return "AndroidVersionName";
 				case "x-amzn-trace-id": return "x-amzn-trace-id";
+				case "calling-agent": return "calling-agent";
 				default: return _normalizeHeaderCase( header );
 			}
 		};
@@ -250,7 +251,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
-	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ] };
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
@@ -285,7 +286,7 @@ function _getHackyAuth( resource, method, request, response ) {
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
-	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ] };
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
@@ -342,7 +343,8 @@ function _getService( method, requestUrl, request, response ) {
 		'Access-Token': response.locals[ "access-token" ],
 		'Client-Type': response.locals[ "client-type" ],
 		'Client-Version': response.locals[ "client-version" ],
-		'User-Agent': response.locals[ "user-agent" ]
+		'User-Agent': response.locals[ "user-agent" ],
+		'calling-agent': response.locals[ "calling-agent" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
@@ -398,7 +400,8 @@ function _getHackyService( method, request, response ) {
 		'Access-Token': response.locals[ "access-token" ],
 		'Client-Type': response.locals[ "client-type" ],
 		'Client-Version': response.locals[ "client-version" ],
-		'User-Agent': response.locals[ "user-agent" ]
+		'User-Agent': response.locals[ "user-agent" ],
+		'calling-agent': response.locals[ "calling-agent" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
@@ -801,6 +804,7 @@ function resolvePOST( request, response, next ) {
 				.then( (userId) => {
 					request[ "headers" ][ "User-Id" ] = userId;
 					request[ "headers" ][ "Access-Token" ] = response.locals[ "access-token" ];
+					request[ "headers" ][ "calling-agent" ] = response.locals[ "calling-agent" ];
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					var startTimestamp = Date.now();
@@ -940,6 +944,9 @@ app.use( (request, response, next) => {
 
 	// Setting User Agent
 	response.locals[ "user-agent" ] = request.headers[ "user-agent" ] || null;
+
+	// Logging experimentation
+	response.locals[ "calling-agent" ] = process.env.APP_NAME || "PAG";
 
 	next();
 
