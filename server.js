@@ -893,7 +893,16 @@ app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
 // for initializing log object
 app.use( (request, response, next) => {
 	request.log = new Logger();
-	next();
+
+    response.send = function(data){
+        response.body = data;
+    };
+
+    response.json = function(data){
+        response.body = data;
+    };
+	
+    next();
 });
 
 //CORS middleware
@@ -1005,7 +1014,7 @@ app.delete( ['/*'], (request, response, next) => {
 // Bigquery logs
 app.use( (request, response, next ) => {
 	// Logging to bigquery logs
-	request.log.submit( request, response );
+    request.log.submit( request, response );
 	next();
 });
 
