@@ -502,5 +502,28 @@ module.exports = {
 				}
 			}
 		}
-	}
+	},
+
+        // Event Service
+        '/event/list': {
+                'GET': {
+                        'path': '/event/list',
+                        'auth': false
+                }
+        },
+
+        '/event': {
+                'GET': {
+                        'path': '/event',
+                        'auth': false
+                },
+                'POST': {
+                        'methods': {
+                                'POST': {
+                                        'path': '/event'
+                                }
+                        }
+                }
+        }
+
 };
