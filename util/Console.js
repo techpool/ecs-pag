@@ -1,4 +1,5 @@
 const bigqueryClient = require('@google-cloud/bigquery');
+const dateFormat = require('dateformat');
 
 var bigquery;
 var table;
@@ -79,7 +80,7 @@ class Console {
         var IST = new Date(UTC.getTime()); // Clone UTC Timestamp
         // IST.setHours(IST.getHours() + 5);
         // IST.setMinutes(IST.getMinutes() + 30);
-        var istTime = IST.toString('dddd MMM yyyy h:mm:ss');
+        var istTime = dateFormat(IST, "dd mmmm yyyy HH:MM:ss");
         return istTime;
     }
 }
