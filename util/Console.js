@@ -1,18 +1,24 @@
+const mainConfig = require( './../config/main' )[ process.env.STAGE || 'local' ];
 const bigqueryClient = require('@google-cloud/bigquery');
 
 var bigquery;
 var table;
+var startTimestamp;
 
 class Console {
 
     static init(config) {
-        bigquery = bigqueryClient({projectId: config.project}).dataset(config.dataset);
-        table = bigquery.table(config.table);
+        bigquery = bigqueryClient({projectId: mainConfig.BIGQUERY_PROJECT}).dataset(mainConfig.BIGQUERY_DATASET);
+        table = bigquery.table(mainConfig.LOGGING_TABLE);
         return this;
     }
 
-    changeAgent(request, service) {
-        request.headers[ "calling-agent" ] = service;
+    constructor(){
+        startTimestamp = new Date();
+    }
+
+    changeAgent(request) {
+        request.headers[ "calling-agent" ] = process.env.APP_NAME;
     }
 
     submit(request, response) {
@@ -35,10 +41,10 @@ class Console {
                 AGENT: agent,
                 RESPONSE_CODE: response.statusCode,
                 RESPONSE: JSON.stringify(response.body),
-                LATENCY: new Date() - request.startTimestamp,
+                LATENCY: new Date() - startTimestamp,
                 REQUEST: request.originalUrl,
                 REQUEST_BODY: JSON.stringify(request.body),
-                TIMESTAMP: (new Date()).getTime()
+                TIME_STAMP: this.getIstTime()
             }
         };
 
@@ -56,6 +62,15 @@ class Console {
             console.log(`records inserted !` + JSON.stringify(apiResponse));
         }
     };
+
+    getIstTime(){
+        var UTC = new Date();
+        var IST = new Date(UTC.getTime()); // Clone UTC Timestamp
+        IST.setHours(IST.getHours() + 5); // set Hours to 5 hours later
+        IST.setMinutes(IST.getMinutes() + 30); // set Minutes to be 30 minutes later
+        var istTime = IST.toString('dddd MMM yyyy h:mm:ss');
+        return istTime;
+    }
 }
 
 module.exports = Console;
