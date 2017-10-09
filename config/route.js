@@ -508,14 +508,14 @@ module.exports = {
         '/event/list': {
                 'GET': {
                         'path': '/event/list',
-                        'auth': false
+                        'auth': true
                 }
         },
 
         '/event': {
                 'GET': {
                         'path': '/event',
-                        'auth': false
+                        'auth': true
                 },
                 'POST': {
                         'methods': {
