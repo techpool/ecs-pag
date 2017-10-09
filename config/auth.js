@@ -179,4 +179,19 @@ module.exports = {
 			'params': [ 'resource', 'method' ]
 		}
 	},
+
+       '/event/list': {
+                'GET': {
+                        'params': [ 'resource', 'method' ]
+                }
+        },
+
+        '/event': {
+                'POST': {
+                        'params': [ 'resource', 'method' ]
+                },
+                'GET': {
+                        'params': [ 'resource', 'method' ]
+                }
+        }
 };
