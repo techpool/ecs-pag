@@ -1012,6 +1012,7 @@ app.delete( ['/*'], (request, response, next) => {
 // Bigquery logs
 app.use( (request, response, next ) => {
 	// Logging to bigquery logs
+	console.log( "SACHIN_BIGQUERY" + " :: " + request.url + " :: " JSON.stringify( request.headers ) );
     request.log.submit( request, response );
 	next();
 });
