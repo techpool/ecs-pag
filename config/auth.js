@@ -196,6 +196,20 @@ module.exports = {
 		'GET': {
 			'params': [ 'resource', 'id', 'method' ]
 		}
+	},
+
+	//Library Service
+	'/userpratilipi/library/list': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+    },
+
+    //Library Service
+	'/userpratilipi/library': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
 	}
 
 };

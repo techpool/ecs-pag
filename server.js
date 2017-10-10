@@ -838,7 +838,7 @@ function resolvePOST( request, response, next ) {
 							var fieldObject = requiredFields[ j ];
 							var fieldName = Object.keys( fieldObject )[0];
 							var fieldValue = fieldObject[ fieldName ];
-							if( ! request.body[fieldName] || ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
+							if( request.body[fieldName] === undefined || ( fieldValue !== null && fieldValue !== request.body[fieldName] ) ) {
 								fieldsFlag = false;
 								continue loop1;
 							}
@@ -851,7 +851,12 @@ function resolvePOST( request, response, next ) {
 			if( fieldsFlag ) {
 				_resolvePostPatchDelete( methodName, request, response, next );
 			} else {
-				response.send( "Method not yet supported!" );
+				// TO-DO: Remove Hack once new integrations are done
+				if( api === 'userpratilipi/library' ) {
+					_forwardToGae( "POST", request, response, next );
+				} else {
+					response.send( "Method not yet supported!" );
+				}
 			}
 		}
 
