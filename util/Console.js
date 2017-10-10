@@ -41,10 +41,7 @@ class Console {
             id = insertId;
         }
 
-        var agent = request.headers[ "calling-agent" ];
-        if (!agent){
-            agent = request.headers["User-Agent"];
-        }
+        var agent = request.headers[ "calling-agent" ] || request.headers[ "User-Agent" ] || request.headers[ "user-agent" ];
 
         var row = {
             insertId: insertId,
