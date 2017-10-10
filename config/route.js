@@ -504,28 +504,34 @@ module.exports = {
 		}
 	},
 
-        // Event Service
-        '/event/list': {
-                'GET': {
-                        'path': '/event/list',
-                        'auth': true
-                }
-        },
+	// Event Service
+	'/event/list': {
+		'GET': {
+			'path': '/event/list',
+			'auth': true
+		}
+	},
 
-        '/event': {
-                'GET': {
-                        'path': '/event',
-                        'primaryKey': 'eventId',
-                        'auth': true
-                },
-                'POST': {
-                        'methods': {
-                                'POST': {
-                                        'path': '/event',
-                                        'primaryKey': 'eventId',
-                                }
-                        }
-                }
-        }
+	'/event': {
+		'GET': {
+			'path': '/event',
+			'primaryKey': 'eventId',
+			'auth': true
+		},
+		'POST': {
+			'methods': {
+				'PATCH': {
+					'path': '/event',
+					'primaryKey': 'eventId',
+					'requiredFields': [
+						{ 'eventId': null }
+					]
+				},
+				'POST': {
+					'path': '/event'
+				}
+			}
+		}
+	}
 
 };

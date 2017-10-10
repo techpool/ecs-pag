@@ -180,18 +180,22 @@ module.exports = {
 		}
 	},
 
-       '/event/list': {
-                'GET': {
-                        'params': [ 'resource', 'method', 'language' ]
-                }
-        },
+	'/event/list': {
+		'GET': {
+			'params': [ 'resource', 'method', 'language' ]
+		}
+    },
 
-        '/event': {
-                'POST': {
-                        'params': [ 'resource', 'method', 'id' ]
-                },
-                'GET': {
-                        'params': [ 'resource', 'method', 'id' ]
-                }
-        }
+	'/event': {
+		'PATCH': {
+			'params': [ 'resource', 'id', 'method' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		},
+		'GET': {
+			'params': [ 'resource', 'id', 'method' ]
+		}
+	}
+
 };
