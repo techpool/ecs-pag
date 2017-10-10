@@ -532,6 +532,29 @@ module.exports = {
 				}
 			}
 		}
+	},
+
+	//Library Service
+	'/userpratilipi/library/list' : {
+		'GET': {
+			'path': '/userpratilipi/library/list',
+			'auth': true
+		}
+	},
+
+	//Library Service
+	'/userpratilipi/library' : {
+		'POST': {
+			'methods': {
+				'POST' : {
+					'path' : '/userpratilipi/library',
+					'auth': true,
+					'requiredFields': [
+						{ 'addedToLib': null }
+					]
+				}
+			}
+		}
 	}
 
 };

@@ -791,7 +791,6 @@ function resolvePOST( request, response, next ) {
 		c.	send request to that method depending on the method selected
 	3. pipe is required for image requests
 	*/
-
 	var api = request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
 	if( isApiSupported ) {
@@ -851,7 +850,12 @@ function resolvePOST( request, response, next ) {
 			if( fieldsFlag ) {
 				_resolvePostPatchDelete( methodName, request, response, next );
 			} else {
-				response.send( "Method not yet supported!" );
+				// TO-DO: Remove Hack once new integrations are done
+				if( api === '/userpratilipi/library' ) {
+					_forwardToGae( "POST", request, response, next );
+				} else {
+					response.send( "Method not yet supported!" );
+				}
 			}
 		}
 
