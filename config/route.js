@@ -535,7 +535,7 @@ module.exports = {
 	},
 
 	//Library Service
-	'userpratilipi/library/list' : {
+	'/userpratilipi/library/list' : {
 		'GET': {
 			'path': 'userpratilipi/library/list',
 			'auth': true
@@ -543,7 +543,7 @@ module.exports = {
 	},
 
 	//Library Service
-	'userpratilipi/library' : {
+	'/userpratilipi/library' : {
 		'POST': {
 			'methods': {
 				'POST' : {
