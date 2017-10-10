@@ -333,11 +333,6 @@ function _getService( method, requestUrl, request, response ) {
 	var params = isGETRequest ? urlQueryParams : request.body;
 	var primaryContentId = params[ primaryKey ] ? params[ primaryKey ] : null;
 
-	if( primaryContentId ) {
-		delete urlQueryParams[ primaryKey ];
-		delete request.body[ primaryKey ];
-	}
-
 	// headers
 	var headers = {
 		'Access-Token': response.locals[ "access-token" ],
