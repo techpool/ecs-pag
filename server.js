@@ -333,6 +333,12 @@ function _getService( method, requestUrl, request, response ) {
 	var params = isGETRequest ? urlQueryParams : request.body;
 	var primaryContentId = params[ primaryKey ] ? params[ primaryKey ] : null;
 
+	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
+	if( primaryContentId && servicePath.indexOf( "$primaryContentId" ) > -1 ) {
+		delete urlQueryParams[ primaryKey ];
+		delete request.body[ primaryKey ];
+	}
+
 	// headers
 	var headers = {
 		'Access-Token': response.locals[ "access-token" ],
@@ -351,7 +357,7 @@ function _getService( method, requestUrl, request, response ) {
 	if( isGETRequest && routeConfig[api]["GET"].auth !== undefined ) isAuthRequired = routeConfig[api]["GET"].auth;
 	if( ! isGETRequest && routeConfig[api]["POST"]["methods"][method].auth !== undefined ) isAuthRequired = routeConfig[api]["POST"]["methods"][method].auth;
 
-	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
+
 
 	// TODO: Better implementation
 	if( isGETRequest && routeConfig[api]["GET"][ "copyParam" ] ) {
