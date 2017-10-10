@@ -182,16 +182,16 @@ module.exports = {
 
        '/event/list': {
                 'GET': {
-                        'params': [ 'resource', 'method' ]
+                        'params': [ 'resource', 'method', 'language' ]
                 }
         },
 
         '/event': {
                 'POST': {
-                        'params': [ 'resource', 'method' ]
+                        'params': [ 'resource', 'method', 'id' ]
                 },
                 'GET': {
-                        'params': [ 'resource', 'method' ]
+                        'params': [ 'resource', 'method', 'id' ]
                 }
         }
 };

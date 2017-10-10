@@ -515,12 +515,14 @@ module.exports = {
         '/event': {
                 'GET': {
                         'path': '/event',
+                        'primaryKey': 'eventId',
                         'auth': true
                 },
                 'POST': {
                         'methods': {
                                 'POST': {
-                                        'path': '/event'
+                                        'path': '/event',
+                                        'primaryKey': 'eventId',
                                 }
                         }
                 }
