@@ -410,6 +410,8 @@ function _getHackyService( method, request, response ) {
 	var servicePath;
 	if( request.path.startsWith( '/follows' ) ) {
 		servicePath = "/follows";
+	} else if( request.path.startsWith( '/devices' ) ) {
+		servicePath = "/devices";
 	}
 
 	var authPromise = _getHackyAuth( servicePath, method, request, response );
@@ -763,7 +765,7 @@ function resolvePOST( request, response, next ) {
 	}
 
 	// TODO: Remove Hack
-	if( request.path.startsWith( '/follows' ) ) {
+	if( request.path.startsWith( '/follows' ) || request.path.startsWith( '/devices' ) ) {
 		_getHackyService( "POST", request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
@@ -1002,6 +1004,24 @@ app.patch( ['/*'], (request, response, next) => {
 				response.status( err.statusCode ).send( err.error );
 				next();
 			})
+		;
+		return;
+	}
+	// TODO: Remove Hack
+	if( request.path.startsWith( '/devices' ) ) {
+		_getHackyService( "PATCH", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
+				}
+			});
 		;
 		return;
 	}
