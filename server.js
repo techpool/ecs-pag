@@ -281,8 +281,13 @@ function _getHackyAuth( resource, method, request, response ) {
 	authParams[ "resource" ] = encodeURIComponent( resource );
 	authParams[ "method" ] = method;
 
-	if( request.path.match(/\d\d+/g) )
-		authParams[ "id" ] = request.path.match(/\d\d+/g)[0];
+	var paths = request.path.split('/');
+	for( var i = paths.length - 1; i >= 0; i-- ) {
+		if( /^\d+$/.test( paths[ i ] ) ) {
+			authParams[ "id" ] = paths[ i ];
+			break;
+		}
+	}
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
@@ -408,8 +413,12 @@ function _getHackyService( method, request, response ) {
 		headers[ "Version" ] = request.headers.version;
 
 	var servicePath;
-	if( request.path.startsWith( '/follows' ) ) {
+	if( request.path.includes( '/follows' ) ) {
 		servicePath = "/follows";
+	} else if( request.path.includes( '/devices' ) ) {
+		servicePath = "/devices";
+	} else if( request.path.includes( '/social' ) ) {
+		servicePath = "/social";
 	}
 
 	var authPromise = _getHackyAuth( servicePath, method, request, response );
@@ -461,9 +470,14 @@ function resolveGET( request, response, next ) {
 		return;
 	}
 
+	// TODO: Remove Hack
+	if( request.path === "/pratilipi/list" && _getUrlParameter( request.url, "eventId" ) ) {
+		request.path = "/event/pratilipi";
+		request.url = "/event/pratilipi" + "?" + request.url.split( "?" )[1];
+	}
 
 
-	if( request.path.startsWith('/follows' ) ) {
+	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
 		_getHackyService( "GET", request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
@@ -763,7 +777,7 @@ function resolvePOST( request, response, next ) {
 	}
 
 	// TODO: Remove Hack
-	if( request.path.startsWith( '/follows' ) ) {
+	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
 		_getHackyService( "POST", request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
@@ -1005,14 +1019,50 @@ app.patch( ['/*'], (request, response, next) => {
 		;
 		return;
 	}
+	// TODO: Remove Hack
+	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+		_getHackyService( "PATCH", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
+				}
+			});
+		;
+		return;
+	}
 });
 
-/*
+
 // delete
 app.delete( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "DELETE", request, response, next );
+	// _resolvePostPatchDelete( "DELETE", request, response, next );
+	// TODO: Remove Hack
+	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+		_getHackyService( "DELETE", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
+				}
+			});
+		;
+		return;
+	}
 });
-*/
+
 
 // Bigquery logs
 app.use( (request, response, next ) => {
