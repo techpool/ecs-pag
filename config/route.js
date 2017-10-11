@@ -537,7 +537,11 @@ module.exports = {
 	'/event/pratilipi': {
 		'GET': {
 			'path': '/event/pratilipi',
-			'auth': true
+			'auth': true,
+			'primaryKey': 'eventId',
+			'requiredFields': [
+				{ 'eventId': null }
+			]
 		}
 	},
 
