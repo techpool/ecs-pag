@@ -209,11 +209,11 @@ function _getHttpPromise( uri, method, headers, body ) {
 		for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
 		return copyObj;
 	};
-	console.log( 'HTTP :: ' + method + " :: " + genericReqOptions.uri + " :: " + JSON.stringify( genericReqOptions.headers ) + " :: " + JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) );
+	console.log( `HTTP_REQUEST :: ${ method } :: ${ genericReqOptions.uri } :: ${ JSON.stringify( genericReqOptions.headers ) } :: ${ JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) }` );
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
-			console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR ${method} ${uri}` );
+			console.log( `HTTP_RESPONSE :: ${ JSON.stringify( response ) } :: TIME_TAKEN ${ Date.now() - startTimestamp }` );
 			return response;
 		})
 	;
@@ -255,7 +255,6 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
-			console.log(`DEBUGGING: ${JSON.stringify(authResponse)}`);
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
 			var statusCode = authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
@@ -764,6 +763,18 @@ function resolveGETBatch( request, response, next ) {
 }
 
 function resolvePOST( request, response, next ) {
+
+	// // TODO: Remove once library migration is done
+	// if( request.path === '/userpratilipi/library' ) {
+	// 	response.status( 500 ).json( UNEXPECTED_SERVER_EXCEPTION );
+	// 	return;
+	// }
+
+	// // TODO: Remove once event migration is done
+	// if( request.path === '/event' ) {
+	// 	response.status( 500 ).json( UNEXPECTED_SERVER_EXCEPTION );
+	// 	return;
+	// }
 
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
