@@ -470,7 +470,7 @@ function resolveGET( request, response, next ) {
 
 
 
-	if( request.path.startsWith('/follows' ) ) {
+	if( /^(\/v\d+.*)?(\/devices.*||\/follows.*)$/.test(request.path) ) {
 		_getHackyService( "GET", request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
@@ -770,7 +770,7 @@ function resolvePOST( request, response, next ) {
 	}
 
 	// TODO: Remove Hack
-	if( request.path.startsWith( '/follows' ) || request.path.startsWith( '/devices' ) ) {
+	if( /^(\/v\d+.*)?(\/devices.*||\/follows.*)$/.test(request.path) ) {
 		_getHackyService( "POST", request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
@@ -1013,7 +1013,7 @@ app.patch( ['/*'], (request, response, next) => {
 		return;
 	}
 	// TODO: Remove Hack
-	if( request.path.startsWith( '/devices' ) ) {
+	if( /^(\/v\d+.*)?(\/devices.*||\/follows.*)$/.test(request.path) ) {
 		_getHackyService( "PATCH", request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
