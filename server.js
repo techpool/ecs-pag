@@ -765,6 +765,18 @@ function resolveGETBatch( request, response, next ) {
 
 function resolvePOST( request, response, next ) {
 
+	// TODO: Remove once library migration is done
+	if( request.path === '/userpratilipi/library' ) {
+		response.status( 500 ).json( { "message": "Yolo" } );
+		return;
+	}
+
+	// TODO: Remove once event migration is done
+	if( request.path === '/event' ) {
+		response.status( 500 ).json( { "message": "Yolo" } );
+		return;
+	}
+
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
 	// body: content
