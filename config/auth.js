@@ -139,6 +139,83 @@ module.exports = {
 		'POST': {
 			'params': [ 'resource', 'method', 'parentId' ]
 		}
+	},
+	
+	'/blog-scraper/search': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
+	'/blog-scraper': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		},
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
+	'/blog-scraper/$primaryContentId': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
+	'/blog-scraper/$primaryContentId/scrape': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
+	'/blog-scraper/$primaryContentId/publish': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
+	'/blog-scraper/$primaryContentId/create': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/event/list': {
+		'GET': {
+			'params': [ 'resource', 'method', 'language' ]
+		}
+    },
+
+	'/event': {
+		'PATCH': {
+			'params': [ 'resource', 'id', 'method' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		},
+		'GET': {
+			'params': [ 'resource', 'id', 'method' ]
+		}
+	},
+
+	'/event/pratilipi': {
+		'GET': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	//Library Service
+	'/userpratilipi/library/list': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+    },
+
+    //Library Service
+	'/userpratilipi/library': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
 	}
 
 };

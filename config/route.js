@@ -423,6 +423,149 @@ module.exports = {
 			'path': '/user/accesstoken',
 			'auth': false
 		}
-	}
+	},
+	
+	
+	'/blog-scraper/search': {
+		'GET': {
+			'path': '/blog-scraper/search',
+			'auth': true
+		}
+	},
+	
+	'/blog-scraper': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scraper',
+					'auth': true
+				}
+			}
+		},
+		'GET': {
+			'path': '/blog-scraper',
+			'auth': true
+		}
+	},
+
+	'/blog-scraper/blogpost/list': {
+		'GET': {
+			'path': '/blog-scraper/$primaryContentId',
+			'auth': true,
+			'primaryKey': 'blogId',
+			'requiredFields': [
+				{ 'blogId': null }
+			]
+		}
+	},
+	
+	'/blog-scraper/blogpost/scrape': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scraper/$primaryContentId/scrape',
+					'auth': true,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	},
+	
+	'/blog-scraper/blogpost/publish': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scraper/$primaryContentId/publish',
+					'auth': true,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	},
+	
+	'/blog-scraper/blogpost/create': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scraper/$primaryContentId/create',
+					'auth': true,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	},
+
+	// Event Service
+	'/event/list': {
+		'GET': {
+			'path': '/event/list',
+			'auth': true
+		}
+	},
+
+	'/event': {
+		'GET': {
+			'path': '/event',
+			'primaryKey': 'eventId',
+			'auth': true
+		},
+		'POST': {
+			'methods': {
+				'PATCH': {
+					'path': '/event',
+					'primaryKey': 'eventId',
+					'requiredFields': [
+						{ 'eventId': null }
+					]
+				},
+				'POST': {
+					'path': '/event'
+				}
+			}
+		}
+	},
+
+	'/event/pratilipi': {
+		'GET': {
+			'path': '/event/pratilipi',
+			'auth': true,
+			'primaryKey': 'eventId',
+			'requiredFields': [
+				{ 'eventId': null }
+			]
+		}
+	} //,
+
+	// //Library Service
+	// '/userpratilipi/library/list' : {
+	// 	'GET': {
+	// 		'path': '/userpratilipi/library/list',
+	// 		'auth': true
+	// 	}
+	// },
+
+	// //Library Service
+	// '/userpratilipi/library' : {
+	// 	'POST': {
+	// 		'methods': {
+	// 			'POST' : {
+	// 				'path' : '/userpratilipi/library',
+	// 				'auth': true,
+	// 				'requiredFields': [
+	// 					{ 'addedToLib': null }
+	// 				]
+	// 			}
+	// 		}
+	// 	}
+	// }
 
 };

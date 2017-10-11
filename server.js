@@ -32,6 +32,7 @@ const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at ser
 const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
 
+const Logger = require('./util/Console').init(mainConfig);
 
 /*  TODO: Sachin
 const consoleLogger = require('./util/Console').init({
@@ -117,9 +118,6 @@ function _sendResponseToClient( request, response, status, body ) {
 	// Sending response to client
 	response.status( resCode ).json( resBody );
 
-	// Logging to gcp logs
-	request.log.submit( resCode, JSON.stringify( resBody ).length );
-
 }
 
 function _forwardToGae( method, request, response, next ) {
@@ -138,19 +136,23 @@ function _forwardToGae( method, request, response, next ) {
 
 	// headers
 	var ECSHostName = request.headers.host;
-//	ECSHostName = "pr-hindi.ptlp.co";
-	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname' ];
+//	ECSHostName = "hindi-devo.ptlp.co";
+	var validHeaders = [ 'content-type', 'user-agent', 'androidversion', 'androidversionname', 'x-amzn-trace-id', 'calling-agent' ];
 	var _clean = function( headers ) {
 		var _cleanHeader = function( header ) {
 			switch( header ) {
 				case "androidversion": return "AndroidVersion";
 				case "androidversionname": return "AndroidVersionName";
+				case "x-amzn-trace-id": return "x-amzn-trace-id";
+				case "calling-agent": return "calling-agent";
 				default: return _normalizeHeaderCase( header );
 			}
 		};
 		for( var header in headers ) {
-			headers[ _cleanHeader( header ) ] = headers[ header ];
-			delete headers[header];
+			if( headers[ _cleanHeader( header ) ] !== headers[ header ] ) {
+				headers[ _cleanHeader( header ) ] = headers[ header ];
+				delete headers[header];
+			}
 		}
 		return headers;
 	};
@@ -167,7 +169,8 @@ function _forwardToGae( method, request, response, next ) {
 		var startTimestamp = Date.now();
 		reqModule
 			.on( 'end', function() {
-			  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
+				console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE ${method} ${appengineUrl}` );
+				next();
 			})
 			.pipe( response )
 			.on( 'error', (error) => {
@@ -216,11 +219,11 @@ function _getHttpPromise( uri, method, headers, body ) {
 		for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
 		return copyObj;
 	};
-	console.log( 'HTTP :: ' + method + " :: " + genericReqOptions.uri + " :: " + JSON.stringify( genericReqOptions.headers ) + " :: " + JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) );
+	console.log( `HTTP_REQUEST :: ${ method } :: ${ genericReqOptions.uri } :: ${ JSON.stringify( genericReqOptions.headers ) } :: ${ JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) }` );
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
-			console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR ${method} ${uri}` );
+			console.log( `HTTP_RESPONSE :: ${ JSON.stringify( response ) } :: TIME_TAKEN ${ Date.now() - startTimestamp }` );
 			return response;
 		})
 	;
@@ -258,11 +261,10 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
-	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ] };
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
-			console.log(`DEBUGGING: ${JSON.stringify(authResponse)}`);
 			var isAuthorized = authResponse.body.data[0].isAuthorized;
 			var statusCode = authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
@@ -288,12 +290,17 @@ function _getHackyAuth( resource, method, request, response ) {
 	authParams[ "resource" ] = encodeURIComponent( resource );
 	authParams[ "method" ] = method;
 
-	if( request.path.match(/\d\d+/g) )
-		authParams[ "id" ] = request.path.match(/\d\d+/g)[0];
+	var paths = request.path.split('/');
+	for( var i = paths.length - 1; i >= 0; i-- ) {
+		if( /^\d+$/.test( paths[ i ] ) ) {
+			authParams[ "id" ] = paths[ i ];
+			break;
+		}
+	}
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
-	var headers = { 'Access-Token': response.locals[ "access-token" ] };
+	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ] };
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
@@ -340,7 +347,8 @@ function _getService( method, requestUrl, request, response ) {
 	var params = isGETRequest ? urlQueryParams : request.body;
 	var primaryContentId = params[ primaryKey ] ? params[ primaryKey ] : null;
 
-	if( primaryContentId ) {
+	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
+	if( primaryContentId && servicePath.indexOf( "$primaryContentId" ) > -1 ) {
 		delete urlQueryParams[ primaryKey ];
 		delete request.body[ primaryKey ];
 	}
@@ -350,7 +358,8 @@ function _getService( method, requestUrl, request, response ) {
 		'Access-Token': response.locals[ "access-token" ],
 		'Client-Type': response.locals[ "client-type" ],
 		'Client-Version': response.locals[ "client-version" ],
-		'User-Agent': response.locals[ "user-agent" ]
+		'User-Agent': response.locals[ "user-agent" ],
+		'calling-agent': response.locals[ "calling-agent" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
@@ -362,7 +371,7 @@ function _getService( method, requestUrl, request, response ) {
 	if( isGETRequest && routeConfig[api]["GET"].auth !== undefined ) isAuthRequired = routeConfig[api]["GET"].auth;
 	if( ! isGETRequest && routeConfig[api]["POST"]["methods"][method].auth !== undefined ) isAuthRequired = routeConfig[api]["POST"]["methods"][method].auth;
 
-	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
+
 
 	// TODO: Better implementation
 	if( isGETRequest && routeConfig[api]["GET"][ "copyParam" ] ) {
@@ -406,14 +415,19 @@ function _getHackyService( method, request, response ) {
 		'Access-Token': response.locals[ "access-token" ],
 		'Client-Type': response.locals[ "client-type" ],
 		'Client-Version': response.locals[ "client-version" ],
-		'User-Agent': response.locals[ "user-agent" ]
+		'User-Agent': response.locals[ "user-agent" ],
+		'calling-agent': response.locals[ "calling-agent" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
 
 	var servicePath;
-	if( request.path.startsWith( '/follows' ) ) {
+	if( request.path.includes( '/follows' ) ) {
 		servicePath = "/follows";
+	} else if( request.path.includes( '/devices' ) ) {
+		servicePath = "/devices";
+	} else if( request.path.includes( '/social' ) ) {
+		servicePath = "/social";
 	}
 
 	var authPromise = _getHackyAuth( servicePath, method, request, response );
@@ -465,23 +479,30 @@ function resolveGET( request, response, next ) {
 		return;
 	}
 
-
-
-	if( request.path.startsWith('/follows' ) ) {
-		_getHackyService( "GET", request, response )
-			.then( (serviceResponse) => {
-				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-			}, (httpError) => {
-				// httpError will be null if Auth has rejected Promise
-				if( httpError ) {
-					console.log( "ERROR_STATUS :: " + httpError.statusCode );
-					console.log( "ERROR_MESSAGE :: " + httpError.message );
-					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-				}
-			});
-		;
-		return ;
+	// TODO: Remove Hack
+	if( request.path === "/pratilipi/list" && _getUrlParameter( request.url, "eventId" ) ) {
+		request.path = "/event/pratilipi";
+		request.url = "/event/pratilipi" + "?" + request.url.split( "?" )[1];
 	}
+
+
+	// if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+	// 	_getHackyService( "GET", request, response )
+	// 		.then( (serviceResponse) => {
+	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+	// 			next();
+	// 		}, (httpError) => {
+	// 			// httpError will be null if Auth has rejected Promise
+	// 			if( httpError ) {
+	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
+	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
+	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+	// 				next();
+	// 			}
+	// 		});
+	// 	;
+	// 	return ;
+	// }
 
 
 	/*
@@ -513,7 +534,8 @@ function resolveGET( request, response, next ) {
 				var startTimestamp = Date.now();
 				request.pipe( requestModule( url ) )
 					.on( 'end', function() {
-					  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE GET ${url}` );
+						console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE GET ${url}` );
+						next();
 					})
 					.pipe( response )
 					.on( 'error', function( error ) {
@@ -530,12 +552,14 @@ function resolveGET( request, response, next ) {
 		_getService( "GET", requestUrl, request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
 				}
 			});
 		;
@@ -612,7 +636,8 @@ function resolveGETBatch( request, response, next ) {
 			_getHttpPromise( pageServiceUrl, "GET" )
 				.then( (res) => {
 					var hackyResponseBody = { "req1": { "status": res.statusCode, "response": res.body }, "req2": { "status": 500, "response": UNEXPECTED_SERVER_EXCEPTION } };
-					response.json( hackyResponseBody );
+					response.status(200).json( hackyResponseBody );
+					next();
 				})
 			;
 			return;
@@ -663,11 +688,13 @@ function resolveGETBatch( request, response, next ) {
 					for( var i = 0; i < responseArray.length; i++ )
 						returnResponse[ requestArray[i].name ] = { "status": responseArray[i].statusCode, "response": responseArray[i].body };
 					_sendResponseToClient( request, response, 200, returnResponse );
+					next();
 				}).catch( (error) => {
 					console.log( "ERROR_CAUSE :: Promise.all" );
 					console.log( "ERROR_STATUS :: " + error.statusCode );
 					console.log( "ERROR_MESSAGE :: " + error.message );
 					_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+					next();
 				})
 			;
 		} else {
@@ -728,6 +755,7 @@ function resolveGETBatch( request, response, next ) {
 							return recursiveGET( reqArray, responseObject );
 						} else {
 							_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+							next();
 						}
 					})
 				;
@@ -736,6 +764,7 @@ function resolveGETBatch( request, response, next ) {
 			recursiveGET( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
 				.then( (res) => {
 					_sendResponseToClient( request, response, 200, res );
+					next();
 				})
 			;
 		}
@@ -743,6 +772,18 @@ function resolveGETBatch( request, response, next ) {
 }
 
 function resolvePOST( request, response, next ) {
+
+	// // TODO: Remove once library migration is done
+	// if( request.path === '/userpratilipi/library' ) {
+	// 	response.status( 500 ).json( UNEXPECTED_SERVER_EXCEPTION );
+	// 	return;
+	// }
+
+	// // TODO: Remove once event migration is done
+	// if( request.path === '/event' ) {
+	// 	response.status( 500 ).json( UNEXPECTED_SERVER_EXCEPTION );
+	// 	return;
+	// }
 
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
@@ -755,21 +796,24 @@ function resolvePOST( request, response, next ) {
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /<\/?center>/g,"" ) : "{}";
 	}
 
-	if( request.path.startsWith( '/follows' ) ) {
-		_getHackyService( "POST", request, response )
-			.then( (serviceResponse) => {
-				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-			}, (httpError) => {
-				// httpError will be null if Auth has rejected Promise
-				if( httpError ) {
-					console.log( "ERROR_STATUS :: " + httpError.statusCode );
-					console.log( "ERROR_MESSAGE :: " + httpError.message );
-					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-				}
-			});
-		;
-		return;
-	}
+	// // TODO: Remove Hack
+	// if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+	// 	_getHackyService( "POST", request, response )
+	// 		.then( (serviceResponse) => {
+	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+	// 			next();
+	// 		}, (httpError) => {
+	// 			// httpError will be null if Auth has rejected Promise
+	// 			if( httpError ) {
+	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
+	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
+	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+	// 				next();
+	// 			}
+	// 		});
+	// 	;
+	// 	return;
+	// }
 
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
@@ -781,7 +825,6 @@ function resolvePOST( request, response, next ) {
 		c.	send request to that method depending on the method selected
 	3. pipe is required for image requests
 	*/
-
 	var api = request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api].POST;
 	if( isApiSupported ) {
@@ -795,16 +838,14 @@ function resolvePOST( request, response, next ) {
 				.then( (userId) => {
 					request[ "headers" ][ "User-Id" ] = userId;
 					request[ "headers" ][ "Access-Token" ] = response.locals[ "access-token" ];
+					request[ "headers" ][ "calling-agent" ] = response.locals[ "calling-agent" ];
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					var startTimestamp = Date.now();
 					request.pipe( requestModule.post( url, request.body ) )
-						.on( 'error', (error) => {
-							console.log( "ERROR_MESSAGE :: " + JSON.stringify(error) );
-							response.status( 500 ).send( UNEXPECTED_SERVER_EXCEPTION );
-						})
 						.on('end', function() {
-						  console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE POST ${url}` );
+							console.log( `TIME TAKEN ${Date.now() - startTimestamp} msec FOR PIPE POST ${url}` );
+							next();
 						})
 						.pipe( response )
 						.on( 'error', function(error) {
@@ -841,9 +882,14 @@ function resolvePOST( request, response, next ) {
 				}
 
 			if( fieldsFlag ) {
-				_resolvePostPatchDelete( methodName, request, response );
+				_resolvePostPatchDelete( methodName, request, response, next );
 			} else {
-				response.send( "Method not yet supported!" );
+				// TO-DO: Remove Hack once new integrations are done
+				if( api === '/userpratilipi/library' ) {
+					_forwardToGae( "POST", request, response, next );
+				} else {
+					response.send( "Method not yet supported!" );
+				}
 			}
 		}
 
@@ -854,7 +900,7 @@ function resolvePOST( request, response, next ) {
 
 }
 
-function _resolvePostPatchDelete( methodName, request, response ) {
+function _resolvePostPatchDelete( methodName, request, response, next ) {
 
 	// Sanity check -> direct request from frontend
 	var api = request.path;
@@ -864,12 +910,14 @@ function _resolvePostPatchDelete( methodName, request, response ) {
 		_getService( methodName, null, request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
+					next();
 				}
 			});
 		;
@@ -887,9 +935,8 @@ app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
 
 // for initializing log object
 app.use( (request, response, next) => {
-	var log = request.log = new Logging( request );
-	request.startTimestamp = Date.now();
-	next();
+	request.log = new Logger(request,response);
+    next();
 });
 
 //CORS middleware
@@ -909,6 +956,7 @@ app.options( "/*", (request, response, next) => {
 app.get( "/health", (request, response, next) => {
 	response.send( 'Pag is healthy !' );
 });
+
 
 // Setting response.locals
 app.use( (request, response, next) => {
@@ -935,6 +983,9 @@ app.use( (request, response, next) => {
 
 	// Setting User Agent
 	response.locals[ "user-agent" ] = request.headers[ "user-agent" ] || null;
+
+	// Logging experimentation
+	response.locals[ "calling-agent" ] = process.env.APP_NAME || "PAG";
 
 	next();
 
@@ -970,7 +1021,7 @@ app.get( ['/*'], (request, response, next) => {
 app.post( ['/*'], (request, response, next) => {
 	resolvePOST( request, response, next );
 	// TODO: Uncomment once Frontend makes all calls
-	// _resolvePostPatchDelete( "POST", request, response );
+	// _resolvePostPatchDelete( "POST", request, response, next );
 });
 
 // patch
@@ -988,14 +1039,58 @@ app.patch( ['/*'], (request, response, next) => {
 		;
 		return;
 	}
+	// // TODO: Remove Hack
+	// if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+	// 	_getHackyService( "PATCH", request, response )
+	// 		.then( (serviceResponse) => {
+	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+	// 			next();
+	// 		}, (httpError) => {
+	// 			// httpError will be null if Auth has rejected Promise
+	// 			if( httpError ) {
+	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
+	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
+	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+	// 				next();
+	// 			}
+	// 		});
+	// 	;
+	// 	return;
+	// }
 });
 
-/*
-// delete
-app.delete( ['/*'], (request, response, next) => {
-	_resolvePostPatchDelete( "DELETE", request, response );
+
+// // delete
+// app.delete( ['/*'], (request, response, next) => {
+// 	// _resolvePostPatchDelete( "DELETE", request, response, next );
+// 	// TODO: Remove Hack
+// 	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+// 		_getHackyService( "DELETE", request, response )
+// 			.then( (serviceResponse) => {
+// 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+// 				next();
+// 			}, (httpError) => {
+// 				// httpError will be null if Auth has rejected Promise
+// 				if( httpError ) {
+// 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+// 					console.log( "ERROR_MESSAGE :: " + httpError.message );
+// 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+// 					next();
+// 				}
+// 			});
+// 		;
+// 		return;
+// 	}
+// });
+
+
+// Bigquery logs
+app.use( (request, response, next ) => {
+	// Logging to bigquery logs
+	console.log( "SACHIN_BIGQUERY" + " :: " + request.url + " :: " + JSON.stringify( request.headers ) );
+    request.log.submit( request, response );
+	next();
 });
-*/
 
 // Debugging
 app.use( (err, req, res, next) => {
