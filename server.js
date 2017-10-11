@@ -764,11 +764,11 @@ function resolveGETBatch( request, response, next ) {
 
 function resolvePOST( request, response, next ) {
 
-	// // TODO: Remove once library migration is done
-	// if( request.path === '/userpratilipi/library' ) {
-	// 	response.status( 500 ).json( UNEXPECTED_SERVER_EXCEPTION );
-	// 	return;
-	// }
+	// TODO: Remove once library migration is done
+	if( request.path === '/userpratilipi/library' ) {
+		response.status( 500 ).json( UNEXPECTED_SERVER_EXCEPTION );
+		return;
+	}
 
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
