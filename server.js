@@ -468,6 +468,11 @@ function resolveGET( request, response, next ) {
 		return;
 	}
 
+	// TODO: Remove Hack
+	if( request.path === "/pratilipi/list" && _getUrlParameter( request.url, "eventId" ) ) {
+		request.path = "/event/pratilipi";
+		request.url = "/event/pratilipi" + "?" + request.url.split( "?" )[1];
+	}
 
 
 	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {

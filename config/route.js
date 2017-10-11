@@ -534,6 +534,13 @@ module.exports = {
 		}
 	},
 
+	'/event/pratilipi': {
+		'GET': {
+			'path': '/event/pratilipi',
+			'auth': true
+		}
+	},
+
 	//Library Service
 	'/userpratilipi/library/list' : {
 		'GET': {

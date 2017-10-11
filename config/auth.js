@@ -198,6 +198,12 @@ module.exports = {
 		}
 	},
 
+	'/event/pratilipi': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
 	//Library Service
 	'/userpratilipi/library/list': {
 		'GET': {
