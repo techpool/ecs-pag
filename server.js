@@ -417,6 +417,8 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/follows";
 	} else if( request.path.includes( '/devices' ) ) {
 		servicePath = "/devices";
+	} else if( request.path.includes( '/social' ) ) {
+		servicePath = "/social";
 	}
 
 	var authPromise = _getHackyAuth( servicePath, method, request, response );
