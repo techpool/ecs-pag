@@ -281,8 +281,13 @@ function _getHackyAuth( resource, method, request, response ) {
 	authParams[ "resource" ] = encodeURIComponent( resource );
 	authParams[ "method" ] = method;
 
-	if( request.path.match(/\d\d+/g) )
-		authParams[ "id" ] = request.path.match(/\d\d+/g)[0];
+	var paths = request.path.split('/');
+	for( var i = paths.length - 1; i >= 0; i-- ) {
+		if( /^\d+$/.test( paths[ i ] ) ) {
+			authParams[ "id" ] = paths[ i ];
+			break;
+		}
+	}
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
