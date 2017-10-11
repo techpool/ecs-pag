@@ -200,7 +200,7 @@ module.exports = {
 
 	'/event/pratilipi': {
 		'GET': {
-			'params': [ 'resource', 'method' ]
+			'params': [ 'resource', 'method', 'id' ]
 		}
 	},
 
