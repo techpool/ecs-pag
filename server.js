@@ -413,9 +413,9 @@ function _getHackyService( method, request, response ) {
 		headers[ "Version" ] = request.headers.version;
 
 	var servicePath;
-	if( request.path.startsWith( '/follows' ) ) {
+	if( request.path.includes( '/follows' ) ) {
 		servicePath = "/follows";
-	} else if( request.path.startsWith( '/devices' ) ) {
+	} else if( request.path.includes( '/devices' ) ) {
 		servicePath = "/devices";
 	}
 
