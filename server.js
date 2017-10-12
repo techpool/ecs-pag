@@ -1045,6 +1045,8 @@ app.patch( ['/*'], (request, response, next) => {
 		;
 		return;
 	}
+
+	response.send( "Api Not supported yet!" );
 });
 
 
@@ -1069,6 +1071,7 @@ app.delete( ['/*'], (request, response, next) => {
 		;
 		return;
 	}
+	response.send( "Api Not supported yet!" );
 });
 
 
