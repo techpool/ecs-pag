@@ -485,24 +485,24 @@ function resolveGET( request, response, next ) {
 		request.url = "/event/pratilipi" + "?" + request.url.split( "?" )[1];
 	}
 
-
-	// if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
-	// 	_getHackyService( "GET", request, response )
-	// 		.then( (serviceResponse) => {
-	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-	// 			next();
-	// 		}, (httpError) => {
-	// 			// httpError will be null if Auth has rejected Promise
-	// 			if( httpError ) {
-	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
-	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
-	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-	// 				next();
-	// 			}
-	// 		});
-	// 	;
-	// 	return ;
-	// }
+	// TODO: Remove if new service being built
+	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+		_getHackyService( "GET", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
+				}
+			});
+		;
+		return ;
+	}
 
 
 	/*
@@ -784,24 +784,24 @@ function resolvePOST( request, response, next ) {
 		request.body[ "jsonObject" ] = request.body[ "jsonObject" ] ? request.body[ "jsonObject" ].replace( /<\/?center>/g,"" ) : "{}";
 	}
 
-	// // TODO: Remove Hack
-	// if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
-	// 	_getHackyService( "POST", request, response )
-	// 		.then( (serviceResponse) => {
-	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-	// 			next();
-	// 		}, (httpError) => {
-	// 			// httpError will be null if Auth has rejected Promise
-	// 			if( httpError ) {
-	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
-	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
-	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-	// 				next();
-	// 			}
-	// 		});
-	// 	;
-	// 	return;
-	// }
+	// TODO: Remove Hack
+	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+		_getHackyService( "POST", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
+				}
+			});
+		;
+		return;
+	}
 
 	/*
 	Decide which method to call internally depending on the required fields provided from the config
@@ -1027,49 +1027,49 @@ app.patch( ['/*'], (request, response, next) => {
 		;
 		return;
 	}
-	// // TODO: Remove Hack
-	// if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
-	// 	_getHackyService( "PATCH", request, response )
-	// 		.then( (serviceResponse) => {
-	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-	// 			next();
-	// 		}, (httpError) => {
-	// 			// httpError will be null if Auth has rejected Promise
-	// 			if( httpError ) {
-	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
-	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
-	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-	// 				next();
-	// 			}
-	// 		});
-	// 	;
-	// 	return;
-	// }
+	// TODO: Remove Hack
+	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+		_getHackyService( "PATCH", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
+				}
+			});
+		;
+		return;
+	}
 });
 
 
-// // delete
-// app.delete( ['/*'], (request, response, next) => {
-// 	// _resolvePostPatchDelete( "DELETE", request, response, next );
-// 	// TODO: Remove Hack
-// 	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
-// 		_getHackyService( "DELETE", request, response )
-// 			.then( (serviceResponse) => {
-// 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-// 				next();
-// 			}, (httpError) => {
-// 				// httpError will be null if Auth has rejected Promise
-// 				if( httpError ) {
-// 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
-// 					console.log( "ERROR_MESSAGE :: " + httpError.message );
-// 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-// 					next();
-// 				}
-// 			});
-// 		;
-// 		return;
-// 	}
-// });
+// delete
+app.delete( ['/*'], (request, response, next) => {
+	// _resolvePostPatchDelete( "DELETE", request, response, next );
+	// TODO: Remove Hack
+	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
+		_getHackyService( "DELETE", request, response )
+			.then( (serviceResponse) => {
+				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				next();
+			}, (httpError) => {
+				// httpError will be null if Auth has rejected Promise
+				if( httpError ) {
+					console.log( "ERROR_STATUS :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					next();
+				}
+			});
+		;
+		return;
+	}
+});
 
 
 // Bigquery logs
