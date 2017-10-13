@@ -473,7 +473,7 @@ module.exports = {
 			}
 		}
 	},
-	
+
 	'/blog-scraper/blogpost/publish': {
 		'POST': {
 			'methods': {
