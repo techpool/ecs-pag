@@ -53,9 +53,9 @@ module.exports = {
 
 	'/author/image/remove': {
 		'POST': {
-			'path': '/image/author/$primaryContentId/profile',
 			'methods': {
 				'DELETE': {
+					'path': '/image/author/$primaryContentId/profile',
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
@@ -67,9 +67,9 @@ module.exports = {
 
 	'/author/cover/remove': {
 		'POST': {
-			'path': '/image/author/$primaryContentId/cover',
 			'methods': {
 				'DELETE': {
+					'path': '/image/author/$primaryContentId/cover',
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
