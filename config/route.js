@@ -53,9 +53,9 @@ module.exports = {
 
 	'/author/image/remove': {
 		'POST': {
-			'path': '/image/author/$primaryContentId/profile',
 			'methods': {
 				'DELETE': {
+					'path': '/image/author/$primaryContentId/profile',
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
@@ -67,9 +67,9 @@ module.exports = {
 
 	'/author/cover/remove': {
 		'POST': {
-			'path': '/image/author/$primaryContentId/cover',
 			'methods': {
 				'DELETE': {
+					'path': '/image/author/$primaryContentId/cover',
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
@@ -80,11 +80,11 @@ module.exports = {
 	},
 
 	'/search': {
-		'GET': { 'path': '/search/search', 'auth': false }
+		'GET': { 'path': '/search/search', 'auth': true }
 	},
 
 	'/search/search': {
-		'GET': { 'path': '/search/search', 'auth': false }
+		'GET': { 'path': '/search/search', 'auth': true }
 	},
 
 	'/search/trending_search': {
@@ -247,28 +247,16 @@ module.exports = {
 		}
 	},
 
-	'/ecs/growth': {
+	'/ecs-gr': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/ecs/growth',
+					'path': '/ecs-gr',
 					'auth': false
 				}
 			}
 		}
 	},
-
-	'/ecs/product': {
-		'POST': {
-			'methods': {
-				'POST': {
-					'path': '/ecs/product',
-					'auth': false
-				}
-			}
-		}
-	},
-
 
 	// UserPratilipi Service
 	'/userpratilipi/review/list': {
@@ -320,6 +308,326 @@ module.exports = {
 				}
 			}
 		}
-	}
+	},
 
+	'/pratilipi/v2/categories/system': {
+		'GET': {
+			'path': '/pratilipi/v2/categories/system',
+			'auth': false
+		}
+	},
+
+
+	// User Apis
+	'/user': {
+		'GET': {
+			'path': '/user',
+			'auth': false
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/register': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/register',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/login': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/login',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/login/facebook': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/login/facebook',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/login/google': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/login/google',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/logout': {
+		'GET': {
+			'path': '/user/logout',
+			'auth': false
+		}
+	},
+
+	'/user/email': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/email',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/passwordupdate': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/passwordupdate',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/verification': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user/verification',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/user/accesstoken': {
+		'GET': {
+			'path': '/user/accesstoken',
+			'auth': false
+		}
+	},
+	
+	
+	'/blog-scraper/search': {
+		'GET': {
+			'path': '/blog-scraper/search',
+			'auth': true
+		}
+	},
+	
+	'/blog-scraper': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scraper',
+					'auth': true
+				}
+			}
+		},
+		'GET': {
+			'path': '/blog-scraper',
+			'auth': true
+		}
+	},
+
+	'/blog-scraper/blogpost/list': {
+		'GET': {
+			'path': '/blog-scraper/$primaryContentId',
+			'auth': true,
+			'primaryKey': 'blogId',
+			'requiredFields': [
+				{ 'blogId': null }
+			]
+		}
+	},
+	
+	'/blog-scraper/blogpost/scrape': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scraper/$primaryContentId/scrape',
+					'auth': true,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/blog-scraper/blogpost/publish': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scraper/$primaryContentId/publish',
+					'auth': true,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/blog-scraper/blogpost/create': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/blog-scraper/$primaryContentId/create',
+					'auth': true,
+					'primaryKey': 'blogId',
+					'requiredFields': [
+						{ 'blogId': null }
+					]
+				}
+			}
+		}
+	},
+
+	// Event Service
+	'/event/list': {
+		'GET': {
+			'path': '/event/list',
+			'auth': true
+		}
+	},
+
+	'/event': {
+		'GET': {
+			'path': '/event',
+			'primaryKey': 'eventId',
+			'auth': true
+		},
+		'POST': {
+			'methods': {
+				'PATCH': {
+					'path': '/event',
+					'primaryKey': 'eventId',
+					'requiredFields': [
+						{ 'eventId': null }
+					]
+				},
+				'POST': {
+					'path': '/event'
+				}
+			}
+		}
+	},
+
+	'/event/pratilipi': {
+		'GET': {
+			'path': '/event/pratilipi',
+			'auth': true,
+			'primaryKey': 'eventId',
+			'requiredFields': [
+				{ 'eventId': null }
+			]
+		}
+	},
+
+	//Library Service
+	'/userpratilipi/library/list' : {
+		'GET': {
+			'path': '/userpratilipi/library/list',
+			'auth': true
+		}
+	},
+
+	//Library Service
+	'/userpratilipi/library' : {
+		'POST': {
+			'methods': {
+				'POST' : {
+					'path' : '/userpratilipi/library',
+					'auth': true,
+					'requiredFields': [
+						{ 'addedToLib': null }
+					]
+				}
+			}
+		}
+	}//,
+
+	// '/pratilipi/content/batch': {
+	// 		'POST': {
+	// 				'methods': {
+	// 						'POST': {
+	// 								'path': '/pratilipi/content/batch',
+	// 								'auth': false
+	// 						}
+	// 				}
+	// 		}
+	// },
+
+	// '/pratilipi/content/chapter/add': {
+	// 		'POST': {
+	// 				'methods': {
+	// 						'POST': {
+	// 								'path': '/pratilipi/content/chapter/add',
+	// 								'auth': false
+	// 						}
+	// 				}
+	// 		}
+	// },
+
+	// '/pratilipi/content/chapter/delete': {
+	// 		'POST': {
+	// 				'methods': {
+	// 						'POST': {
+	// 								'path': '/pratilipi/content/chapter/delete',
+	// 								'auth': false
+	// 						}
+	// 				}
+	// 		}
+	// },
+
+	// '/pratilipi/content/index': {
+	// 		'GET': {
+	// 				'path': '/pratilipi/content/index',
+	// 				'auth': false
+	// 		},
+	// 		'POST': {
+	// 				'methods': {
+	// 						'POST': {
+	// 								'path': '/pratilipi/content/index',
+	// 								'auth': false
+	// 						}
+	// 				}
+	// 		}
+	// },
+
+	// '/pratilipi/content': {
+	// 		'GET': {
+	// 				'path': '/pratilipi/content',
+	// 				'auth': false
+	// 		},
+	// 		'POST': {
+	// 				'methods': {
+	// 						'POST': {
+	// 								'path': '/pratilipi/content',
+	// 								'auth': false
+	// 						}
+	// 				}
+	// 		}
+	// }
 };
