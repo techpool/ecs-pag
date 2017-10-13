@@ -34,6 +34,16 @@ const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.
 
 const Logger = require('./util/Console').init(mainConfig);
 
+/*  TODO: Sachin
+const consoleLogger = require('./util/Console').init({
+	project: mainConfig.BIGQUERY_PROJECT,
+	dataset: mainConfig.BIGQUERY_DATASET,
+	table: mainConfig.LOGGING_TABLE
+});
+
+// const console = new consoleLogger();
+*/
+
 Array.prototype.contains = function (obj) {
     return this.indexOf(obj) > -1;
 };
@@ -475,7 +485,7 @@ function resolveGET( request, response, next ) {
 		request.url = "/event/pratilipi" + "?" + request.url.split( "?" )[1];
 	}
 
-
+	// TODO: Remove if new service being built
 	if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
 		_getHackyService( "GET", request, response )
 			.then( (serviceResponse) => {
@@ -505,7 +515,6 @@ function resolveGET( request, response, next ) {
 	// request.path will be /xxx
 	var api = request.path;
 	var isApiSupported = _isGETApiSupported( request.url );
-	// var isRegexSupported = isRegex(request.url);
 	var isPipeRequired = isApiSupported && routeConfig[api].GET.shouldPipe;
 
 	// For image requests
@@ -763,18 +772,6 @@ function resolveGETBatch( request, response, next ) {
 }
 
 function resolvePOST( request, response, next ) {
-
-	// // TODO: Remove once library migration is done
-	// if( request.path === '/userpratilipi/library' ) {
-	// 	response.status( 500 ).json( UNEXPECTED_SERVER_EXCEPTION );
-	// 	return;
-	// }
-
-	// // TODO: Remove once event migration is done
-	// if( request.path === '/event' ) {
-	// 	response.status( 500 ).json( UNEXPECTED_SERVER_EXCEPTION );
-	// 	return;
-	// }
 
 	// TODO: Remove once everything is fixed
 	// url: /pratilipi/content/batch
@@ -1048,6 +1045,8 @@ app.patch( ['/*'], (request, response, next) => {
 		;
 		return;
 	}
+
+	response.send( "Api Not supported yet!" );
 });
 
 
@@ -1072,6 +1071,7 @@ app.delete( ['/*'], (request, response, next) => {
 		;
 		return;
 	}
+	response.send( "Api Not supported yet!" );
 });
 
 
