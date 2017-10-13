@@ -30,7 +30,7 @@ const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for t
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
 const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
-const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com" ];
+const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com", "android-devo.ptlp.co" ];
 
 const Logger = require('./util/Console').init(mainConfig);
 
@@ -285,6 +285,13 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 function _getHackyAuth( resource, method, request, response ) {
 
+	// TODO : HACK to be removed once auth is fixed with social v2 apis
+//	if( process.env.STAGE !== 'prod' && ( resource === '/reviews' || resource === '/comments' || resource === '/votes' ) ) {
+//		return new Promise( function(resolve,reject) {
+//			resolve(5666005993914368);
+//		});
+//	}
+
 	var authParams = {};
 
 	authParams[ "resource" ] = encodeURIComponent( resource );
@@ -426,8 +433,12 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/follows";
 	} else if( request.path.includes( '/devices' ) ) {
 		servicePath = "/devices";
-	} else if( request.path.includes( '/social' ) ) {
-		servicePath = "/social";
+	} else if( request.path.includes( '/reviews' ) ) {
+		servicePath = "/reviews";
+	} else if( request.path.includes( '/comments' ) ) {
+		servicePath = "/comments";
+	} else if( request.path.includes( '/votes' ) ) {
+		servicePath = "/votes";
 	}
 
 	var authPromise = _getHackyAuth( servicePath, method, request, response );

@@ -53,9 +53,9 @@ module.exports = {
 
 	'/author/image/remove': {
 		'POST': {
-			'path': '/image/author/$primaryContentId/profile',
 			'methods': {
 				'DELETE': {
+					'path': '/image/author/$primaryContentId/profile',
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
@@ -67,9 +67,9 @@ module.exports = {
 
 	'/author/cover/remove': {
 		'POST': {
-			'path': '/image/author/$primaryContentId/cover',
 			'methods': {
 				'DELETE': {
+					'path': '/image/author/$primaryContentId/cover',
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
@@ -473,7 +473,7 @@ module.exports = {
 			}
 		}
 	},
-	
+
 	'/blog-scraper/blogpost/publish': {
 		'POST': {
 			'methods': {
@@ -488,7 +488,7 @@ module.exports = {
 			}
 		}
 	},
-	
+
 	'/blog-scraper/blogpost/create': {
 		'POST': {
 			'methods': {
@@ -566,6 +566,68 @@ module.exports = {
 				}
 			}
 		}
-	}
+	},
 
+	'/pratilipi/content/batch': {
+			'POST': {
+					'methods': {
+							'POST': {
+									'path': '/pratilipi/content/batch',
+									'auth': false
+							}
+					}
+			}
+	},
+
+	'/pratilipi/content/chapter/add': {
+			'POST': {
+					'methods': {
+							'POST': {
+									'path': '/pratilipi/content/chapter/add',
+									'auth': false
+							}
+					}
+			}
+	},
+
+	'/pratilipi/content/chapter/delete': {
+			'POST': {
+					'methods': {
+							'POST': {
+									'path': '/pratilipi/content/chapter/delete',
+									'auth': false
+							}
+					}
+			}
+	},
+
+	'/pratilipi/content/index': {
+			'GET': {
+					'path': '/pratilipi/content/index',
+					'auth': false
+			},
+			'POST': {
+					'methods': {
+							'POST': {
+									'path': '/pratilipi/content/index',
+									'auth': false
+							}
+					}
+			}
+	},
+
+	'/pratilipi/content': {
+			'GET': {
+					'path': '/pratilipi/content',
+					'auth': false
+			},
+			'POST': {
+					'methods': {
+							'POST': {
+									'path': '/pratilipi/content',
+									'auth': false
+							}
+					}
+			}
+	}
 };
