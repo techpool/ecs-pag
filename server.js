@@ -286,11 +286,11 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 function _getHackyAuth( resource, method, request, response ) {
 
 	// TODO : HACK to be removed once auth is fixed with social v2 apis
-	if(resource === '/reviews' || resource === '/comments' || resource === '/votes') {
-		return new Promise( function(resolve,reject) {
-			resolve(5666005993914368);
-		})
-	}
+//	if( process.env.STAGE !== 'prod' && ( resource === '/reviews' || resource === '/comments' || resource === '/votes' ) ) {
+//		return new Promise( function(resolve,reject) {
+//			resolve(5666005993914368);
+//		});
+//	}
 
 	var authParams = {};
 
