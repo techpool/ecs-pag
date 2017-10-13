@@ -426,8 +426,12 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/follows";
 	} else if( request.path.includes( '/devices' ) ) {
 		servicePath = "/devices";
-	} else if( request.path.includes( '/social' ) ) {
-		servicePath = "/social";
+	} else if( request.path.includes( '/reviews' ) ) {
+		servicePath = "/reviews";
+	} else if( request.path.includes( '/comments' ) ) {
+		servicePath = "/comments";
+	} else if( request.path.includes( '/votes' ) ) {
+		servicePath = "/votes";
 	}
 
 	var authPromise = _getHackyAuth( servicePath, method, request, response );
