@@ -285,6 +285,13 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 function _getHackyAuth( resource, method, request, response ) {
 
+	// TODO : HACK to be removed once auth is fixed with social v2 apis
+	if(resource === '/reviews' || resource === '/comments' || resource === '/votes') {
+		return new Promise( function(resolve,reject) {
+			resolve(5666005993914368);
+		})
+	}
+
 	var authParams = {};
 
 	authParams[ "resource" ] = encodeURIComponent( resource );
@@ -426,8 +433,12 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/follows";
 	} else if( request.path.includes( '/devices' ) ) {
 		servicePath = "/devices";
-	} else if( request.path.includes( '/social' ) ) {
-		servicePath = "/social";
+	} else if( request.path.includes( '/reviews' ) ) {
+		servicePath = "/reviews";
+	} else if( request.path.includes( '/comments' ) ) {
+		servicePath = "/comments";
+	} else if( request.path.includes( '/votes' ) ) {
+		servicePath = "/votes";
 	}
 
 	var authPromise = _getHackyAuth( servicePath, method, request, response );
