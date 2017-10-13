@@ -488,7 +488,7 @@ module.exports = {
 			}
 		}
 	},
-	
+
 	'/blog-scraper/blogpost/create': {
 		'POST': {
 			'methods': {
