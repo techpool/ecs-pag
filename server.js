@@ -901,6 +901,11 @@ function resolvePOST( request, response, next ) {
 
 function _resolvePostPatchDelete( methodName, request, response, next ) {
 
+	if( request.path === '/userpratilipi/library' && request.body['lastOpenedPage'] !== undefined ) {
+		_forwardToGae( "POST", request, response, next );
+		return;
+	}
+
 	// Sanity check -> direct request from frontend
 	var api = request.path;
 	var isApiSupported = routeConfig[api] && routeConfig[api]["POST"]["methods"][methodName];
