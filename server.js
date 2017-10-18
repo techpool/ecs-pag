@@ -305,6 +305,12 @@ function _getHackyAuth( resource, method, request, response ) {
 		}
 	}
 
+	if( resource === '/reviews' && method === 'POST' ) {
+		authParams["pratilipiId"] = authParams["id"];
+	}
+
+	
+
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
 	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ] };
