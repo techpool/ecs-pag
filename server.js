@@ -305,6 +305,12 @@ function _getHackyAuth( resource, method, request, response ) {
 		}
 	}
 
+	if( /\/(reviews|comments|votes)/.test( resource ) && method === 'POST' ) {
+		authParams["parentId"] = authParams["id"];
+	}
+
+	
+
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
 	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ] };
@@ -900,6 +906,11 @@ function resolvePOST( request, response, next ) {
 }
 
 function _resolvePostPatchDelete( methodName, request, response, next ) {
+
+	if( request.path === '/userpratilipi/library' && request.body['lastOpenedPage'] !== undefined ) {
+		_forwardToGae( "POST", request, response, next );
+		return;
+	}
 
 	// Sanity check -> direct request from frontend
 	var api = request.path;

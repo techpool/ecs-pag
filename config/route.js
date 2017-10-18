@@ -199,7 +199,7 @@ module.exports = {
 
 	'/userauthor/follow': {
 		'GET': {
-			'path': '/userauthor/follow', 
+			'path': '/userauthor/follow',
 			'auth': true,
 			'requiredFields': [
 				{ 'authorId': null }
@@ -218,15 +218,15 @@ module.exports = {
 	},
 
 	'/userauthor/follow/list': {
-		'GET': { 
+		'GET': {
 			'path': '/userauthor/follow/list',
-			'auth': true 
+			'auth': true
 		}
 	},
 
 	'/follows/isFollowing' : {
 		'GET' : {
-			'path' : '/follows/isFollowing', 
+			'path' : '/follows/isFollowing',
 			'auth': true,
 			'requiredFields': [
 				{ 'referenceId': null },
@@ -424,15 +424,15 @@ module.exports = {
 			'auth': false
 		}
 	},
-	
-	
+
+
 	'/blog-scraper/search': {
 		'GET': {
 			'path': '/blog-scraper/search',
 			'auth': true
 		}
 	},
-	
+
 	'/blog-scraper': {
 		'POST': {
 			'methods': {
@@ -458,7 +458,7 @@ module.exports = {
 			]
 		}
 	},
-	
+
 	'/blog-scraper/blogpost/scrape': {
 		'POST': {
 			'methods': {
