@@ -441,9 +441,11 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/devices";
 	} else if( request.path.includes( '/reviews' ) ) {
 		servicePath = "/reviews";
-	} else if( request.path.includes( '/comments' ) ) {
+	}
+	if( request.path.includes( '/comments' ) ) {
 		servicePath = "/comments";
-	} else if( request.path.includes( '/votes' ) ) {
+	}
+	if( request.path.includes( '/votes' ) ) {
 		servicePath = "/votes";
 	}
 
