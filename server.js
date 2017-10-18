@@ -125,7 +125,7 @@ function _forwardToGae( method, request, response, next ) {
 	var api = request.path;
 
 	// params
-	var params = _getUrlParameters( request.url );
+	var params = _.mapValues( request.query, (value, key) => ( key === 'name' ? encodeURIComponent( qs.escape( value ) ) : value ) );
 	if( response.locals[ "access-token" ] )
 		params[ "accessToken" ] = response.locals[ "access-token" ];
 	if( params[ "requests" ] )
