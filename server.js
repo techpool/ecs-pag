@@ -305,8 +305,8 @@ function _getHackyAuth( resource, method, request, response ) {
 		}
 	}
 
-	if( resource === '/reviews' && method === 'POST' ) {
-		authParams["pratilipiId"] = authParams["id"];
+	if( /\/(reviews|comments|votes)/.test( resource ) && method === 'POST' ) {
+		authParams["parentId"] = authParams["id"];
 	}
 
 	
