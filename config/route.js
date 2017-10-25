@@ -639,5 +639,75 @@ module.exports = {
 							}
 					}
 			}
+	},
+	
+	'/social-connect/contact/profile': {
+	    	'GET': {
+	        	'path': '/image/contact/profile',
+		        'auth': false,
+		        'shouldPipe': true
+	    	}
+	},
+
+	'/social-connect/access_token': {
+		'GET': {
+			'path': '/social-connect/access_token',
+			'auth': true,
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/social-connect/access_token',
+					'requiredFields': []
+				}
+			}
+		}
+	},
+
+	'/social-connect/access_token/unlink': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'PATCH': {
+					'path': '/social-connect/access_token/unlink',
+					'requiredFields': [
+						{ 'unlinkSocialAccount': "true" }
+					]
+				}
+			}
+		}
+	},
+
+	'/social-connect/access_token/remind_me_later': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'PATCH': {
+					'path': '/social-connect/access_token/remind_me_later',
+					'requiredFields': [
+						{ 'updateLastRemindMeLater': "true" }
+					]
+				}
+			}
+		}
+	},
+
+	'/social-connect/contacts': {
+		'GET': {
+			'path': '/social-connect/contacts',
+			'auth': true,
+		}
+	},
+
+	'/social-connect/contacts/invite': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/social-connect/contacts/invite',
+					'requiredFields': []
+				}
+			}
+		}
 	}
 };
