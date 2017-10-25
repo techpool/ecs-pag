@@ -151,9 +151,7 @@ module.exports = {
                 'POST': {
                     'path': '/authors',
                     'requiredFields': [
-                        {'name': null},
-                        {'language': null},
-                        {'userId': 0} // Only AEEs can add Authors
+                        {'language': null}
                     ]
                 }
             }
