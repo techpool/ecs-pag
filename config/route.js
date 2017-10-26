@@ -719,9 +719,9 @@ module.exports = {
 	// Hack
 	'/temp/library': {
 		'GET': {
-			'auth': true,
+			'auth': false,
 			'path': '/library/v1.0/pratilipis/$primaryContentId',
-			'primaryKey': 'pratilipiId'
+			'primaryKey': 'parentId'
 		}
 	},
 
@@ -729,7 +729,7 @@ module.exports = {
 		'GET': {
 			'auth': true,
 			'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
-			'primaryKey': 'pratilipiId'
+			'primaryKey': 'parentId'
 		}
 	}
 

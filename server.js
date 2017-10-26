@@ -644,14 +644,14 @@ function resolveGETBatch( request, response, next ) {
 
 		var id0 = requestArray[0]["api"].substr( requestArray[0]["api"].lastIndexOf( "/" ) + 1 );
 		requestArray[0]["api"] = '/temp/library';
-		requestArray[0]["url"] = '/temp/library?pratilipiId=' + id0;
+		requestArray[0]["url"] = '/temp/library?parentId=' + id0;
 		requestArray[0]["isSupported"] = true;
-		requestArray[0]["isAuthRequired"] = true;
+		requestArray[0]["isAuthRequired"] = false;
 
 		var id2 = requestArray[2]["api"].substr( requestArray[2]["api"].indexOf( "/social/v2.0/pratilipis/" ) + "/social/v2.0/pratilipis/".length );
 		id2 = id2.substr( 0, id2.indexOf( "/" ) );
 		requestArray[2]["api"] = '/temp/social';
-		requestArray[2]["url"] = '/temp/social?pratilipiId=' + id2;
+		requestArray[2]["url"] = '/temp/social?parentId=' + id2;
 		requestArray[2]["isSupported"] = true;
 		requestArray[2]["isAuthRequired"] = true;
 	}
