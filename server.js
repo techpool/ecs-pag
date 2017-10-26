@@ -441,6 +441,8 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/devices";
 	} else if( request.path.includes( '/reviews' ) ) {
 		servicePath = "/reviews";
+	} else if( request.path.includes( '/social-connect' ) ) {
+		servicePath = "/social-connect";
 	}
 	if( request.path.includes( '/comments' ) ) {
 		servicePath = "/comments";
@@ -1021,9 +1023,13 @@ app.use( (request, response, next) => {
 });
 
 app.use( (request, response, next) => {
-	if( /^(\/v\d+.*)?\/(devices|follows|social|library).*$/.test(request.path) ) {
-		var method = request.method.toUpperCase() === 'POST' ? ( request.body["X-HTTP-Method-Override"] !== undefined ? request.body["X-HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
-		console.log(method);
+	if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library).*$/.test(request.path) ) {
+		var method;
+		if( request.body["HTTP-Method-Override"] !== undefined ) {
+			method = request.method.toUpperCase() === 'POST' ? ( request.body["HTTP-Method-Override"] !== undefined ? request.body["HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
+		} else {
+			method = request.method.toUpperCase() === 'POST' ? ( request.headers["HTTP-Method-Override"] !== undefined ? request.headers["HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
+		}
 		_getHackyService( method, request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
