@@ -45,7 +45,7 @@ const consoleLogger = require('./util/Console').init({
 */
 
 Array.prototype.contains = function (obj) {
-    return this.indexOf(obj) > -1;
+	return this.indexOf(obj) > -1;
 };
 
 var _getAppengineEndpoint = function( request ) {
@@ -634,6 +634,28 @@ function resolveGETBatch( request, response, next ) {
 		}
 	}
 
+	// TODO: Remove hack - Introduced by PAG
+	if( requestArray.length === 3 &&
+		requestArray[0]["api"].startsWith( "/library/v1.0/pratilipis/" ) &&
+		requestArray[1]["api"] === "/auth/isAuthorized" &&
+		requestArray[2]["api"].startsWith( "/social/v2.0/pratilipis/" ) ) {
+
+		var id0 = requestArray[0]["api"].substr( requestArray[0]["api"].lastIndexOf( "/" ) + 1 );
+		requestArray[0]["api"] = '/temp/library';
+		requestArray[0]["url"] = '/temp/library?pratilipiId=' + id0;
+		requestArray[0]["isSupported"] = true;
+		requestArray[0]["isAuthRequired"] = true;
+
+		var id2 = requestArray[2]["api"].substr( requestArray[2]["api"].indexOf( "/social/v2.0/pratilipis/" ) + "/social/v2.0/pratilipis/".length );
+		id2 = id2.substr( 0, id2.indexOf( "/" ) );
+		requestArray[2]["api"] = '/temp/social';
+		requestArray[2]["url"] = '/temp/social?pratilipiId=' + id2;
+		requestArray[2]["isSupported"] = true;
+		requestArray[2]["isAuthRequired"] = true;
+	}
+
+
+
 	// TODO: Remove hack: http://android.pratilipi.com/?requests=%7B%22req1%22%3A%22%5C%2Fpage%3Furi%3D%5C%2Fgdvh%3Futm_source%3Dandroid%26utm_campaign%3Dmyprofile_share%26%22%2C%22req2%22%3A%22%5C%2Fpratilipi%3FpratilipiId%3D%24req1.primaryContentId%26%22%7D&
 	if( requestArray.length === 2 &&
 		requestArray[0]["name"] === "req1" &&
@@ -948,7 +970,7 @@ app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
 // for initializing log object
 app.use( (request, response, next) => {
 	request.log = new Logger(request,response);
-    next();
+	next();
 });
 
 //CORS middleware
@@ -1023,9 +1045,9 @@ app.use( (request, response, next) => {
 // get
 app.get( ['/*'], (request, response, next) => {
 	if( request.path === '/' ) {
-        resolveGETBatch( request, response, next );
+		resolveGETBatch( request, response, next );
 	} else {
-        resolveGET( request, response, next );
+		resolveGET( request, response, next );
 	}
 });
 
@@ -1103,7 +1125,7 @@ app.delete( ['/*'], (request, response, next) => {
 app.use( (request, response, next ) => {
 	// Logging to bigquery logs
 	console.log( "SACHIN_BIGQUERY" + " :: " + request.url + " :: " + JSON.stringify( request.headers ) );
-    request.log.submit( request, response );
+	request.log.submit( request, response );
 	next();
 });
 
