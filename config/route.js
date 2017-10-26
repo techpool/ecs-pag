@@ -707,5 +707,30 @@ module.exports = {
 				}
 			}
 		}
+	},
+
+	'/auth/isAuthorized': {
+		'GET': {
+			'auth': false,
+			'path': '/auth/isAuthorized'
+		}
+	},
+
+	// Hack
+	'/temp/library': {
+		'GET': {
+			'auth': true,
+			'path': '/library/v1.0/pratilipis/$primaryContentId',
+			'primaryKey': 'pratilipiId'
+		}
+	},
+
+	'/temp/social': {
+		'GET': {
+			'auth': true,
+			'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
+			'primaryKey': 'pratilipiId'
+		}
 	}
+
 };
