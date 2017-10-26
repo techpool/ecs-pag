@@ -1055,17 +1055,14 @@ app.use( (request, response, next) => {
 		_getHackyService( method, request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-				next();
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-					next();
 				}
 			});
-		;
 		return;
 	}
 	next();
@@ -1102,50 +1099,12 @@ app.patch( ['/*'], (request, response, next) => {
 		;
 		return;
 	}
-	// // TODO: Remove Hack
-	// if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
-	// 	_getHackyService( "PATCH", request, response )
-	// 		.then( (serviceResponse) => {
-	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-	// 			next();
-	// 		}, (httpError) => {
-	// 			// httpError will be null if Auth has rejected Promise
-	// 			if( httpError ) {
-	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
-	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
-	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-	// 				next();
-	// 			}
-	// 		});
-	// 	;
-	// 	return;
-	// }
-
 	response.send( "Api Not supported yet!" );
 });
 
 
 // delete
 app.delete( ['/*'], (request, response, next) => {
-	// _resolvePostPatchDelete( "DELETE", request, response, next );
-	// // TODO: Remove Hack
-	// if( /^(\/v\d+.*)?\/(devices|follows|social).*$/.test(request.path) ) {
-	// 	_getHackyService( "DELETE", request, response )
-	// 		.then( (serviceResponse) => {
-	// 			_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-	// 			next();
-	// 		}, (httpError) => {
-	// 			// httpError will be null if Auth has rejected Promise
-	// 			if( httpError ) {
-	// 				console.log( "ERROR_STATUS :: " + httpError.statusCode );
-	// 				console.log( "ERROR_MESSAGE :: " + httpError.message );
-	// 				_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-	// 				next();
-	// 			}
-	// 		});
-	// 	;
-	// 	return;
-	// }
 	response.send( "Api Not supported yet!" );
 });
 
