@@ -251,11 +251,11 @@ module.exports = {
 		}
 	},
 
-	// '/library/v1.0/pratilipis/$primaryContentId': {
-	// 	'GET': {
- //            'params': [ 'resource', 'method', 'id' ]
- //        }
-	// },
+	'/library/v1.0/pratilipis/$primaryContentId': {
+		'GET': {
+            'params': [ 'resource', 'method' ]
+        }
+	},
 
 	'/social/v2.0/pratilipis/$primaryContentId/reviews/user-review': {
 		'GET': {

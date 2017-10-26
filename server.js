@@ -362,7 +362,7 @@ function _getService( method, requestUrl, request, response ) {
 
 	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
 	if( primaryContentId && servicePath.indexOf( "$primaryContentId" ) > -1 ) {
-		delete urlQueryParams[ primaryKey ];
+		// delete urlQueryParams[ primaryKey ];
 		delete request.body[ primaryKey ];
 	}
 
@@ -646,7 +646,7 @@ function resolveGETBatch( request, response, next ) {
 		requestArray[0]["api"] = '/temp/library';
 		requestArray[0]["url"] = '/temp/library?parentId=' + id0;
 		requestArray[0]["isSupported"] = true;
-		requestArray[0]["isAuthRequired"] = false;
+		requestArray[0]["isAuthRequired"] = true;
 
 		var id2 = requestArray[2]["api"].substr( requestArray[2]["api"].indexOf( "/social/v2.0/pratilipis/" ) + "/social/v2.0/pratilipis/".length );
 		id2 = id2.substr( 0, id2.indexOf( "/" ) );

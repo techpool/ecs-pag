@@ -719,7 +719,7 @@ module.exports = {
 	// Hack
 	'/temp/library': {
 		'GET': {
-			'auth': false,
+			'auth': true,
 			'path': '/library/v1.0/pratilipis/$primaryContentId',
 			'primaryKey': 'parentId'
 		}
