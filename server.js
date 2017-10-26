@@ -1055,12 +1055,16 @@ app.use( (request, response, next) => {
 		_getHackyService( method, request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
+				console.log( "SACHIN_BIGQUERY" + " :: " + request.url + " :: " + JSON.stringify( request.headers ) );
+				request.log.submit( request, response );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
+					console.log( "SACHIN_BIGQUERY" + " :: " + request.url + " :: " + JSON.stringify( request.headers ) );
+					request.log.submit( request, response );
 				}
 			});
 		return;
