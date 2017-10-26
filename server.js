@@ -362,7 +362,7 @@ function _getService( method, requestUrl, request, response ) {
 
 	var servicePath = isGETRequest ? routeConfig[api]["GET"]["path"] : routeConfig[api]["POST"]["methods"][method]["path"];
 	if( primaryContentId && servicePath.indexOf( "$primaryContentId" ) > -1 ) {
-		// delete urlQueryParams[ primaryKey ];
+		delete urlQueryParams[ primaryKey ];
 		delete request.body[ primaryKey ];
 	}
 
