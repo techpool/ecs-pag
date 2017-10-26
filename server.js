@@ -1047,10 +1047,10 @@ app.use( (request, response, next) => {
 app.use( (request, response, next) => {
 	if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library).*$/.test(request.path) ) {
 		var method;
-		if( request.body["HTTP-Method-Override"] !== undefined ) {
-			method = request.method.toUpperCase() === 'POST' ? ( request.body["HTTP-Method-Override"] !== undefined ? request.body["HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
+		if( request.body["X-HTTP-Method-Override"] !== undefined ) {
+			method = request.method.toUpperCase() === 'POST' ? ( request.body["X-HTTP-Method-Override"] !== undefined ? request.body["X-HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
 		} else {
-			method = request.method.toUpperCase() === 'POST' ? ( request.headers["HTTP-Method-Override"] !== undefined ? request.headers["HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
+			method = request.method.toUpperCase() === 'POST' ? ( request.headers["X-HTTP-Method-Override"] !== undefined ? request.headers["X-HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
 		}
 		_getHackyService( method, request, response )
 			.then( (serviceResponse) => {
