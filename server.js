@@ -443,6 +443,8 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/reviews";
 	} else if( request.path.includes( '/social-connect' ) ) {
 		servicePath = "/social-connect";
+	} else if( request.path.includes( '/library' ) ) {
+		servicePath = "/library";
 	}
 	if( request.path.includes( '/comments' ) ) {
 		servicePath = "/comments";
@@ -576,7 +578,7 @@ function hackyGetBatch( request, response, next, requestArray ) {
 	var promiseArray = [];
 			requestArray.forEach( (req) => {
 				promiseArray.push( 
-				_getHttpPromise( 'localhost' + req.url, "GET", request.headers ) );
+				_getHttpPromise( `http://localhost:${mainConfig.SERVICE_PORT}` + req.url, "GET", request.headers ) );
 			});
 
 			// Pretty simple with Promise.all, isn't it?
