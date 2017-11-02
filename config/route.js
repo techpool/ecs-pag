@@ -153,7 +153,7 @@ module.exports = {
 					'requiredFields': [
 						{ 'name': null },
 						{ 'language': null },
-						{ 'userId': 0 } // Only AEEs can add Authors
+						{ 'userId': "0" } // Only AEEs can add Authors
 					]
 				}
 			}
