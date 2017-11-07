@@ -216,6 +216,51 @@ module.exports = {
 		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
+	},
+	
+    	'/social-connect/access_token': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/social-connect/access_token/unlink': {
+		'PATCH': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/social-connect/access_token/remind_me_later': {
+		'PATCH': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/social-connect/contacts' : {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/social-connect/contacts/invite': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/library/v1.0/pratilipis/$primaryContentId': {
+		'GET': {
+            'params': [ 'resource', 'method' ]
+        }
+	},
+
+	'/social/v2.0/pratilipis/$primaryContentId/reviews/user-review': {
+		'GET': {
+            'params': [ 'resource', 'method', 'parentId' ]
+		}
 	}
 
 };
