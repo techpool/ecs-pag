@@ -18,6 +18,11 @@ module.exports = {
     },
 
     '/event/banner': {
+    	'GET': {
+            'path': '/image/event/banner',
+            'auth': false,
+            'shouldPipe': true
+        },
         'POST': {
             'path': '/image/event/banner',
             'shouldPipe': true,
