@@ -6,6 +6,12 @@ module.exports = {
 		}
 	},
 
+	'/image/event/banner': {
+		'POST': {
+			'params': [ 'resource', 'id', 'method' ]
+		}
+	},
+
 	'/image/author/profile': {
 		'POST': {
 			'params': [ 'resource', 'id', 'method' ]
