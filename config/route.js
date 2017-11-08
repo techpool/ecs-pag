@@ -17,6 +17,18 @@ module.exports = {
         }
     },
 
+    '/event/banner': {
+        'POST': {
+            'path': '/image/event/banner',
+            'shouldPipe': true,
+            'methods': {
+                'POST': {
+                    'primaryKey': 'eventId'
+                }
+            }
+        }
+    },
+
     '/author/image': {
         'GET': {
             'path': '/image/author/profile',
