@@ -6,8 +6,8 @@
             "name": "$APP_NAME",
             "image": "$DOCKER_REPO/$APP_NAME:$APP_VERSION",
             "cpu": 128,
-            "memoryReservation": 256,
-            "memory": 512,
+            "memoryReservation": 128,
+            "memory": 256,
             "portMappings": [
                 {
                     "hostPort": 0,
@@ -23,12 +23,6 @@
                     "awslogs-region": "ap-southeast-1"
                 }
             }
-        }
-    ],
-    "placementConstraints": [
-        {
-            "expression": "attribute:instance-category-default == true",
-            "type": "memberOf"
         }
     ]
 }
