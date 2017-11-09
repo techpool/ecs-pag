@@ -34,6 +34,14 @@ module.exports = {
         }
     },
 
+    '/init/banner': {
+    	'GET': {
+            'path': '/image/init/banner',
+            'auth': false,
+            'shouldPipe': true
+        }
+    },
+
     '/author/image': {
         'GET': {
             'path': '/image/author/profile',
