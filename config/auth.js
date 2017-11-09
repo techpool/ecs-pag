@@ -6,6 +6,12 @@ module.exports = {
 		}
 	},
 
+	'/image/pratilipi/content': {
+		'POST': {
+			'params': [ 'resource', 'id', 'method' ]
+		}
+	},
+
 	'/image/event/banner': {
 		'POST': {
 			'params': [ 'resource', 'id', 'method' ]

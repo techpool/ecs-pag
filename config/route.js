@@ -42,6 +42,23 @@ module.exports = {
         }
     },
 
+    '/pratilipi/content/image': {
+        // 'GET': {
+        //     'path': '/image/pratilipi/content',
+        //     'auth': false,
+        //     'shouldPipe': true
+        // },
+        'POST': {
+            'path': '/image/pratilipi/content',
+            'shouldPipe': true,
+            'methods': {
+                'POST': {
+                    'primaryKey': 'pratilipiId'
+                }
+            }
+        }
+    },
+
     '/author/image': {
         'GET': {
             'path': '/image/author/profile',
