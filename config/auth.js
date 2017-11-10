@@ -115,7 +115,7 @@ module.exports = {
 		'GET': {
 			'params': [ 'resource', 'method', 'referenceId' ]
 		}
-    },
+	},
 
 	'/userpratilipi/review/list': {
 		'GET': {
@@ -132,6 +132,63 @@ module.exports = {
 	'/userpratilipi': {
 		'GET': {
 			'params': [ 'resource', 'method', 'pratilipiId' ]
+		}
+	},
+
+	'/user': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method', 'userId' ]
+		}
+	},
+
+	'/user/register': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/user/login': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/user/login/facebook': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/user/login/google': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/user/logout': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/user/email': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/user/passwordupdate': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/user/verification': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
 		}
 	},
 
@@ -196,7 +253,7 @@ module.exports = {
 		'GET': {
 			'params': [ 'resource', 'method', 'language' ]
 		}
-    },
+	},
 
 	'/event': {
 		'PATCH': {
@@ -221,16 +278,16 @@ module.exports = {
 		'GET': {
 			'params': [ 'resource', 'method' ]
 		}
-    },
+	},
 
-    //Library Service
+	//Library Service
 	'/userpratilipi/library': {
 		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
 	
-    	'/social-connect/access_token': {
+		'/social-connect/access_token': {
 		'GET': {
 			'params': [ 'resource', 'method' ]
 		},
@@ -265,13 +322,13 @@ module.exports = {
 
 	'/library/v1.0/pratilipis/$primaryContentId': {
 		'GET': {
-            'params': [ 'resource', 'method' ]
-        }
+			'params': [ 'resource', 'method' ]
+		}
 	},
 
 	'/social/v2.0/pratilipis/$primaryContentId/reviews/user-review': {
 		'GET': {
-            'params': [ 'resource', 'method', 'parentId' ]
+			'params': [ 'resource', 'method', 'parentId' ]
 		}
 	}
 
