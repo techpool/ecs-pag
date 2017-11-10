@@ -372,13 +372,13 @@ module.exports = {
 	'/user': {
 		'GET': {
 			'path': '/user',
-			'auth': false
+			'auth': true
 		},
 		'POST': {
 			'methods': {
 				'POST': {
 					'path': '/user',
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -389,7 +389,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/user/register',
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -400,7 +400,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/user/login',
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -411,7 +411,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/user/login/facebook',
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -422,7 +422,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/user/login/google',
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -431,7 +431,7 @@ module.exports = {
 	'/user/logout': {
 		'GET': {
 			'path': '/user/logout',
-			'auth': false
+			'auth': true
 		}
 	},
 
@@ -440,7 +440,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/user/email',
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -451,7 +451,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/user/passwordupdate',
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -462,7 +462,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/user/verification',
-					'auth': false
+					'auth': true
 				}
 			}
 		}
