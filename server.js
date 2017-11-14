@@ -1067,7 +1067,7 @@ app.get( ['/*'], (request, response, next) => {
 // post
 app.post( ['/*'], (request, response, next) => {
 
-	var stopUserCalls = true;
+	var stopUserCalls = false;
 	if( stopUserCalls ) {
 		if( request.path === '/user' || request.path.startsWith( '/user/' ) ) {
 			return response.status(500).json(UNEXPECTED_SERVER_EXCEPTION);
