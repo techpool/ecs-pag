@@ -502,6 +502,11 @@ function resolveGET( request, response, next ) {
 		return;
 	}
 
+	if( request.path === '/pratilipi/content' && response.locals[ "access-token" ] == null ) {
+		response.status(400).send( INVALID_ARGUMENT_EXCEPTION );
+		return ;
+	}
+
 	// TODO: Remove Hack
 	if( request.path === "/pratilipi/list" && _getUrlParameter( request.url, "eventId" ) ) {
 		request.path = "/event/pratilipi";
