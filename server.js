@@ -1066,6 +1066,14 @@ app.get( ['/*'], (request, response, next) => {
 
 // post
 app.post( ['/*'], (request, response, next) => {
+
+	var stopUserCalls = true;
+	if( stopUserCalls ) {
+		if( request.path === '/user' || request.path.startsWith( '/user/' ) || request.path === '/author' ) {
+			return response.status(500).json(UNEXPECTED_SERVER_EXCEPTION);
+		}
+	}
+
 	resolvePOST( request, response, next );
 	// TODO: Uncomment once Frontend makes all calls
 	// _resolvePostPatchDelete( "POST", request, response, next );
