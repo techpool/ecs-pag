@@ -137,7 +137,7 @@ module.exports = {
 
 	'/user': {
 		'GET': {
-			'params': [ 'resource', 'method' ]
+			'params': [ 'resource', 'method', 'userId' ]
 		},
 		'POST': {
 			'params': [ 'resource', 'method', 'userId' ]
