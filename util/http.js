@@ -18,6 +18,7 @@ const HttpUtil = function() {
 
     const _getRequestPromise = (method, uri, headers, qs, body) => {
         // TODO: Calling agent in header -> Logging in bigquery
+        // TODO: qs.encode
         let options = {
             method: method,
             uri: uri,

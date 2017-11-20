@@ -12,6 +12,8 @@ String.prototype.replaceAll = function(search, replacement) { return this.split(
 
 const ServiceUtil = function() {
 
+    const self = this;
+
     const _getPathConfig = (path) => _.filter(pathConfig, (v, k) => new RegExp(k).test(path))[0];
 
     const _getQuery = (regex, string, matches) =>
@@ -26,7 +28,6 @@ const ServiceUtil = function() {
                 return new Response(404, {message: 'Api not found.'});
 
             const $q = config.$q ? _getQuery(config.$q.match, path, config.$q.group) : {};
-            $qs = $qs || {}, $b = $b || {}, $h = $h || {};
 
             if (config.auth) {
 
@@ -72,12 +73,9 @@ const ServiceUtil = function() {
 
         });
 
-
     // Public Methods
-    this.get = (path, headers, query) => _service('GET', path, headers, query);
-    this.post = (path, headers, body) => _service('POST', path, headers, null, body);
-    this.patch = (path, headers, body) => _service('PATCH', path, headers, null, body);
-    this.delete = (path, headers, body) => _service('DELETE', path, headers, null, body);
+    this.get = ($req) =>
+        _service($req.method, $req.path, $req.$h, $req.$qs, $req.$b);
 
 };
 
