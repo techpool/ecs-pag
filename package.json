@@ -10,6 +10,8 @@
     "@google-cloud/bigquery": "^0.9.6",
     "@google-cloud/trace-agent": "1.0.3",
     "body-parser": "1.17.2",
+    "co": "^4.6.0",
+    "co-express": "^2.0.0",
     "cookie-parser": "^1.4.3",
     "dateformat": "^3.0.2",
     "express": "4.15.2",
