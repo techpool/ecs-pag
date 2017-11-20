@@ -78,6 +78,12 @@ module.exports = {
 		}
 	},
 
+	'/authors/recommendation': {
+		'GET': {
+			'params': [ 'resource', 'method', 'language' ]
+		}
+	},
+
 	'/recommendation/pratilipis': {
 		'GET': {
 			'params': [ 'resource', 'method' ]

@@ -207,6 +207,13 @@ module.exports = {
         }
     },
 
+	'/author/recommend': {
+		'GET': {
+			'path': '/authors/recommendation',
+			'auth': true
+		}
+	},
+
 	'/user-activity/is_add_to_lib': {
 		'GET': { 'path': '/user-activity/is_add_to_lib', 'auth': false }
 	},
