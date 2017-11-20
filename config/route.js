@@ -203,10 +203,7 @@ module.exports = {
     '/authorNew': {
         'GET': {
             'path': '/authors',
-            'auth': false,
-            'requiredFields': [
-                {'slug': null}
-            ]
+            'auth': false
         }
     },
 
