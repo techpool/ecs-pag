@@ -203,12 +203,16 @@ module.exports = {
     '/authorNew': {
         'GET': {
             'path': '/authors',
-            'auth': false,
-            'requiredFields': [
-                {'slug': null}
-            ]
+            'auth': false
         }
     },
+
+	'/author/recommend': {
+		'GET': {
+			'path': '/authors/recommendation',
+			'auth': true
+		}
+	},
 
 	'/user-activity/is_add_to_lib': {
 		'GET': { 'path': '/user-activity/is_add_to_lib', 'auth': false }
