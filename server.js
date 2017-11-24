@@ -445,6 +445,8 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/social-connect";
 	} else if( request.path.includes( '/library' ) ) {
 		servicePath = "/library";
+	} else if( request.path.includes( '/notifications' ) ) {
+		servicePath = "/notifications";
 	}
 	if( request.path.includes( '/comments' ) ) {
 		servicePath = "/comments";
