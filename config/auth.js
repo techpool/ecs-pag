@@ -336,6 +336,42 @@ module.exports = {
 		'GET': {
 			'params': [ 'resource', 'method', 'parentId' ]
 		}
+	},
+
+	'/pratilipi/content/batch': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/pratilipi/content/chapter/add': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/pratilipi/content/chapter/delete': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/pratilipi/content/index': {
+		'GET': {
+			'params': [ 'resource', 'method', 'id' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/pratilipi/content': {
+		'GET': {
+			'params': [ 'resource', 'method', 'id' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
 	}
 
 };

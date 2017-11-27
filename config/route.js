@@ -627,7 +627,11 @@ module.exports = {
 					'methods': {
 							'POST': {
 									'path': '/pratilipi/content/batch',
-									'auth': false
+									'auth': true,
+									'primaryKey': 'pratilipiId',
+									'requiredFields': [
+										{ 'pratilipiId': null }
+									]
 							}
 					}
 			}
@@ -638,7 +642,11 @@ module.exports = {
 					'methods': {
 							'POST': {
 									'path': '/pratilipi/content/chapter/add',
-									'auth': false
+									'auth': true,
+									'primaryKey': 'pratilipiId',
+									'requiredFields': [
+										{ 'pratilipiId': null }
+									]
 							}
 					}
 			}
@@ -649,7 +657,11 @@ module.exports = {
 					'methods': {
 							'POST': {
 									'path': '/pratilipi/content/chapter/delete',
-									'auth': false
+									'auth': true,
+									'primaryKey': 'pratilipiId',
+									'requiredFields': [
+										{ 'pratilipiId': null }
+									]
 							}
 					}
 			}
@@ -658,13 +670,21 @@ module.exports = {
 	'/pratilipi/content/index': {
 			'GET': {
 					'path': '/pratilipi/content/index',
-					'auth': false
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
 			},
 			'POST': {
 					'methods': {
 							'POST': {
 									'path': '/pratilipi/content/index',
-									'auth': false
+									'auth': true,
+									'primaryKey': 'pratilipiId',
+									'requiredFields': [
+										{ 'pratilipiId': null }
+									]
 							}
 					}
 			}
@@ -673,13 +693,21 @@ module.exports = {
 	'/pratilipi/content': {
 			'GET': {
 					'path': '/pratilipi/content',
-					'auth': false
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
 			},
 			'POST': {
 					'methods': {
 							'POST': {
 									'path': '/pratilipi/content',
-									'auth': false
+									'auth': true,
+									'primaryKey': 'pratilipiId',
+									'requiredFields': [
+										{ 'pratilipiId': null }
+									]
 							}
 					}
 			}
