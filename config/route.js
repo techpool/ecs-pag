@@ -805,6 +805,24 @@ module.exports = {
 			'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
 			'primaryKey': 'parentId'
 		}
+	},
+	
+	'/coverimage-recommendation/cover': {
+		'GET': {
+			'auth': true,
+			'path': '/coverimage-recommendation/cover',
+		}
+	},
+	
+	'/coverimage-recommendation/cover/select': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/coverimage-recommendation/cover/select'
+				}
+			}
+		}
 	}
-
+	
 };
