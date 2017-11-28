@@ -384,6 +384,12 @@ module.exports = {
 		'POST': {
 			'params': [ 'resource', 'method', 'id' ]
 		}
+	},
+	
+	'/coverimage-recommendation/cover/select': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
 	}
 
 };

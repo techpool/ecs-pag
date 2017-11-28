@@ -782,6 +782,24 @@ module.exports = {
 			}
 		}
 	},
+	
+	'/coverimage-recommendation/cover': {
+		'GET': {
+			'auth': false,
+			'path': '/coverimage-recommendation/cover',
+		}
+	},
+	
+	'/coverimage-recommendation/cover/select': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/coverimage-recommendation/cover/select'
+				}
+			}
+		}
+	},
 
 	'/auth/isAuthorized': {
 		'GET': {
@@ -828,5 +846,5 @@ module.exports = {
 			}
 		}
 	}
-
+	
 };
