@@ -378,12 +378,6 @@ module.exports = {
 		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
-	},
-	
-	'/coverimage-recommendation/cover': {
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
 	}
 
 };
