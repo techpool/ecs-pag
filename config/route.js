@@ -805,6 +805,28 @@ module.exports = {
 			'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
 			'primaryKey': 'parentId'
 		}
+	},
+
+	'/notification/list': {
+		'GET': {
+			'auth': true,
+			'path': '/notification/list'
+		}
+	},
+
+	'/notification': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/notification',
+					'requiredFields': [
+						{ 'notificationId': null },
+						{ 'state': null }
+					]
+				}
+			}
+		}
 	}
 
 };

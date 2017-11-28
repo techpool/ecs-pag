@@ -356,6 +356,18 @@ module.exports = {
 		}
 	},
 
+	'/notification': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/notification/list': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
 	'/pratilipi/content/index': {
 		'GET': {
 			'params': [ 'resource', 'method', 'id' ]
