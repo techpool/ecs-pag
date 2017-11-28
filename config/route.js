@@ -809,7 +809,7 @@ module.exports = {
 	
 	'/coverimage-recommendation/cover': {
 		'GET': {
-			'auth': true,
+			'auth': false,
 			'path': '/coverimage-recommendation/cover',
 		}
 	},
