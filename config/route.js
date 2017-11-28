@@ -782,6 +782,24 @@ module.exports = {
 			}
 		}
 	},
+	
+	'/coverimage-recommendation/cover': {
+		'GET': {
+			'auth': false,
+			'path': '/coverimage-recommendation/cover',
+		}
+	},
+	
+	'/coverimage-recommendation/cover/select': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/coverimage-recommendation/cover/select'
+				}
+			}
+		}
+	},
 
 	'/auth/isAuthorized': {
 		'GET': {
@@ -804,24 +822,6 @@ module.exports = {
 			'auth': true,
 			'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
 			'primaryKey': 'parentId'
-		}
-	},
-	
-	'/coverimage-recommendation/cover': {
-		'GET': {
-			'auth': false,
-			'path': '/coverimage-recommendation/cover',
-		}
-	},
-	
-	'/coverimage-recommendation/cover/select': {
-		'POST': {
-			'auth': true,
-			'methods': {
-				'POST': {
-					'path': '/coverimage-recommendation/cover/select'
-				}
-			}
 		}
 	}
 	
