@@ -711,14 +711,23 @@ module.exports = {
 
 	'/notification': {
 		'POST': {
-			'auth': true,
 			'methods': {
 				'POST': {
 					'path': '/notification',
-					'requiredFields': [
-						{ 'notificationId': null },
-						{ 'state': null }
-					]
+					'auth': true
+				}
+			}
+		}
+	},
+
+
+	// Report
+	'/contact': {
+        'POST': {
+			'methods': {
+				'POST': {
+					'path': '/report',
+					'auth': true
 				}
 			}
 		}

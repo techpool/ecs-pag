@@ -333,6 +333,14 @@ module.exports = {
 	},
 
 
+	// Report
+	'/report': {
+        'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+
 	// Hacks
 	'/library/v1.0/pratilipis/$primaryContentId': {
         'GET': {
