@@ -1,103 +1,135 @@
 module.exports = {
 
-    '/pratilipi/cover': {
-        'GET': {
-            'path': '/image/pratilipi/cover',
-            'auth': false,
-            'shouldPipe': true
-        },
-        'POST': {
-            'path': '/image/pratilipi/cover',
-            'shouldPipe': true,
-            'methods': {
-                'POST': {
-                    'primaryKey': 'pratilipiId'
-                }
-            }
-        }
-    },
+	// Ecs
+	'/ecs': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/ecs',
+					'auth': false
+				}
+			}
+		}
+	},
 
-    '/event/banner': {
-    	'GET': {
-            'path': '/image/event/banner',
-            'auth': false,
-            'shouldPipe': true
-        },
-        'POST': {
-            'path': '/image/event/banner',
-            'shouldPipe': true,
-            'methods': {
-                'POST': {
-                    'primaryKey': 'eventId'
-                }
-            }
-        }
-    },
+	'/ecs-gr': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/ecs-gr',
+					'auth': false
+				}
+			}
+		}
+	},
 
-    '/init/banner': {
-    	'GET': {
-            'path': '/image/init/banner',
-            'auth': false,
-            'shouldPipe': true
-        }
-    },
+	// Product
 
-    '/pratilipi/content/image': {
-        'GET': {
-            'path': '/image/pratilipi/content',
-            'auth': false,
-            'shouldPipe': true
-        },
-        'POST': {
-            'path': '/image/pratilipi/content',
-            'shouldPipe': true,
-            'methods': {
-                'POST': {
-                    'primaryKey': 'pratilipiId'
-                }
-            }
-        }
-    },
+	// Image
+	'/pratilipi/cover': {
+		'GET': {
+			'path': '/image/pratilipi/cover',
+			'auth': false,
+			'shouldPipe': true
+		},
+		'POST': {
+			'path': '/image/pratilipi/cover',
+			'auth': true,
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'pratilipiId'
+				}
+			}
+		}
+	},
 
-    '/author/image': {
-        'GET': {
-            'path': '/image/author/profile',
-            'auth': false,
-            'shouldPipe': true
-        },
-        'POST': {
-            'path': '/image/author/profile',
-            'shouldPipe': true,
-            'methods': {
-                'POST': {
-                    'primaryKey': 'authorId'
-                }
-            }
-        }
-    },
+	'/pratilipi/content/image': {
+		'GET': {
+			'path': '/image/pratilipi/content',
+			'auth': false,
+			'shouldPipe': true
+		},
+		'POST': {
+			'path': '/image/pratilipi/content',
+			'auth': true,
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'pratilipiId'
+				}
+			}
+		}
+	},
 
-    '/author/cover': {
-        'GET': {
-            'path': '/image/author/cover',
-            'auth': false,
-            'shouldPipe': true
-        },
-        'POST': {
-            'path': '/image/author/cover',
-            'shouldPipe': true,
-            'methods': {
-                'POST': {
-                    'primaryKey': 'authorId'
-                }
-            }
-        }
-    },
+	'/author/image': {
+		'GET': {
+			'path': '/image/author/profile',
+			'auth': false,
+			'shouldPipe': true
+		},
+		'POST': {
+			'path': '/image/author/profile',
+			'auth': true,
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'authorId'
+				}
+			}
+		}
+	},
+
+	'/author/cover': {
+		'GET': {
+			'path': '/image/author/cover',
+			'auth': false,
+			'shouldPipe': true
+		},
+		'POST': {
+			'path': '/image/author/cover',
+			'auth': true,
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'authorId'
+				}
+			}
+		}
+	},
+
+	'/event/banner': {
+		'GET': {
+			'path': '/image/event/banner',
+			'auth': false,
+			'shouldPipe': true
+		},
+		'POST': {
+			'path': '/image/event/banner',
+			'auth': true,
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'eventId'
+				}
+			}
+		}
+	},
+
+	'/init/banner': {
+		'GET': {
+			'path': '/image/init/banner',
+			'auth': false,
+			'shouldPipe': true
+		}
+	},
 
 	'/author/image/remove': {
 		'POST': {
 			'methods': {
 				'DELETE': {
 					'path': '/image/author/$primaryContentId/profile',
+					'auth': true,
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
@@ -112,6 +144,7 @@ module.exports = {
 			'methods': {
 				'DELETE': {
 					'path': '/image/author/$primaryContentId/cover',
+					'auth': true,
 					'primaryKey': 'authorId',
 					'requiredFields': [
 						{ 'authorId': null }
@@ -121,91 +154,165 @@ module.exports = {
 		}
 	},
 
-    '/search': {
-        'GET': {'path': '/search/search', 'auth': true}
-    },
 
-    '/search/search': {
-        'GET': {'path': '/search/search', 'auth': true}
-    },
+	// Search
+	'/search': {
+		'GET': {
+			'path': '/search/search',
+			'auth': true
+		}
+	},
 
-    '/search/trending_search': {
-        'GET': {'path': '/search/trending_search', 'auth': false}
-    },
+	'/search/search': {
+		'GET': {
+			'path': '/search/search',
+			'auth': true
+		}
+	},
 
-    '/recommendation/pratilipis': {
-        'GET': {'path': '/recommendation/pratilipis', 'auth': false}
-    },
+	'/search/trending_search': {
+		'GET': {
+			'path': '/search/trending_search',
+			'auth': false
+		}
+	},
 
-    '/page': {
-        'GET': {'path': '/pages', 'auth': false}
-    },
 
-    '/pratilipi': {
-        'GET': {
-            'path': '/pratilipis/$primaryContentId',
-            'auth': true,
-            'primaryKey': 'pratilipiId'
-        },
-        'POST': {
-            'methods': {
-                'DELETE': {
-                    'path': '/pratilipis/$primaryContentId',
-                    'primaryKey': 'pratilipiId',
-                    'requiredFields': [
-                        {'pratilipiId': null},
-                        {'state': 'DELETED'}
-                    ]
-                },
-                'PATCH': {
-                    'path': '/pratilipis/$primaryContentId',
-                    'primaryKey': 'pratilipiId',
-                    'requiredFields': [
-                        {'pratilipiId': null}
-                    ]
-                },
-                'POST': {
-                    'path': '/pratilipis',
-                    'requiredFields': [
-                        {'language': null},
-                        {'type': null}
-                    ]
-                }
-            }
-        }
-    },
+	// Recommendation
+	'/recommendation/pratilipis': {
+		'GET': {
+			'path': '/recommendation/pratilipis',
+			'auth': false
+		}
+	},
 
-    '/author': {
-        'GET': {
-            'path': '/authors/$primaryContentId',
-            'auth': true,
-            'primaryKey': 'authorId'
-        },
-        'POST': {
-            'methods': {
-                'PATCH': {
-                    'path': '/authors/$primaryContentId',
-                    'primaryKey': 'authorId',
-                    'requiredFields': [
-                        {'authorId': null}
-                    ],
-                },
-                'POST': {
-                    'path': '/authors',
-                    'requiredFields': [
-                        {'language': null}
-                    ]
-                }
-            }
-        }
-    },
 
-    '/authorNew': {
-        'GET': {
-            'path': '/authors',
-            'auth': false
-        }
-    },
+	// Page
+	'/page': {
+		'GET': {
+			'path': '/pages',
+			'auth': false
+		}
+	},
+
+
+	// Pratilipi
+	'/pratilipi': {
+		'GET': {
+			'path': '/pratilipis/$primaryContentId',
+			'auth': true,
+			'primaryKey': 'pratilipiId'
+		},
+		'POST': {
+			'methods': {
+				'DELETE': {
+					'path': '/pratilipis/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{'pratilipiId': null},
+						{'state': 'DELETED'}
+					]
+				},
+				'PATCH': {
+					'path': '/pratilipis/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{'pratilipiId': null}
+					]
+				},
+				'POST': {
+					'path': '/pratilipis',
+					'auth': true,
+					'requiredFields': [
+						{'language': null},
+						{'type': null}
+					]
+				}
+			}
+		}
+	},
+
+	'/pratilipi/tags/update': {
+		'POST': {
+			'methods': {
+				'PATCH': {
+					'path': '/pratilipis/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{'pratilipiId': null}
+					]
+				}
+			}
+		}
+	},
+
+	'/pratilipi/list': {
+		'GET': {
+			'path': '/pratilipis',
+			'auth': true,
+			'requiredFields': [
+				{'authorId': null},
+				{'state': null},
+				{'_apiVer': "3"}
+			],
+			'copyParam': [
+				{'resultCount': 'limit'}
+			]
+		}
+	},
+
+	'/pratilipi/v2/categories/system': {
+		'GET': {
+			'path': '/pratilipi/v2/categories/system',
+			'auth': false
+		}
+	},
+
+
+	// Author
+	'/author': {
+		'GET': {
+			'path': '/authors/$primaryContentId',
+			'auth': true,
+			'primaryKey': 'authorId'
+		},
+		'POST': {
+			'methods': {
+				'PATCH': {
+					'path': '/authors/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'authorId',
+					'requiredFields': [
+						{'authorId': null}
+					],
+				},
+				'POST': {
+					'path': '/authors',
+					'auth': true,
+					'requiredFields': [
+						{'language': null}
+					]
+				}
+			}
+		}
+	},
+
+	'/authors': {
+		'GET': {
+			'path': '/authors',
+			'auth': true
+		}
+	},
+
+	'/authorNew': { // TODO: Remove asap
+		'GET': {
+			'path': '/authors',
+			'auth': true
+		}
+	},
 
 	'/author/recommend': {
 		'GET': {
@@ -214,43 +321,8 @@ module.exports = {
 		}
 	},
 
-	'/user-activity/is_add_to_lib': {
-		'GET': { 'path': '/user-activity/is_add_to_lib', 'auth': false }
-	},
 
-    '/user-activity/is_following_author': {
-        'GET': {'path': '/user-activity/is_following_author', 'auth': false}
-    },
-
-    '/pratilipi/tags/update': {
-        'POST': {
-            'methods': {
-                'PATCH': {
-                    'path': '/pratilipis/$primaryContentId',
-                    'primaryKey': 'pratilipiId',
-                    'requiredFields': [
-                        {'pratilipiId': null}
-                    ]
-                }
-            }
-        }
-    },
-
-    '/pratilipi/list': {
-        'GET': {
-            'path': '/pratilipis',
-            'auth': true,
-            'requiredFields': [
-                {'authorId': null},
-                {'state': null},
-                {'_apiVer': "3"}
-            ],
-            'copyParam': [
-                {'resultCount': 'limit'}
-            ]
-        }
-    },
-
+	// UserAuthor / Follow
 	'/userauthor/follow': {
 		'GET': {
 			'path': '/userauthor/follow',
@@ -263,6 +335,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/userauthor/follow',
+					'auth': true,
 					'requiredFields': [
 						{ 'authorId': null }
 					]
@@ -290,29 +363,8 @@ module.exports = {
 		}
 	},
 
-	'/ecs': {
-		'POST': {
-			'methods': {
-				'POST': {
-					'path': '/ecs',
-					'auth': false
-				}
-			}
-		}
-	},
 
-	'/ecs-gr': {
-		'POST': {
-			'methods': {
-				'POST': {
-					'path': '/ecs-gr',
-					'auth': false
-				}
-			}
-		}
-	},
-
-	// UserPratilipi Service
+	// UserPratilipi / Review
 	'/userpratilipi/review/list': {
 		'GET': {
 			'path': '/userpratilipi/review/list',
@@ -324,7 +376,8 @@ module.exports = {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/userpratilipi/review'
+					'path': '/userpratilipi/review',
+					'auth': true
 				}
 			}
 		}
@@ -337,11 +390,14 @@ module.exports = {
 		}
 	},
 
+
+	// Comment
 	'/comment': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/comment'
+					'path': '/comment',
+					'auth': true
 				}
 			}
 		}
@@ -354,25 +410,21 @@ module.exports = {
 		}
 	},
 
+
+	// Vote
 	'/vote': {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/vote'
+					'path': '/vote',
+					'auth': true
 				}
 			}
 		}
 	},
 
-	'/pratilipi/v2/categories/system': {
-		'GET': {
-			'path': '/pratilipi/v2/categories/system',
-			'auth': false
-		}
-	},
 
-
-	// User Apis
+	// User
 	'/user': {
 		'GET': {
 			'path': '/user',
@@ -480,6 +532,313 @@ module.exports = {
 	},
 
 
+	// Event
+	'/event/list': {
+		'GET': {
+			'path': '/event/list',
+			'auth': true
+		}
+	},
+
+	'/event': {
+		'GET': {
+			'path': '/event',
+			'primaryKey': 'eventId',
+			'auth': true
+		},
+		'POST': {
+			'methods': {
+				'PATCH': {
+					'path': '/event',
+					'auth': true,
+					'primaryKey': 'eventId',
+					'requiredFields': [
+						{ 'eventId': null }
+					]
+				},
+				'POST': {
+					'path': '/event',
+					'auth': true
+				}
+			}
+		}
+	},
+
+	'/event/pratilipi': {
+		'GET': {
+			'path': '/event/pratilipi',
+			'auth': true,
+			'primaryKey': 'eventId',
+			'requiredFields': [
+				{ 'eventId': null }
+			]
+		}
+	},
+
+
+	//Library
+	'/userpratilipi/library/list' : {
+		'GET': {
+			'path': '/userpratilipi/library/list',
+			'auth': true
+		}
+	},
+
+	'/userpratilipi/library' : {
+		'POST': {
+			'methods': {
+				'POST' : {
+					'path' : '/userpratilipi/library',
+					'auth': true,
+					'requiredFields': [
+						{ 'addedToLib': null }
+					]
+				}
+			}
+		}
+	},
+
+
+	// Content
+	'/pratilipi/content/batch': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/pratilipi/content/batch',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/pratilipi/content/chapter/add': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/pratilipi/content/chapter/add',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/pratilipi/content/chapter/delete': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/pratilipi/content/chapter/delete',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/pratilipi/content/index': {
+		'GET': {
+			'path': '/pratilipi/content/index',
+			'auth': true,
+			'primaryKey': 'pratilipiId',
+			'requiredFields': [
+				{ 'pratilipiId': null }
+			]
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/pratilipi/content/index',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
+		}
+	},
+
+	'/pratilipi/content': {
+		'GET': {
+			'path': '/pratilipi/content',
+			'auth': true,
+			'primaryKey': 'pratilipiId',
+			'requiredFields': [
+				{ 'pratilipiId': null }
+			]
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/pratilipi/content',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
+		}
+	},
+
+
+	// Auth
+	'/auth/isAuthorized': {
+		'GET': {
+			'auth': false,
+			'path': '/auth/isAuthorized'
+		}
+	},
+
+
+	// Notification
+	'/notification/list': {
+		'GET': {
+			'auth': true,
+			'path': '/notification/list'
+		}
+	},
+
+	'/notification': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/notification',
+					'requiredFields': [
+						{ 'notificationId': null },
+						{ 'state': null }
+					]
+				}
+			}
+		}
+	},
+
+
+	// Hacks
+    '/temp/library': {
+        'GET': {
+            'auth': true,
+            'path': '/library/v1.0/pratilipis/$primaryContentId',
+            'primaryKey': 'parentId'
+        }
+    },
+
+    '/temp/social': {
+        'GET': {
+            'auth': true,
+            'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
+            'primaryKey': 'parentId'
+        }
+    },
+
+
+
+
+	// Growth Experiments
+
+	// SocialConnect
+	'/social-connect/contact/profile': {
+		'GET': {
+			'path': '/image/contact/profile',
+			'auth': false,
+			'shouldPipe': true
+		}
+	},
+
+	'/social-connect/access_token': {
+		'GET': {
+			'path': '/social-connect/access_token',
+			'auth': true,
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/social-connect/access_token',
+					'requiredFields': []
+				}
+			}
+		}
+	},
+
+	'/social-connect/access_token/unlink': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'PATCH': {
+					'path': '/social-connect/access_token/unlink',
+					'requiredFields': [
+						{ 'unlinkSocialAccount': "true" }
+					]
+				}
+			}
+		}
+	},
+
+	'/social-connect/access_token/remind_me_later': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'PATCH': {
+					'path': '/social-connect/access_token/remind_me_later',
+					'requiredFields': [
+						{ 'updateLastRemindMeLater': "true" }
+					]
+				}
+			}
+		}
+	},
+
+	'/social-connect/contacts': {
+		'GET': {
+			'path': '/social-connect/contacts',
+			'auth': true,
+		}
+	},
+
+	'/social-connect/contacts/invite': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/social-connect/contacts/invite',
+					'requiredFields': []
+				}
+			}
+		}
+	},
+
+	// CoverImage
+	'/coverimage-recommendation/cover': {
+		'GET': {
+			'auth': false,
+			'path': '/coverimage-recommendation/cover',
+		}
+	},
+
+	'/coverimage-recommendation/cover/select': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/coverimage-recommendation/cover/select'
+				}
+			}
+		}
+	},
+
+
+	// BlogScrapper
 	'/blog-scraper/search': {
 		'GET': {
 			'path': '/blog-scraper/search',
@@ -556,295 +915,6 @@ module.exports = {
 				}
 			}
 		}
-	},
-
-	// Event Service
-	'/event/list': {
-		'GET': {
-			'path': '/event/list',
-			'auth': true
-		}
-	},
-
-	'/event': {
-		'GET': {
-			'path': '/event',
-			'primaryKey': 'eventId',
-			'auth': true
-		},
-		'POST': {
-			'methods': {
-				'PATCH': {
-					'path': '/event',
-					'primaryKey': 'eventId',
-					'requiredFields': [
-						{ 'eventId': null }
-					]
-				},
-				'POST': {
-					'path': '/event'
-				}
-			}
-		}
-	},
-
-	'/event/pratilipi': {
-		'GET': {
-			'path': '/event/pratilipi',
-			'auth': true,
-			'primaryKey': 'eventId',
-			'requiredFields': [
-				{ 'eventId': null }
-			]
-		}
-	},
-
-	//Library Service
-	'/userpratilipi/library/list' : {
-		'GET': {
-			'path': '/userpratilipi/library/list',
-			'auth': true
-		}
-	},
-
-	//Library Service
-	'/userpratilipi/library' : {
-		'POST': {
-			'methods': {
-				'POST' : {
-					'path' : '/userpratilipi/library',
-					'auth': true,
-					'requiredFields': [
-						{ 'addedToLib': null }
-					]
-				}
-			}
-		}
-	},
-
-	'/pratilipi/content/batch': {
-			'POST': {
-					'methods': {
-							'POST': {
-									'path': '/pratilipi/content/batch',
-									'auth': true,
-									'primaryKey': 'pratilipiId',
-									'requiredFields': [
-										{ 'pratilipiId': null }
-									]
-							}
-					}
-			}
-	},
-
-	'/pratilipi/content/chapter/add': {
-			'POST': {
-					'methods': {
-							'POST': {
-									'path': '/pratilipi/content/chapter/add',
-									'auth': true,
-									'primaryKey': 'pratilipiId',
-									'requiredFields': [
-										{ 'pratilipiId': null }
-									]
-							}
-					}
-			}
-	},
-
-	'/pratilipi/content/chapter/delete': {
-			'POST': {
-					'methods': {
-							'POST': {
-									'path': '/pratilipi/content/chapter/delete',
-									'auth': true,
-									'primaryKey': 'pratilipiId',
-									'requiredFields': [
-										{ 'pratilipiId': null }
-									]
-							}
-					}
-			}
-	},
-
-	'/pratilipi/content/index': {
-			'GET': {
-					'path': '/pratilipi/content/index',
-					'auth': true,
-					'primaryKey': 'pratilipiId',
-					'requiredFields': [
-						{ 'pratilipiId': null }
-					]
-			},
-			'POST': {
-					'methods': {
-							'POST': {
-									'path': '/pratilipi/content/index',
-									'auth': true,
-									'primaryKey': 'pratilipiId',
-									'requiredFields': [
-										{ 'pratilipiId': null }
-									]
-							}
-					}
-			}
-	},
-
-	'/pratilipi/content': {
-			'GET': {
-					'path': '/pratilipi/content',
-					'auth': true,
-					'primaryKey': 'pratilipiId',
-					'requiredFields': [
-						{ 'pratilipiId': null }
-					]
-			},
-			'POST': {
-					'methods': {
-							'POST': {
-									'path': '/pratilipi/content',
-									'auth': true,
-									'primaryKey': 'pratilipiId',
-									'requiredFields': [
-										{ 'pratilipiId': null }
-									]
-							}
-					}
-			}
-	},
-	
-	'/social-connect/contact/profile': {
-	    	'GET': {
-	        	'path': '/image/contact/profile',
-		        'auth': false,
-		        'shouldPipe': true
-	    	}
-	},
-
-	'/social-connect/access_token': {
-		'GET': {
-			'path': '/social-connect/access_token',
-			'auth': true,
-		},
-		'POST': {
-			'methods': {
-				'POST': {
-					'path': '/social-connect/access_token',
-					'requiredFields': []
-				}
-			}
-		}
-	},
-
-	'/social-connect/access_token/unlink': {
-		'POST': {
-			'auth': true,
-			'methods': {
-				'PATCH': {
-					'path': '/social-connect/access_token/unlink',
-					'requiredFields': [
-						{ 'unlinkSocialAccount': "true" }
-					]
-				}
-			}
-		}
-	},
-
-	'/social-connect/access_token/remind_me_later': {
-		'POST': {
-			'auth': true,
-			'methods': {
-				'PATCH': {
-					'path': '/social-connect/access_token/remind_me_later',
-					'requiredFields': [
-						{ 'updateLastRemindMeLater': "true" }
-					]
-				}
-			}
-		}
-	},
-
-	'/social-connect/contacts': {
-		'GET': {
-			'path': '/social-connect/contacts',
-			'auth': true,
-		}
-	},
-
-	'/social-connect/contacts/invite': {
-		'POST': {
-			'auth': true,
-			'methods': {
-				'POST': {
-					'path': '/social-connect/contacts/invite',
-					'requiredFields': []
-				}
-			}
-		}
-	},
-	
-	'/coverimage-recommendation/cover': {
-		'GET': {
-			'auth': false,
-			'path': '/coverimage-recommendation/cover',
-		}
-	},
-	
-	'/coverimage-recommendation/cover/select': {
-		'POST': {
-			'auth': true,
-			'methods': {
-				'POST': {
-					'path': '/coverimage-recommendation/cover/select'
-				}
-			}
-		}
-	},
-
-	'/auth/isAuthorized': {
-		'GET': {
-			'auth': false,
-			'path': '/auth/isAuthorized'
-		}
-	},
-
-	// Hack
-	'/temp/library': {
-		'GET': {
-			'auth': true,
-			'path': '/library/v1.0/pratilipis/$primaryContentId',
-			'primaryKey': 'parentId'
-		}
-	},
-
-	'/temp/social': {
-		'GET': {
-			'auth': true,
-			'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
-			'primaryKey': 'parentId'
-		}
-	},
-
-	'/notification/list': {
-		'GET': {
-			'auth': true,
-			'path': '/notification/list'
-		}
-	},
-
-	'/notification': {
-		'POST': {
-			'auth': true,
-			'methods': {
-				'POST': {
-					'path': '/notification',
-					'requiredFields': [
-						{ 'notificationId': null },
-						{ 'state': null }
-					]
-				}
-			}
-		}
 	}
-	
+
 };

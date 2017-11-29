@@ -1,5 +1,8 @@
 module.exports = {
 
+	// Product
+
+	// Image
 	'/image/pratilipi/cover': {
 		'POST': {
 			'params': [ 'resource', 'id', 'method' ]
@@ -7,12 +10,6 @@ module.exports = {
 	},
 
 	'/image/pratilipi/content': {
-		'POST': {
-			'params': [ 'resource', 'id', 'method' ]
-		}
-	},
-
-	'/image/event/banner': {
 		'POST': {
 			'params': [ 'resource', 'id', 'method' ]
 		}
@@ -30,6 +27,12 @@ module.exports = {
 		}
 	},
 
+	'/image/event/banner': {
+		'POST': {
+			'params': [ 'resource', 'id', 'method' ]
+		}
+	},
+
 	'/image/author/$primaryContentId/profile': {
 		'DELETE': {
 			'params': [ 'resource', 'method', 'id' ]
@@ -42,6 +45,30 @@ module.exports = {
 		}
 	},
 
+
+	// Search
+	'/search/search': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/search/trending_search': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+
+	// Recommendation
+	'/recommendation/pratilipis': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+
+	// Pratilipi
 	'/pratilipis/$primaryContentId': {
 		'GET': {
 			'params': [ 'resource', 'id', 'method' ]
@@ -63,6 +90,8 @@ module.exports = {
 		}
 	},
 
+
+	// Author
 	'/authors/$primaryContentId': {
 		'GET': {
 			'params': [ 'resource', 'id', 'method' ]
@@ -73,6 +102,9 @@ module.exports = {
 	},
 
 	'/authors': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		},
 		'POST': {
 			'params': [ 'resource', 'method', 'language' ]
 		}
@@ -84,24 +116,8 @@ module.exports = {
 		}
 	},
 
-	'/recommendation/pratilipis': {
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
 
-	'/search/search': {
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-
-	'/search/trending_search': {
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-
+	// UserAuthor / Follow
 	'/userauthor/follow': {
 		'GET': {
 			'params': [ 'resource', 'method', 'authorId' ]
@@ -123,6 +139,8 @@ module.exports = {
 		}
 	},
 
+
+	// UserPratilipi / Review
 	'/userpratilipi/review/list': {
 		'GET': {
 			'params': [ 'resource', 'method', 'pratilipiId' ]
@@ -141,6 +159,30 @@ module.exports = {
 		}
 	},
 
+
+	// Comment
+	'/comment': {
+		'POST': {
+			'params': [ 'resource', 'method', 'commentId' ]
+		}
+	},
+
+	'/comment/list': {
+		'GET': {
+			'params': [ 'resource', 'method', 'parentId' ]
+		}
+	},
+
+
+	// Vote
+	'/vote': {
+		'POST': {
+			'params': [ 'resource', 'method', 'parentId' ]
+		}
+	},
+
+
+	// User
 	'/user': {
 		'GET': {
 			'params': [ 'resource', 'method', 'userId' ]
@@ -198,63 +240,8 @@ module.exports = {
 		}
 	},
 
-	'/comment': {
-		'POST': {
-			'params': [ 'resource', 'method', 'commentId' ]
-		}
-	},
 
-	'/comment/list': {
-		'GET': {
-			'params': [ 'resource', 'method', 'parentId' ]
-		}
-	},
-
-	'/vote': {
-		'POST': {
-			'params': [ 'resource', 'method', 'parentId' ]
-		}
-	},
-	
-	'/blog-scraper/search': {
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-	
-	'/blog-scraper': {
-		'POST': {
-			'params': [ 'resource', 'method' ]
-		},
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-	
-	'/blog-scraper/$primaryContentId': {
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-	
-	'/blog-scraper/$primaryContentId/scrape': {
-		'POST': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-	
-	'/blog-scraper/$primaryContentId/publish': {
-		'POST': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-	
-	'/blog-scraper/$primaryContentId/create': {
-		'POST': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-
+	// Event
 	'/event/list': {
 		'GET': {
 			'params': [ 'resource', 'method', 'language' ]
@@ -279,21 +266,93 @@ module.exports = {
 		}
 	},
 
-	//Library Service
+
+	//Library
 	'/userpratilipi/library/list': {
 		'GET': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
 
-	//Library Service
 	'/userpratilipi/library': {
 		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
-	
-		'/social-connect/access_token': {
+
+
+	// Content
+	'/pratilipi/content/batch': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/pratilipi/content/chapter/add': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/pratilipi/content/chapter/delete': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/pratilipi/content/index': {
+		'GET': {
+			'params': [ 'resource', 'method', 'id' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/pratilipi/content': {
+		'GET': {
+			'params': [ 'resource', 'method', 'id' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+
+	// Notification
+	'/notification/list': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/notification': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+
+	// Hacks
+	'/library/v1.0/pratilipis/$primaryContentId': {
+        'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/social/v2.0/pratilipis/$primaryContentId/reviews/user-review': {
+		'GET': {
+			'params': [ 'resource', 'method', 'parentId' ]
+		}
+	},
+
+
+
+
+	// Growth
+
+	// SocialConnect
+	'/social-connect/access_token': {
 		'GET': {
 			'params': [ 'resource', 'method' ]
 		},
@@ -326,67 +385,50 @@ module.exports = {
 		}
 	},
 
-	'/library/v1.0/pratilipis/$primaryContentId': {
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
 
-	'/social/v2.0/pratilipis/$primaryContentId/reviews/user-review': {
-		'GET': {
-			'params': [ 'resource', 'method', 'parentId' ]
-		}
-	},
-
-	'/pratilipi/content/batch': {
-		'POST': {
-			'params': [ 'resource', 'method', 'id' ]
-		}
-	},
-
-	'/pratilipi/content/chapter/add': {
-		'POST': {
-			'params': [ 'resource', 'method', 'id' ]
-		}
-	},
-
-	'/pratilipi/content/chapter/delete': {
-		'POST': {
-			'params': [ 'resource', 'method', 'id' ]
-		}
-	},
-
-	'/notification': {
-		'POST': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-
-	'/notification/list': {
-		'GET': {
-			'params': [ 'resource', 'method' ]
-		}
-	},
-
-	'/pratilipi/content/index': {
-		'GET': {
-			'params': [ 'resource', 'method', 'id' ]
-		},
-		'POST': {
-			'params': [ 'resource', 'method', 'id' ]
-		}
-	},
-
-	'/pratilipi/content': {
-		'GET': {
-			'params': [ 'resource', 'method', 'id' ]
-		},
-		'POST': {
-			'params': [ 'resource', 'method', 'id' ]
-		}
-	},
-	
+	// CoverImage
 	'/coverimage-recommendation/cover/select': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+
+	// BlogScrapper
+	'/blog-scraper/search': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/blog-scraper': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		},
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/blog-scraper/$primaryContentId': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/blog-scraper/$primaryContentId/scrape': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/blog-scraper/$primaryContentId/publish': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/blog-scraper/$primaryContentId/create': {
 		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
