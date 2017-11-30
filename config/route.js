@@ -726,7 +726,7 @@ module.exports = {
         'POST': {
 			'methods': {
 				'POST': {
-					'path': '/report',
+					'path': '/report/v1.0/report',
 					'auth': true
 				}
 			}

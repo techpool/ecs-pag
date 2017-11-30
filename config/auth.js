@@ -334,7 +334,7 @@ module.exports = {
 
 
 	// Report
-	'/report': {
+	'/report/v1.0/report': {
         'POST': {
 			'params': [ 'resource', 'method' ]
 		}
