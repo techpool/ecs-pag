@@ -447,7 +447,7 @@ function _getHackyService( method, request, response ) {
 		servicePath = "/library";
 	} else if( request.path.includes( '/notifications' ) ) {
 		servicePath = "/notifications";
-	} } else if( request.path.includes( '/report' ) ) {
+	} else if( request.path.includes( '/report' ) ) {
 		servicePath = "/report";
 	}
 	if( request.path.includes( '/comments' ) ) {
