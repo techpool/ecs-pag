@@ -395,6 +395,12 @@ module.exports = {
 
 
 	// CoverImage
+	'/coverimage-recommendation/cover': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
 	'/coverimage-recommendation/cover/select': {
 		'POST': {
 			'params': [ 'resource', 'method' ]
