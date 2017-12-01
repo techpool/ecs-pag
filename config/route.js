@@ -830,7 +830,7 @@ module.exports = {
 	// CoverImage
 	'/coverimage-recommendation/cover': {
 		'GET': {
-			'auth': false,
+			'auth': true,
 			'path': '/coverimage-recommendation/cover',
 		}
 	},
