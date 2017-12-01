@@ -234,6 +234,57 @@ module.exports = {
 		}
 	},
 
+    '/pratilipiNew': {
+        'GET': {
+            'path': '/pratilipis',
+            'auth': false,
+            'requiredFields': [
+                {'slug': null},
+            ]
+        }
+    },
+
+    '/author': {
+        'GET': {
+            'path': '/authors/$primaryContentId',
+            'auth': true,
+            'primaryKey': 'authorId'
+        },
+        'POST': {
+            'methods': {
+                'PATCH': {
+                    'path': '/authors/$primaryContentId',
+                    'primaryKey': 'authorId',
+                    'requiredFields': [
+                        {'authorId': null}
+                    ],
+                },
+                'POST': {
+                    'path': '/authors',
+                    'requiredFields': [
+                        {'name': null},
+                        {'language': null},
+                        {'userId': 0} // Only AEEs can add Authors
+                    ]
+                }
+            }
+        }
+    },
+
+    '/authorNew': {
+        'GET': {
+            'path': '/authors',
+            'auth': false,
+            'requiredFields': [
+                {'slug': null}
+            ]
+        }
+    },
+
+	'/user-activity/is_add_to_lib': {
+		'GET': { 'path': '/user-activity/is_add_to_lib', 'auth': false }
+	},
+
 	'/pratilipi/tags/update': {
 		'POST': {
 			'methods': {
@@ -271,43 +322,7 @@ module.exports = {
 		}
 	},
 
-
-	// Author
-	'/author': {
-		'GET': {
-			'path': '/authors/$primaryContentId',
-			'auth': true,
-			'primaryKey': 'authorId'
-		},
-		'POST': {
-			'methods': {
-				'PATCH': {
-					'path': '/authors/$primaryContentId',
-					'auth': true,
-					'primaryKey': 'authorId',
-					'requiredFields': [
-						{'authorId': null}
-					],
-				},
-				'POST': {
-					'path': '/authors',
-					'auth': true,
-					'requiredFields': [
-						{'language': null}
-					]
-				}
-			}
-		}
-	},
-
 	'/authors': {
-		'GET': {
-			'path': '/authors',
-			'auth': true
-		}
-	},
-
-	'/authorNew': { // TODO: Remove asap
 		'GET': {
 			'path': '/authors',
 			'auth': true
