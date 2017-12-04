@@ -234,7 +234,7 @@ module.exports = {
 		}
 	},
 
-    '/pratilipiNew': {
+    '/pratilipis': {
         'GET': {
             'path': '/pratilipis',
             'auth': false,
@@ -243,47 +243,6 @@ module.exports = {
             ]
         }
     },
-
-    '/author': {
-        'GET': {
-            'path': '/authors/$primaryContentId',
-            'auth': true,
-            'primaryKey': 'authorId'
-        },
-        'POST': {
-            'methods': {
-                'PATCH': {
-                    'path': '/authors/$primaryContentId',
-                    'primaryKey': 'authorId',
-                    'requiredFields': [
-                        {'authorId': null}
-                    ],
-                },
-                'POST': {
-                    'path': '/authors',
-                    'requiredFields': [
-                        {'name': null},
-                        {'language': null},
-                        {'userId': 0} // Only AEEs can add Authors
-                    ]
-                }
-            }
-        }
-    },
-
-    '/authorNew': {
-        'GET': {
-            'path': '/authors',
-            'auth': false,
-            'requiredFields': [
-                {'slug': null}
-            ]
-        }
-    },
-
-	'/user-activity/is_add_to_lib': {
-		'GET': { 'path': '/user-activity/is_add_to_lib', 'auth': false }
-	},
 
 	'/pratilipi/tags/update': {
 		'POST': {
@@ -319,6 +278,42 @@ module.exports = {
 		'GET': {
 			'path': '/pratilipi/v2/categories/system',
 			'auth': false
+		}
+	},
+
+	'/test/pratilipis': {
+		'GET': {
+			'path': '/pratilipis',
+			'auth': false
+		}
+	},
+
+
+	// Author
+	'/author': {
+		'GET': {
+			'path': '/authors/$primaryContentId',
+			'auth': true,
+			'primaryKey': 'authorId'
+		},
+		'POST': {
+			'methods': {
+				'PATCH': {
+					'path': '/authors/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'authorId',
+					'requiredFields': [
+						{'authorId': null}
+					],
+				},
+				'POST': {
+					'path': '/authors',
+					'auth': true,
+					'requiredFields': [
+						{'language': null}
+					]
+				}
+			}
 		}
 	},
 
