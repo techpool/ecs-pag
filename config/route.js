@@ -755,9 +755,13 @@ module.exports = {
 
 	// Test
 	'/pages/uri': {
-		'GET': {
-			'path': '/pages/uri',
-			'auth': false
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/pages/uri',
+					'auth': false
+				}
+			}
 		}
 	},
 
