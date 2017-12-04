@@ -763,6 +763,13 @@ module.exports = {
     },
 
 
+	// Test
+	'/pages/uri': {
+		'GET': {
+			'path': '/pages/uri',
+			'auth': false
+		}
+	},
 
 
 	// Growth Experiments
