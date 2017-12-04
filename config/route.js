@@ -235,15 +235,12 @@ module.exports = {
 	},
 
 
-    '/pratilipis': {
-        'GET': {
-            'path': '/pratilipis',
-            'auth': false,
-            'requiredFields': [
-                {'slug': null},
-            ]
-        }
-    },
+	'/pratilipis': {
+		'GET': {
+			'path': '/pratilipis',
+			'auth': false
+		}
+	},
 
 	'/pratilipi/tags/update': {
 		'POST': {
@@ -278,13 +275,6 @@ module.exports = {
 	'/pratilipi/v2/categories/system': {
 		'GET': {
 			'path': '/pratilipi/v2/categories/system',
-			'auth': false
-		}
-	},
-
-	'/test/pratilipis': {
-		'GET': {
-			'path': '/pratilipis',
 			'auth': false
 		}
 	},
@@ -734,7 +724,7 @@ module.exports = {
 
 	// Report
 	'/contact': {
-        'POST': {
+		'POST': {
 			'methods': {
 				'POST': {
 					'path': '/report/v1.0/report',
@@ -746,21 +736,21 @@ module.exports = {
 
 
 	// Hacks
-    '/temp/library': {
-        'GET': {
-            'auth': true,
-            'path': '/library/v1.0/pratilipis/$primaryContentId',
-            'primaryKey': 'parentId'
-        }
-    },
+	'/temp/library': {
+		'GET': {
+			'auth': true,
+			'path': '/library/v1.0/pratilipis/$primaryContentId',
+			'primaryKey': 'parentId'
+		}
+	},
 
-    '/temp/social': {
-        'GET': {
-            'auth': true,
-            'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
-            'primaryKey': 'parentId'
-        }
-    },
+	'/temp/social': {
+		'GET': {
+			'auth': true,
+			'path': '/social/v2.0/pratilipis/$primaryContentId/reviews/user-review',
+			'primaryKey': 'parentId'
+		}
+	},
 
 
 	// Test
