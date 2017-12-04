@@ -1079,7 +1079,7 @@ app.post( ['/*'], (request, response, next) => {
 	if( stopAuthorCalls ) {
 		if( request.path === '/user' ||
 			request.path.startsWith( '/user/' ) ||
-			request.path === '/author'
+			request.path === '/author' ||
 			request.path.startsWith( '/author/' ) ||
 			request.path === '/pratilipi' ||
 			request.path.startsWith( '/pratilipi/' ) ) {
