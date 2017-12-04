@@ -271,6 +271,13 @@ module.exports = {
 		}
 	},
 
+	'/test/pratilipis': {
+		'GET': {
+			'path': '/pratilipis',
+			'auth': false
+		}
+	},
+
 
 	// Author
 	'/author': {
@@ -301,13 +308,6 @@ module.exports = {
 	},
 
 	'/authors': {
-		'GET': {
-			'path': '/authors',
-			'auth': true
-		}
-	},
-
-	'/authorNew': { // TODO: Remove asap
 		'GET': {
 			'path': '/authors',
 			'auth': true
