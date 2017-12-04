@@ -234,6 +234,17 @@ module.exports = {
 		}
 	},
 
+
+    '/pratilipis': {
+        'GET': {
+            'path': '/pratilipis',
+            'auth': false,
+            'requiredFields': [
+                {'slug': null},
+            ]
+        }
+    },
+
 	'/pratilipi/tags/update': {
 		'POST': {
 			'methods': {
