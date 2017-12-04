@@ -335,7 +335,21 @@ module.exports = {
 
 	// Report
 	'/report/v1.0/report': {
-        'POST': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+
+	// Init
+	'/init/v1.0/list': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/init/v1.0/init': {
+		'GET': {
 			'params': [ 'resource', 'method' ]
 		}
 	},
@@ -343,7 +357,7 @@ module.exports = {
 
 	// Hacks
 	'/library/v1.0/pratilipis/$primaryContentId': {
-        'GET': {
+		'GET': {
 			'params': [ 'resource', 'method' ]
 		}
 	},

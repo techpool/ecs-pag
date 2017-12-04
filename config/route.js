@@ -272,6 +272,17 @@ module.exports = {
 		}
 	},
 
+	'/pratilipi/list': {
+		'GET': {
+			'path': '/init/v1.0/list',
+			'auth': true,
+			'requiredFields': [
+				{'listName': null},
+				{'language': null}
+			]
+		}
+	},
+
 	'/pratilipi/v2/categories/system': {
 		'GET': {
 			'path': '/pratilipi/v2/categories/system',
@@ -731,6 +742,14 @@ module.exports = {
 					'auth': true
 				}
 			}
+		}
+	},
+
+	// Init
+	'/init': {
+		'GET': {
+			'path': '/init/v1.0/init',
+			'auth': true
 		}
 	},
 
