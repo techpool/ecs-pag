@@ -265,8 +265,9 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
-			var isAuthorized = authResponse.body.data[0].isAuthorized;
-			var statusCode = authResponse.body.data[0].code;
+			// TODO: GIRIDHAR GIRIDHAR GIRIDHAR
+			var isAuthorized = authResponse.body.data.length === 0 ? true : authResponse.body.data[0].isAuthorized;
+			var statusCode = authResponse.body.data.length === 0 ? 200 : authResponse.body.data[0].code;
 			if( ! isAuthorized ) {
 				console.log( 'AUTHENTICATION_FAILED' );
 				_sendResponseToClient( request, response, statusCode, ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
