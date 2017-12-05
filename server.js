@@ -1075,7 +1075,7 @@ app.get( ['/*'], (request, response, next) => {
 // post
 app.post( ['/*'], (request, response, next) => {
 
-	var stopAuthorCalls = true;
+	var stopAuthorCalls = false;
 	if( stopAuthorCalls ) {
 		if( request.path === '/user' ||
 			request.path.startsWith( '/user/' ) ||
