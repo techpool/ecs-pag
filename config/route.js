@@ -262,9 +262,7 @@ module.exports = {
 			'path': '/pratilipis',
 			'auth': true,
 			'requiredFields': [
-				{'authorId': null},
-				{'state': null},
-				{'_apiVer': "3"}
+				{'authorId': null}
 			],
 			'copyParam': [
 				{'resultCount': 'limit'}
@@ -272,14 +270,11 @@ module.exports = {
 		}
 	},
 
-	'/pratilipi/list': {
+	// TODO: Remove hack
+	'/pratilipi/list/list': {
 		'GET': {
 			'path': '/init/v1.0/list',
-			'auth': true,
-			'requiredFields': [
-				{'listName': null},
-				{'language': null}
-			]
+			'auth': true
 		}
 	},
 
@@ -320,14 +315,6 @@ module.exports = {
 	},
 
 	'/authors': {
-		'GET': {
-			'path': '/authors',
-			'auth': true
-		}
-	},
-
-	// TODO: Remove once removed in growth
-	'/authorNew': {
 		'GET': {
 			'path': '/authors',
 			'auth': true

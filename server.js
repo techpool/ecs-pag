@@ -516,6 +516,12 @@ function resolveGET( request, response, next ) {
 		request.url = "/event/pratilipi" + "?" + request.url.split( "?" )[1];
 	}
 
+	// TODO: Remove Hack
+	if( request.path === "/pratilipi/list" && _getUrlParameter( request.url, "listName" ) ) {
+		request.path = "/pratilipi/list/list";
+		request.url = "/pratilipi/list/list" + "?" + request.url.split( "?" )[1];
+	}
+
 	/*
 	*	3 cases:
 	*	1. images -> With or without authentication
