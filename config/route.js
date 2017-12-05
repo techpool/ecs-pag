@@ -326,6 +326,14 @@ module.exports = {
 		}
 	},
 
+	// TODO: Remove once removed in growth
+	'/authorNew': {
+		'GET': {
+			'path': '/authors',
+			'auth': true
+		}
+	},
+
 	'/author/recommend': {
 		'GET': {
 			'path': '/authors/recommendation',
