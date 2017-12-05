@@ -272,7 +272,6 @@ module.exports = {
 		}
 	},
 
-	/*
 	'/pratilipi/list': {
 		'GET': {
 			'path': '/init/v1.0/list',
@@ -283,7 +282,6 @@ module.exports = {
 			]
 		}
 	},
-	*/
 
 	'/pratilipi/v2/categories/system': {
 		'GET': {
@@ -747,28 +745,11 @@ module.exports = {
 		}
 	},
 
+
 	// Init
-	/*
 	'/init': {
 		'GET': {
 			'path': '/init/v1.0/init',
-			'auth': true
-		}
-	},
-	*/
-
-
-	// Test
-	'/test/init': {
-		'GET': {
-			'path': '/init/v1.0/init',
-			'auth': true
-		}
-	},
-
-	'/test/list': {
-		'GET': {
-			'path': '/init/v1.0/list',
 			'auth': true
 		}
 	},
