@@ -240,6 +240,12 @@ module.exports = {
 		}
 	},
 
+	'/user/firebase-token': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
 
 	// Event
 	'/event/list': {

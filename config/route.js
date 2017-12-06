@@ -224,11 +224,7 @@ module.exports = {
 				},
 				'POST': {
 					'path': '/pratilipis',
-					'auth': true,
-					'requiredFields': [
-						{'language': null},
-						{'type': null}
-					]
+					'auth': true
 				}
 			}
 		}
@@ -305,10 +301,7 @@ module.exports = {
 				},
 				'POST': {
 					'path': '/authors',
-					'auth': true,
-					'requiredFields': [
-						{'language': null}
-					]
+					'auth': true
 				}
 			}
 		}
@@ -329,7 +322,7 @@ module.exports = {
 	},
 
 
-	// UserAuthor / Follow
+	// UserAuthor / Follow TODO: Remove requiredFields
 	'/userauthor/follow': {
 		'GET': {
 			'path': '/userauthor/follow',
@@ -358,7 +351,7 @@ module.exports = {
 		}
 	},
 
-	'/follows/isFollowing' : {
+	'/follows/isFollowing' : { // TODO: Remove requiredFields
 		'GET' : {
 			'path' : '/follows/isFollowing',
 			'auth': true,
@@ -538,6 +531,13 @@ module.exports = {
 		}
 	},
 
+	'/user/firebase-token': {
+		'GET': {
+			'path': '/user/firebase-token',
+			'auth': true
+		}
+	},
+
 
 	// Event
 	'/event/list': {
@@ -591,7 +591,7 @@ module.exports = {
 		}
 	},
 
-	'/userpratilipi/library' : {
+	'/userpratilipi/library' : { // TODO: Remove requiredFields
 		'POST': {
 			'methods': {
 				'POST' : {
@@ -800,14 +800,13 @@ module.exports = {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/social-connect/access_token',
-					'requiredFields': []
+					'path': '/social-connect/access_token'
 				}
 			}
 		}
 	},
 
-	'/social-connect/access_token/unlink': {
+	'/social-connect/access_token/unlink': { // TODO: Remove requiredFields
 		'POST': {
 			'auth': true,
 			'methods': {
@@ -821,7 +820,7 @@ module.exports = {
 		}
 	},
 
-	'/social-connect/access_token/remind_me_later': {
+	'/social-connect/access_token/remind_me_later': { // TODO: Remove requiredFields
 		'POST': {
 			'auth': true,
 			'methods': {
@@ -842,7 +841,7 @@ module.exports = {
 		}
 	},
 
-	'/social-connect/contacts/invite': {
+	'/social-connect/contacts/invite': { // TODO: Remove requiredFields
 		'POST': {
 			'auth': true,
 			'methods': {
@@ -897,7 +896,7 @@ module.exports = {
 		}
 	},
 
-	'/blog-scraper/blogpost/list': {
+	'/blog-scraper/blogpost/list': { // TODO: Remove requiredFields
 		'GET': {
 			'path': '/blog-scraper/$primaryContentId',
 			'auth': true,
@@ -908,7 +907,7 @@ module.exports = {
 		}
 	},
 
-	'/blog-scraper/blogpost/scrape': {
+	'/blog-scraper/blogpost/scrape': { // TODO: Remove requiredFields
 		'POST': {
 			'methods': {
 				'POST': {
@@ -923,7 +922,7 @@ module.exports = {
 		}
 	},
 
-	'/blog-scraper/blogpost/publish': {
+	'/blog-scraper/blogpost/publish': { // TODO: Remove requiredFields
 		'POST': {
 			'methods': {
 				'POST': {
@@ -938,7 +937,7 @@ module.exports = {
 		}
 	},
 
-	'/blog-scraper/blogpost/create': {
+	'/blog-scraper/blogpost/create': { // TODO: Remove requiredFields
 		'POST': {
 			'methods': {
 				'POST': {
