@@ -749,6 +749,13 @@ module.exports = {
 		}
 	},
 
+	'/init/banner/list': {
+		'GET': {
+			'path': '/init/v1.0/banner',
+			'auth': false
+		}
+	},
+
 
 	// Hacks
 	'/temp/library': {
