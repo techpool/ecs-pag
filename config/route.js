@@ -238,7 +238,10 @@ module.exports = {
 	'/pratilipis': {
 		'GET': {
 			'path': '/pratilipis',
-			'auth': true
+			'auth': true,
+            'requiredFields': [
+                {'slug': null},
+            ]
 		}
 	},
 
