@@ -777,13 +777,17 @@ module.exports = {
 
 	// Test
 	'/test/giridhar/giridhar/giridhar': {
-		'GET': {
-			'path': '/users/v2.0/admins/users/$primaryContentId',
-			'auth': false,
-			'primaryKey': 'samanthapudi',
-			'requiredFields': [
-				{ 'samanthapudi': null }
-			]
+		'POST': {
+			'methods': {
+				'DELETE': {
+					'path': '/users/v2.0/admins/users/$primaryContentId',
+					'auth': false,
+					'primaryKey': 'samanthapudi',
+					'requiredFields': [
+						{ 'samanthapudi': null }
+					]
+				}
+			}
 		}
 	},
 
