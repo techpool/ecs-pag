@@ -776,14 +776,14 @@ module.exports = {
 
 
 	// Test
-	'/pages/uri': {
-		'POST': {
-			'methods': {
-				'POST': {
-					'path': '/pages/uri',
-					'auth': false
-				}
-			}
+	'/test/giridhar/giridhar/giridhar': {
+		'GET': {
+			'path': '/users/v2.0/admins/users/$primaryContentId',
+			'auth': false,
+			'primaryKey': 'samanthapudi',
+			'requiredFields': [
+				{ 'samanthapudi': null }
+			]
 		}
 	},
 
