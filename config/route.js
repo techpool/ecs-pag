@@ -777,7 +777,6 @@ module.exports = {
 
 	// Test
 	// TODO: Uncomment it for testing ON DEVO ONLY. DON'T PUSH TO GAMMA
-	/*
 	'/test/giridhar/giridhar/giridhar': {
 		'POST': {
 			'methods': {
@@ -792,7 +791,6 @@ module.exports = {
 			}
 		}
 	},
-	*/
 
 
 	// Growth Experiments
