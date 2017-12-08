@@ -582,6 +582,17 @@ module.exports = {
 		}
 	},
 
+	'/events':{
+        'GET': {
+            'path': '/events/v2.0/entries',
+            'auth': true,
+            'requiredFields': [
+                { 'slug': null }
+            ]
+        }
+	}
+	,
+
 
 	//Library
 	'/userpratilipi/library/list' : {
