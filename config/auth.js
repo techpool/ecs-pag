@@ -344,6 +344,12 @@ module.exports = {
 		}
 	},
 
+	'/notification/batch': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
 
 	// Report
 	'/report/v1.0/report': {

@@ -739,6 +739,17 @@ module.exports = {
 		}
 	},
 
+	'/notification/batch': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/notification/batch',
+					'auth': true
+				}
+			}
+		}
+	},
+
 
 	// Report
 	'/contact': {
