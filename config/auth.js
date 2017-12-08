@@ -246,6 +246,12 @@ module.exports = {
 		}
 	},
 
+	'/users/v2.0/admins/users/$primaryContentId': {
+		'DELETE': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
 
 	// Event
 	'/event/list': {

@@ -782,7 +782,7 @@ module.exports = {
 			'methods': {
 				'DELETE': {
 					'path': '/users/v2.0/admins/users/$primaryContentId',
-					'auth': false,
+					'auth': true,
 					'primaryKey': 'samanthapudi',
 					'requiredFields': [
 						{ 'samanthapudi': null }
