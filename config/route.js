@@ -586,6 +586,7 @@ module.exports = {
         'GET': {
             'path': '/events/v2.0/entries',
             'auth': true,
+            'primaryKey': 'slug',
             'requiredFields': [
                 { 'slug': null }
             ]
