@@ -887,6 +887,18 @@ module.exports = {
 			}
 		}
 	},
+	
+	// Pratilipi Summary
+	'/growthjava/pratilipis/metadata': {
+		'POST': {
+			'auth': false,
+			'methods': {
+				'POST': {
+					'path': '/growthjava/pratilipis/metadata'
+				}
+			}
+		}
+	},
 
 	// CoverImage
 	'/coverimage-recommendation/cover': {
