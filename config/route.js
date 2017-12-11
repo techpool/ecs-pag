@@ -584,7 +584,7 @@ module.exports = {
 
 	'/events':{
         'GET': {
-            'path': '/events/v2.0/entries',
+            'path': '/events/v2.0',
             'auth': false,
             'primaryKey': 'slug',
             'requiredFields': [
@@ -887,7 +887,7 @@ module.exports = {
 			}
 		}
 	},
-	
+
 	// Pratilipi Summary
 	'/growthjava/pratilipis/metadata': {
 		'POST': {
