@@ -583,17 +583,11 @@ module.exports = {
 	},
 
 	'/events':{
-        'GET': {
-            'path': '/events/v2.0',
-            'auth': false,
-            'primaryKey': 'slug',
-            'requiredFields': [
-                { 'slug': null }
-            ]
-        }
-	}
-	,
-
+        	'GET': {
+            		'path': '/events/v2.0',
+            		'auth': false
+		}
+	},
 
 	//Library
 	'/userpratilipi/library/list' : {
