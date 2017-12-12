@@ -538,6 +538,21 @@ module.exports = {
 		}
 	},
 
+	'/users/v2.0/admins/users/delete': {
+		'POST': {
+			'methods': {
+				'DELETE': {
+					'path': '/users/v2.0/admins/users/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'userId',
+					'requiredFields': [
+						{ 'userId': null }
+					]
+				}
+			}
+		}
+	},
+
 
 	// Event
 	'/event/list': {
@@ -583,9 +598,9 @@ module.exports = {
 	},
 
 	'/events':{
-        	'GET': {
-            		'path': '/events/v2.0',
-            		'auth': false
+			'GET': {
+					'path': '/events/v2.0',
+					'auth': false
 		}
 	},
 
@@ -791,23 +806,6 @@ module.exports = {
 		}
 	},
 
-
-	// Test
-	// TODO: Uncomment it for testing ON DEVO ONLY. DON'T PUSH TO GAMMA
-	'/test/giridhar/giridhar/giridhar': {
-		'POST': {
-			'methods': {
-				'DELETE': {
-					'path': '/users/v2.0/admins/users/$primaryContentId',
-					'auth': false,
-					'primaryKey': 'samanthapudi',
-					'requiredFields': [
-						{ 'samanthapudi': null }
-					]
-				}
-			}
-		}
-	},
 
 
 	// Growth Experiments
