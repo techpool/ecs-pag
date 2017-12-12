@@ -32,18 +32,6 @@ const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at ser
 const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com", "android-devo.ptlp.co" ];
 
-const Logger = require('./util/Console').init(mainConfig);
-
-/*  TODO: Sachin
-const consoleLogger = require('./util/Console').init({
-	project: mainConfig.BIGQUERY_PROJECT,
-	dataset: mainConfig.BIGQUERY_DATASET,
-	table: mainConfig.LOGGING_TABLE
-});
-
-// const console = new consoleLogger();
-*/
-
 Array.prototype.contains = function (obj) {
 	return this.indexOf(obj) > -1;
 };
@@ -966,16 +954,12 @@ function resolveRegex( request, response, next ) {
 		_getHackyService( method, request, response )
 			.then( (serviceResponse) => {
 				_sendResponseToClient( request, response, serviceResponse.statusCode, serviceResponse.body );
-				console.log( "SACHIN_BIGQUERY" + " :: " + request.url + " :: " + JSON.stringify( request.headers ) );
-				request.log.submit( request, response );
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
 					console.log( "ERROR_STATUS :: " + httpError.statusCode );
 					console.log( "ERROR_MESSAGE :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
-					console.log( "SACHIN_BIGQUERY" + " :: " + request.url + " :: " + JSON.stringify( request.headers ) );
-					request.log.submit( request, response );
 				}
 			});
 		return;
@@ -989,12 +973,6 @@ app.use( morgan('short') );
 app.use( cookieParser() );
 app.use( bodyParser.json({ limit: "50mb" }) );
 app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
-
-// for initializing log object
-app.use( (request, response, next) => {
-	request.log = new Logger(request,response);
-	next();
-});
 
 //CORS middleware
 app.enable( 'trust proxy' );
@@ -1120,15 +1098,6 @@ app.patch( ['/*'], (request, response, next) => {
 // delete
 app.delete( ['/*'], (request, response, next) => {
 	response.send( "Api Not supported yet!" );
-});
-
-
-// Bigquery logs
-app.use( (request, response, next ) => {
-	// Logging to bigquery logs
-	console.log( "SACHIN_BIGQUERY" + " :: " + request.url + " :: " + JSON.stringify( request.headers ) );
-	request.log.submit( request, response );
-	next();
 });
 
 // Debugging
