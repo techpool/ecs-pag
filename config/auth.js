@@ -83,7 +83,7 @@ module.exports = {
 
 	'/pratilipis': {
 		'GET': {
-			'params': [ 'resource', 'method', 'slug' ]
+			'params': [ 'resource', 'method', 'authorId', 'state', 'slug' ]
 		},
 		'POST': {
 			'params': [ 'resource', 'method', 'authorId', 'language' ]

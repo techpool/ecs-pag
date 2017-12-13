@@ -597,10 +597,10 @@ module.exports = {
 		}
 	},
 
-	'/events':{
-			'GET': {
-					'path': '/events/v2.0',
-					'auth': false
+	'/events': {
+		'GET': {
+			'path': '/events/v2.0',
+			'auth': false
 		}
 	},
 
