@@ -103,7 +103,7 @@ module.exports = {
 
 	'/authors': {
 		'GET': {
-			'params': [ 'resource', 'method' ]
+			'params': [ 'resource', 'method', 'slug' ]
 		},
 		'POST': {
 			'params': [ 'resource', 'method', 'language' ]
@@ -275,6 +275,12 @@ module.exports = {
 	'/event/pratilipi': {
 		'GET': {
 			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
+	'/events/v2.0': {
+		'GET': {
+			'params': [ 'resource', 'method', 'slug' ]
 		}
 	},
 
