@@ -597,14 +597,6 @@ module.exports = {
 		}
 	},
 
-	// TODO: Remove asap
-	'/events': {
-		'GET': {
-			'path': '/events/v2.0',
-			'auth': false // TODO: Make it true
-		}
-	},
-
 	'/events/v2.0': {
 		'GET': {
 			'path': '/events/v2.0',
