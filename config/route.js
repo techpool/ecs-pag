@@ -806,6 +806,7 @@ module.exports = {
 		}
 	},
 
+	// Test
 	'/pratilipis/metadata': {
 		'GET': {
 			'path': '/pratilipis/metadata',
@@ -813,6 +814,16 @@ module.exports = {
 		}
 	},
 
+	'/pages/uri': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/pages/uri',
+					'auth': false
+				}
+			}
+		}
+	},
 
 
 	// Growth Experiments
