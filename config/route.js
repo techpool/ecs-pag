@@ -890,10 +890,10 @@ module.exports = {
 	// Pratilipi Summary
 	'/growthjava/pratilipis/metadata': {
 		'POST': {
-			'auth': false,
 			'methods': {
 				'POST': {
-					'path': '/growthjava/pratilipis/metadata'
+					'path': '/growthjava/pratilipis/metadata',
+					'auth': false
 				}
 			}
 		}
@@ -909,10 +909,10 @@ module.exports = {
 
 	'/coverimage-recommendation/cover/select': {
 		'POST': {
-			'auth': true,
 			'methods': {
 				'POST': {
-					'path': '/coverimage-recommendation/cover/select'
+					'path': '/coverimage-recommendation/cover/select',
+					'auth': true
 				}
 			}
 		}
