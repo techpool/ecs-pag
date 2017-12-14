@@ -806,6 +806,13 @@ module.exports = {
 		}
 	},
 
+	'/pratilipis/metadata': {
+		'GET': {
+			'path': '/pratilipis/metadata',
+			'auth': false
+		}
+	},
+
 
 
 	// Growth Experiments
