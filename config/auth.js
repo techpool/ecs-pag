@@ -430,7 +430,12 @@ module.exports = {
 			'params': [ 'resource', 'method' ]
 		}
 	},
-
+	
+	'/template-engine/mobile/homescreen/widgets': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
 
 	// CoverImage
 	'/coverimage-recommendation/cover': {
