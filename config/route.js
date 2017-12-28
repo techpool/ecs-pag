@@ -909,12 +909,20 @@ module.exports = {
 			}
 		}
 	},
+	
+	// Homepage Templating Engine
+	'/template-engine/mobile/homescreen/widgets': {
+		'GET': {
+			'auth': true,
+			'path': '/template-engine/mobile/homescreen/widgets'
+		}
+	},
 
 	// CoverImage
 	'/coverimage-recommendation/cover': {
 		'GET': {
 			'auth': true,
-			'path': '/coverimage-recommendation/cover',
+			'path': '/coverimage-recommendation/cover'
 		}
 	},
 
