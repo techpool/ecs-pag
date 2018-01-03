@@ -934,7 +934,7 @@ function _resolvePostPatchDelete( methodName, request, response, next ) {
 }
 
 function resolveRegex( request, response, next ) {
-	if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library|notifications).*$/.test(request.path) ) {
+	if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library|notifications|oasis).*$/.test(request.path) ) {
 		var method;
 		if( request.body["X-HTTP-Method-Override"] !== undefined ) {
 			method = request.method.toUpperCase() === 'POST' ? ( request.body["X-HTTP-Method-Override"] !== undefined ? request.body["X-HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
