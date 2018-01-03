@@ -896,12 +896,7 @@ function resolvePOST( request, response, next ) {
 			if( fieldsFlag ) {
 				_resolvePostPatchDelete( methodName, request, response, next );
 			} else {
-				// TO-DO: Remove Hack once new integrations are done
-				if( api === '/userpratilipi/library' ) {
-					_forwardToGae( "POST", request, response, next );
-				} else {
-					response.send( "Method not yet supported!" );
-				}
+				response.send( "Method not yet supported!" );
 			}
 		}
 
@@ -913,11 +908,6 @@ function resolvePOST( request, response, next ) {
 }
 
 function _resolvePostPatchDelete( methodName, request, response, next ) {
-
-	if( request.path === '/userpratilipi/library' && request.body['lastOpenedPage'] !== undefined ) {
-		_forwardToGae( "POST", request, response, next );
-		return;
-	}
 
 	// Sanity check -> direct request from frontend
 	var api = request.path;
