@@ -982,6 +982,10 @@ app.get( "/health", (request, response, next) => {
 	response.send( 'Pag is healthy !' );
 });
 
+app.get( "/app/test", (request, response, next) => {
+	response.json( { message: 'OK' } );
+});
+
 
 // Setting response.locals
 app.use( (request, response, next) => {
