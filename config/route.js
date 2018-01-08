@@ -182,7 +182,7 @@ module.exports = {
 	'/recommendation/pratilipis': {
 		'GET': {
 			'path': '/recommendation/pratilipis',
-			'auth': false
+			'auth': true
 		}
 	},
 
