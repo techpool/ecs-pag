@@ -15,14 +15,9 @@ var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 const morgan = require( 'morgan' );
-const mainConfig = require( './config/main' )[ process.env.STAGE || 'local' ];
-const routeConfig = require( './config/route' );
-const authConfig = require( './config/auth' );
-
-const Logging = require( './lib/LoggingGcp.js' ).init({
-	projectId: mainConfig.GCP_PROJ_ID,
-	service: mainConfig.LOGGING_SERVICE_NAME
-});
+const mainConfig = require( './src/config/main' )[ process.env.STAGE || 'local' ];
+const routeConfig = require( './src/config/route' );
+const authConfig = require( './src/config/auth' );
 
 const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };

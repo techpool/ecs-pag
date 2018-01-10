@@ -1,5 +1,6 @@
+.idea
 node_modules
 *.pem
 keyfile*.json
-package-lock.json
-
+build_run.sh
+ecs-pag.iml

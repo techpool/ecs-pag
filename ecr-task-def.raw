@@ -22,7 +22,14 @@
                     "awslogs-group": "$PREFIX$STAGE-$APP_NAME",
                     "awslogs-region": "ap-southeast-1"
                 }
-            }
+            },
+            "ulimits": [
+                {
+                    "name": "nofile",
+                    "softLimit": 65536,
+                    "hardLimit": 65536
+                }
+            ]
         }
     ]
 }

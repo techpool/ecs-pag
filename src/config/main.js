@@ -1,7 +1,7 @@
 var config = {};
 
 config.devo = {
-    'SERVICE_PORT': 80,
+    'SERVICE_PORT': process.env.SERVICE_PORT,
     'GCP_PROJ_ID': process.env.GCP_PROJ_ID,
     'LOGGING_SERVICE_NAME': 'ecs-pag-devo',
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
@@ -14,7 +14,7 @@ config.devo = {
 };
 
 config.gamma = {
-    'SERVICE_PORT': 80,
+    'SERVICE_PORT': process.env.SERVICE_PORT,
     'GCP_PROJ_ID': process.env.GCP_PROJ_ID,
     'LOGGING_SERVICE_NAME': 'ecs-pag-gamma',
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
@@ -27,7 +27,7 @@ config.gamma = {
 };
 
 config.prod = {
-    'SERVICE_PORT': 80,
+    'SERVICE_PORT': process.env.SERVICE_PORT,
     'GCP_PROJ_ID': process.env.GCP_PROJ_ID,
     'LOGGING_SERVICE_NAME': 'ecs-pag-prod',
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
