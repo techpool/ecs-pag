@@ -1,4 +1,5 @@
 FROM $DOCKER_REPO/ubuntu:16.04
+ENV APP_NAME=pag
 
 # Install essentials
 RUN apt-get update && \
