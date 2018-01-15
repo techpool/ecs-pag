@@ -15,7 +15,6 @@ var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 const morgan = require( 'morgan' );
-const logger = require( './src/lib/logger.js' );
 const mainConfig = require( './src/config/main' )[ process.env.STAGE || 'local' ];
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
@@ -959,7 +958,6 @@ function resolveRegex( request, response, next ) {
 const app = express();
 
 app.use( morgan('short') );
-app.use( logger.logger );
 app.use( cookieParser() );
 app.use( bodyParser.json({ limit: "50mb" }) );
 app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
@@ -1110,3 +1108,32 @@ process.on( 'unhandledRejection', function( reason, p ) {
 app.listen( mainConfig.SERVICE_PORT, function(err) {
 	console.log( `PAG Service successfully running on port ${mainConfig.SERVICE_PORT}` );
 });
+
+function createUniqueRequestId( req ) {
+    var realm = getRealm( req ) || 'pr';
+    var client = getClient( req );
+    var uuid = getUuid();
+    var page = getPage( req ) || 'undefined';
+    var requestId = realm + client + uuid + page;
+    return requestId;
+}
+
+function getRealm( req ) {
+    
+}
+
+function getClient( req ) {
+    var clientType = ANDROID_ENDPOINTS.contains( req.headers.host ) ? "a" : "w";
+    return clientType;
+    
+}
+
+function getUuid( uuidLength ) {
+    // logic 1
+    var uuid = Math.random().toString( 36 ).substr( 2, uuidLength );
+    return uuid;
+}
+
+function getPage( req ) {
+    
+}
