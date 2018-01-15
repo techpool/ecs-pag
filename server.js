@@ -15,6 +15,7 @@ var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 const morgan = require( 'morgan' );
+const logger = require( './src/lib/logger.js' );
 const mainConfig = require( './src/config/main' )[ process.env.STAGE || 'local' ];
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
@@ -244,7 +245,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
-	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ] };
+	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ], 'Request-Id': response.locals[ "request-id" ] };
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
@@ -297,7 +298,7 @@ function _getHackyAuth( resource, method, request, response ) {
 
 	var authEndpoint = ECS_END_POINT + mainConfig.AUTHENTICATION_ENDPOINT + "?" + _formatParams( authParams );
 
-	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ] };
+	var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ], 'Request-Id': response.locals[ "request-id" ] };
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
@@ -356,7 +357,8 @@ function _getService( method, requestUrl, request, response ) {
 		'Client-Type': response.locals[ "client-type" ],
 		'Client-Version': response.locals[ "client-version" ],
 		'User-Agent': response.locals[ "user-agent" ],
-		'calling-agent': response.locals[ "calling-agent" ]
+		'calling-agent': response.locals[ "calling-agent" ],
+		'Request-Id': response.locals[ "request-id" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
@@ -413,7 +415,8 @@ function _getHackyService( method, request, response ) {
 		'Client-Type': response.locals[ "client-type" ],
 		'Client-Version': response.locals[ "client-version" ],
 		'User-Agent': response.locals[ "user-agent" ],
-		'calling-agent': response.locals[ "calling-agent" ]
+		'calling-agent': response.locals[ "calling-agent" ],
+		'Request-Id': response.locals[ "request-id" ]
 	};
 	if( request.headers.version )
 		headers[ "Version" ] = request.headers.version;
@@ -846,6 +849,7 @@ function resolvePOST( request, response, next ) {
 					request[ "headers" ][ "User-Id" ] = userId;
 					request[ "headers" ][ "Access-Token" ] = response.locals[ "access-token" ];
 					request[ "headers" ][ "calling-agent" ] = response.locals[ "calling-agent" ];
+					request[ "headers" ][ "Request-Id" ] = response.locals[ "request-id" ];
 					var url = ECS_END_POINT + resource;
 					if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
 					var startTimestamp = Date.now();
@@ -955,6 +959,7 @@ function resolveRegex( request, response, next ) {
 const app = express();
 
 app.use( morgan('short') );
+app.use( logger.logger );
 app.use( cookieParser() );
 app.use( bodyParser.json({ limit: "50mb" }) );
 app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
@@ -1010,6 +1015,9 @@ app.use( (request, response, next) => {
 
 	// Logging experimentation
 	response.locals[ "calling-agent" ] = process.env.APP_NAME || "PAG";
+
+	// 
+	response.locals[ "request-id" ] = request.headers[ "request-id" ] || null;
 
 	next();
 
