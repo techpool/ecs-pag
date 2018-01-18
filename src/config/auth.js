@@ -437,7 +437,7 @@ module.exports = {
 		}
 	},
 	
-	'/template-engine/callbacks/activities': {
+	'/template-engine/callback/activities': {
 		'POST': {
 			'params': [ 'resource', 'method' ]
 		}
