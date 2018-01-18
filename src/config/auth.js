@@ -422,6 +422,9 @@ module.exports = {
 	'/social-connect/contacts' : {
 		'GET': {
 			'params': [ 'resource', 'method' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method' ]
 		}
 	},
 
@@ -436,7 +439,13 @@ module.exports = {
 			'params': [ 'resource', 'method' ]
 		}
 	},
-
+	
+	'/template-engine/callback/activities': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+		
 	// CoverImage
 	'/coverimage-recommendation/cover': {
 		'GET': {
