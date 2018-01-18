@@ -422,6 +422,9 @@ module.exports = {
 	'/social-connect/contacts' : {
 		'GET': {
 			'params': [ 'resource', 'method' ]
+		},
+		'POST': {
+			'params': [ 'resource', 'method' ]
 		}
 	},
 
