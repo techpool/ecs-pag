@@ -436,7 +436,13 @@ module.exports = {
 			'params': [ 'resource', 'method' ]
 		}
 	},
-
+	
+	'/template-engine/callbacks/activities': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+		
 	// CoverImage
 	'/coverimage-recommendation/cover': {
 		'GET': {
