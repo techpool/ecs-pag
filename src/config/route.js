@@ -883,6 +883,15 @@ module.exports = {
 		'GET': {
 			'path': '/social-connect/contacts',
 			'auth': true,
+		},
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/social-connect/contacts',
+					'requiredFields': []
+				}
+			}
 		}
 	},
 
@@ -915,6 +924,17 @@ module.exports = {
 		'GET': {
 			'auth': true,
 			'path': '/template-engine/mobile/homescreen/widgets'
+		}
+	},
+	
+	'/template-engine/callback/activities': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/template-engine/callback/activities',
+					'auth': true
+				}
+			}
 		}
 	},
 
