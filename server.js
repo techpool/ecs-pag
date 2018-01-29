@@ -15,6 +15,7 @@ var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 const morgan = require( 'morgan' );
+const logger = require( './lib/logger.js' );
 const mainConfig = require( './src/config/main' )[ process.env.STAGE || 'local' ];
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
@@ -1015,11 +1016,14 @@ app.use( (request, response, next) => {
 	response.locals[ "calling-agent" ] = process.env.APP_NAME || "PAG";
 
 	// 
-	response.locals[ "request-id" ] = request.headers[ "request-id" ] || null;
+	response.locals[ "request-id" ] = request.headers[ "request-id" ] || createUniqueRequestId( request );
+	request.headers[ "Request-Id" ] = response.locals[ "request-id" ];
 
 	next();
 
 });
+
+app.use(logger.logger);
 
 // Remove /api in the beginning
 app.use( (request, response, next) => {
