@@ -55,4 +55,4 @@ EXPOSE 80
 # poc
 COPY cluster-poc-1.js .
 COPY cluster-poc-2.js .
-CMD["node", "cluster-poc-1.js"]
+CMD ["node", "cluster-poc-1.js"]
