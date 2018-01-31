@@ -49,10 +49,10 @@ RUN npm install
 EXPOSE 80
 
 # Starting nginx and node server
-# COPY start.sh .
-# CMD ["bash", "start.sh"]
+COPY start.sh .
+CMD ["bash", "start.sh"]
 
 # poc
-COPY cluster-poc-1.js .
-COPY cluster-poc-2.js .
-CMD ["node", "cluster-poc-1.js"]
+# COPY cluster-poc-1.js .
+# COPY cluster-poc-2.js .
+# CMD ["node", "cluster-poc-1.js"]
