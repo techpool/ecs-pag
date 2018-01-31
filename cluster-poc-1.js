@@ -4,7 +4,7 @@ var express = require('express');
 var app = express();
 
 // Add a basic route – index page
-app.get('/', function (request, response) {
+app.get('*', function (request, response) {
     response.send('Hello from Master!' );
 });
 
