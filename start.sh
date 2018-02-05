@@ -2,4 +2,4 @@
 exec service nginx start &
 
 # start node server
-exec npm run-script server
+exec pm2-runtime process.yml

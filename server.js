@@ -15,7 +15,7 @@ var httpAgent = new http.Agent({ keepAlive : true });
 var httpsAgent = new https.Agent({ keepAlive : true });
 
 const morgan = require( 'morgan' );
-const logger = require( './src/lib/logger.js' );
+// const logger = require( './lib/logger.js' );
 const mainConfig = require( './src/config/main' )[ process.env.STAGE || 'local' ];
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
@@ -61,7 +61,7 @@ function _getUrlParameter( url, parameter ) {
 function _sendResponseToClient( request, response, status, body ) {
 	var _getResponseCode = function( status, requestUrl ) {
 		if( ! status ) {
-			console.log( "MISSING_RESPONSE_CODE :: " + requestUrl );
+			console.log( `MISSING_RESPONSE_CODE :: ${status} :: ${requestUrl}` );
 			return 500;
 		}
 		status = parseInt( status );
@@ -71,7 +71,7 @@ function _sendResponseToClient( request, response, status, body ) {
 		else if( status === 201 || status === 207 ) return 200;
 		else if( status === 403 || status === 404 ) return 401;
 		else if( status === 502 || status === 504 ) return 500;
-		console.log( "INVALID_RESPONSE_CODE :: " + requestUrl );
+		console.log( `INVALID_RESPONSE_CODE :: ${status} :: ${requestUrl}` );
 		if( status >= 200 && status < 300 ) return 200;
 		else if( status >= 400 && status < 500 ) return 400;
 		else return 500;
@@ -207,7 +207,7 @@ function _getHttpPromise( uri, method, headers, body ) {
 	var startTimestamp = Date.now();
 	return httpPromise( genericReqOptions )
 		.then( response => {
-			console.log( `HTTP_RESPONSE :: ${ JSON.stringify( response ) } :: TIME_TAKEN ${ Date.now() - startTimestamp }` );
+			console.log( `HTTP_RESPONSE :: ${ response.statusCode } :: ${ JSON.stringify( response ) } :: TIME_TAKEN ${ Date.now() - startTimestamp }` );
 			return response;
 		})
 	;
@@ -260,7 +260,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 				return authResponse.headers[ 'user-id' ];
 			}
 		}, (httpError) => {
-			console.log( "ERROR_MESSAGE :: " + httpError.message );
+			console.log( "ERROR_MESSAGE :: _getAuth :: " + httpError.message );
 			_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
 			return Promise.reject();
 		});
@@ -313,7 +313,7 @@ function _getHackyAuth( resource, method, request, response ) {
 				return authResponse.headers[ 'user-id' ];
 			}
 		}, (httpError) => {
-			console.log( "ERROR_MESSAGE :: " + httpError.message );
+			console.log( "ERROR_MESSAGE :: _getHackyAuth :: " + httpError.message );
 			_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
 			return Promise.reject();
 		});
@@ -484,7 +484,7 @@ function resolveGET( request, response, next ) {
 				next();
 			})
 			.catch( err => {
-				console.log( "AUTHOR_FOLLOWERS_ALL_ERROR :: " + err.message );
+				console.log( "AUTHOR_FOLLOWERS_ALL_ERROR :: resolveGET :: " + err.message );
 				next();
 			})
 		;
@@ -559,8 +559,8 @@ function resolveGET( request, response, next ) {
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "ERROR_STATUS :: " + httpError.statusCode );
-					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					console.log( "ERROR_STATUS :: resolveGET :: " + requestUrl + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: resolveGET :: " + requestUrl + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
 					next();
 				}
@@ -591,8 +591,8 @@ function hackyGetBatch( request, response, next, requestArray ) {
 					next();
 				}).catch( (error) => {
 					console.log( "ERROR_CAUSE :: Promise.all" );
-					console.log( "ERROR_STATUS :: " + error.statusCode );
-					console.log( "ERROR_MESSAGE :: " + error.message );
+					console.log( "ERROR_STATUS :: hackyGetBatch :: " + error.statusCode );
+					console.log( "ERROR_MESSAGE :: hackyGetBatch :: " + error.message );
 					_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 					next();
 				})
@@ -732,8 +732,8 @@ function resolveGETBatch( request, response, next ) {
 					next();
 				}).catch( (error) => {
 					console.log( "ERROR_CAUSE :: Promise.all" );
-					console.log( "ERROR_STATUS :: " + error.statusCode );
-					console.log( "ERROR_MESSAGE :: " + error.message );
+					console.log( "ERROR_STATUS :: resolveGETBatch :: " + req.url + " :: " + error.statusCode );
+					console.log( "ERROR_MESSAGE :: resolveGETBatch :: " + req.url + " :: " + error.message );
 					_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 					next();
 				})
@@ -790,8 +790,8 @@ function resolveGETBatch( request, response, next ) {
 					})
 					.catch( (err) => {
 						if( err ) {
-							console.log( "ERROR_STATUS :: " + err.statusCode );
-							console.log( "ERROR_MESSAGE :: " + err.message );
+							console.log( "ERROR_STATUS :: resolveGETBatch" + req.url + err.statusCode );
+							console.log( "ERROR_MESSAGE :: resolveGETBatch"+ req.url + err.message );
 							_onRes( err.statusCode, err.error );
 							return recursiveGET( reqArray, responseObject );
 						} else {
@@ -920,8 +920,8 @@ function _resolvePostPatchDelete( methodName, request, response, next ) {
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "ERROR_STATUS :: " + httpError.statusCode );
-					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					console.log( "ERROR_STATUS :: _resolvePostPatchDelete :: " + request.url + " :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: _resolvePostPatchDelete :: " + request.url + " :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
 					next();
 				}
@@ -946,8 +946,8 @@ function resolveRegex( request, response, next ) {
 			}, (httpError) => {
 				// httpError will be null if Auth has rejected Promise
 				if( httpError ) {
-					console.log( "ERROR_STATUS :: " + httpError.statusCode );
-					console.log( "ERROR_MESSAGE :: " + httpError.message );
+					console.log( "ERROR_STATUS :: resolveRegex :: " + request.url + " :: " + httpError.statusCode );
+					console.log( "ERROR_MESSAGE :: resolveRegex :: " + request.url + " :: " + httpError.message );
 					_sendResponseToClient( request, response, httpError.statusCode, httpError.body );
 				}
 			});
@@ -959,7 +959,6 @@ function resolveRegex( request, response, next ) {
 const app = express();
 
 app.use( morgan('short') );
-app.use( logger.logger );
 app.use( cookieParser() );
 app.use( bodyParser.json({ limit: "50mb" }) );
 app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
@@ -1017,11 +1016,14 @@ app.use( (request, response, next) => {
 	response.locals[ "calling-agent" ] = process.env.APP_NAME || "PAG";
 
 	// 
-	response.locals[ "request-id" ] = request.headers[ "request-id" ] || null;
+	response.locals[ "request-id" ] = request.headers[ "request-id" ] || createUniqueRequestId( request );
+	request.headers[ "Request-Id" ] = response.locals[ "request-id" ];
 
 	next();
 
 });
+
+// app.use(logger.logger);
 
 // Remove /api in the beginning
 app.use( (request, response, next) => {
@@ -1110,3 +1112,32 @@ process.on( 'unhandledRejection', function( reason, p ) {
 app.listen( mainConfig.SERVICE_PORT, function(err) {
 	console.log( `PAG Service successfully running on port ${mainConfig.SERVICE_PORT}` );
 });
+
+function createUniqueRequestId( req ) {
+    var realm = getRealm( req ) || 'pr';
+    var client = getClient( req );
+    var uuid = getUuid();
+    var page = getPage( req ) || 'undefined';
+    var requestId = realm + client + uuid + page;
+    return requestId;
+}
+
+function getRealm( req ) {
+    
+}
+
+function getClient( req ) {
+    var clientType = ANDROID_ENDPOINTS.contains( req.headers.host ) ? "a" : "w";
+    return clientType;
+    
+}
+
+function getUuid( uuidLength ) {
+    // logic 1
+    var uuid = Math.random().toString( 36 ).substr( 2, uuidLength );
+    return uuid;
+}
+
+function getPage( req ) {
+    
+}

@@ -427,6 +427,12 @@ module.exports = {
 			'params': [ 'resource', 'method' ]
 		}
 	},
+	
+	'/social-connect/referred/by_invitation' : {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
 
 	'/social-connect/contacts/invite': {
 		'POST': {

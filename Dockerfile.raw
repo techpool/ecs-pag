@@ -1,5 +1,4 @@
 FROM $DOCKER_REPO/ubuntu:16.04
-ENV APP_NAME=pag
 
 # Install essentials
 RUN apt-get update && \
@@ -19,13 +18,14 @@ RUN apt-get update && \
 # Install nginx
 RUN apt-get install -y nginx
 
-# Configure nginx
-RUN echo "\ndaemon off;" >> /etc/nginx/nginx.conf
-RUN chown -R www-data:www-data /var/lib/nginx
-
-# Install node
+# Install node and pm2
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
-	apt-get install -y nodejs
+	apt-get install -y nodejs && \
+	npm install pm2 -g && \
+	pm2 update
+
+# For node optimisation
+ENV NODE_ENV=production
 
 # Cleanup
 RUN apt-get autoremove
@@ -34,9 +34,12 @@ RUN apt-get clean
 # Environment variables
 ENV SERVICE_PORT 8085
 
-# Copying nginx config files
-COPY config/service.nginx.conf /etc/nginx/servers/ecs-service
-COPY config/container.nginx.conf /etc/nginx/nginx.conf
+# Copying nginx config
+COPY nginx/service.nginx.conf /etc/nginx/servers/ecs-service
+COPY nginx/container.nginx.conf /etc/nginx/nginx.conf
+
+# Copying pm2 config
+COPY pm2/process.yml process.yml
 
 # Copying node application files
 COPY package.json .
