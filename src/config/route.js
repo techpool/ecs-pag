@@ -906,6 +906,17 @@ module.exports = {
 			}
 		}
 	},
+	
+	'/social-connect/referred/by_invitation': {
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/social-connect/referred/by_invitation'
+				}
+			}
+		}
+	},
 
 	// Pratilipi Summary
 	'/growthjava/pratilipis/metadata': {
