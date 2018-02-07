@@ -907,6 +907,17 @@ module.exports = {
 		}
 	},
 	
+	'/social-connect/contacts/scrape_phone_contacts': { // TODO: Remove requiredFields
+		'POST': {
+			'auth': true,
+			'methods': {
+				'POST': {
+					'path': '/social-connect/contacts/scrape_phone_contacts'
+				}
+			}
+		}
+	},
+	
 	'/social-connect/referred/by_invitation': {
 		'POST': {
 			'auth': true,
