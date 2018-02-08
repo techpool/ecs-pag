@@ -25,8 +25,8 @@ const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
-// const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
-const ECS_END_POINT = "https://hindi-devo.ptlp.co/api";
+const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
+// const ECS_END_POINT = "https://hindi-devo.ptlp.co/api";
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com", "android-devo.ptlp.co" ];
 
 Array.prototype.contains = function (obj) {
