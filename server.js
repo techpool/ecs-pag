@@ -25,7 +25,8 @@ const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
-const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
+// const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
+const ECS_END_POINT = "https://hindi-devo.ptlp.co/api";
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com", "android-devo.ptlp.co" ];
 
 Array.prototype.contains = function (obj) {
@@ -249,21 +250,48 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
-			// TODO: GIRIDHAR GIRIDHAR GIRIDHAR
-			var isAuthorized = authResponse.body.data.length === 0 ? true : authResponse.body.data[0].isAuthorized;
-			var statusCode = authResponse.body.data.length === 0 ? 200 : authResponse.body.data[0].code;
-			if( ! isAuthorized ) {
-				console.log( 'AUTHENTICATION_FAILED' );
-				_sendResponseToClient( request, response, statusCode, ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+
+			// If response not got, or 5xx, send server exception
+			if (authResponse == null || authResponse.statusCode == null || authResponse.statusCode >= 500) {
+				console.log(`AUTH_ERROR :: ${authEndpoint} :: ${JSON.stringify(headers)} :: ${authResponse.statusCode}`);
+				_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 				return Promise.reject();
+
+			// Else If code is 200, go into the data
+			} else if (authResponse.statusCode == 200) {
+				// TODO: GIRIDHAR - body data length should not be 0. A hack that we used for building something, we have to remove it.
+				var isAuthorized = authResponse.body.data.length === 0 ? true : authResponse.body.data[0].isAuthorized;
+				var statusCode = authResponse.body.data.length === 0 ? 200 : authResponse.body.data[0].code;
+
+				// If Authorized
+				if (isAuthorized)
+					return authResponse.headers[ 'user-id' ];
+
+				// Else print log, send response and reject promise
+				console.log(`AUTHENTICATION_FAILED :: ${authEndpoint} :: ${JSON.stringify(headers)}`);
+				_sendResponseToClient( request, response, statusCode, ( statusCode == 401 || statusCode == 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+				return Promise.reject();
+
+			// Else if 400 or 401, backfill the message(if not sent)
+			} else if (authResponse.statusCode == 400 || authResponse.statusCode == 401) {
+				if (!authResponse.body.message)
+					authResponse.body.message = (statusCode == 401 || statusCode == 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION;
+				_sendResponseToClient( request, response, authResponse.statusCode, authResponse.body );
+				return Promise.reject();
+
+			// Else log it and send 500
 			} else {
-				return authResponse.headers[ 'user-id' ];
-			}
+				console.log(`AUTH_ERROR :: ${authEndpoint} :: ${JSON.stringify(headers)} :: ${authResponse.statusCode}`);
+				_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+				return Promise.reject();
+			}			
+
 		}, (httpError) => {
 			console.log( "ERROR_MESSAGE :: _getAuth :: " + httpError.message );
-			_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
+			_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 			return Promise.reject();
 		});
+
 	;
 
 }
@@ -302,21 +330,48 @@ function _getHackyAuth( resource, method, request, response ) {
 
 	return _getHttpPromise( authEndpoint, "GET", headers )
 		.then( authResponse => {
-			console.log(`DEBUGGING: ${JSON.stringify(authResponse)}`);
-			var isAuthorized = authResponse.body.data[0].isAuthorized;
-			var statusCode = authResponse.body.data[0].code;
-			if( ! isAuthorized ) {
-				console.log( 'AUTHENTICATION_FAILED' );
-				_sendResponseToClient( request, response, statusCode, ( statusCode === 401 || statusCode === 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+
+			// If response not got, or 5xx, send server exception
+			if (authResponse == null || authResponse.statusCode == null || authResponse.statusCode >= 500) {
+				console.log(`AUTH_ERROR :: ${authEndpoint} :: ${JSON.stringify(headers)} :: ${authResponse.statusCode}`);
+				_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 				return Promise.reject();
+
+			// Else If code is 200, go into the data
+			} else if(authResponse.statusCode == 200) {
+				// TODO: GIRIDHAR - body data length should not be 0. A hack that we used for building something, we have to remove it.
+				var isAuthorized = authResponse.body.data.length === 0 ? true : authResponse.body.data[0].isAuthorized;
+				var statusCode = authResponse.body.data.length === 0 ? 200 : authResponse.body.data[0].code;
+
+				// If Authorized
+				if (isAuthorized)
+					return authResponse.headers[ 'user-id' ];
+
+				// Else print log, send response and reject promise
+				console.log(`AUTHENTICATION_FAILED :: ${authEndpoint} :: ${JSON.stringify(headers)}`);
+				_sendResponseToClient( request, response, statusCode, ( statusCode == 401 || statusCode == 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+				return Promise.reject();
+
+			// Else if 400 or 401, backfill the message(if not sent)
+			} else if(authResponse.statusCode == 400 || authResponse.statusCode == 401) {
+				if (!authResponse.body.message)
+					authResponse.body.message = (statusCode == 401 || statusCode == 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION;
+				_sendResponseToClient( request, response, authResponse.statusCode, authResponse.body );
+				return Promise.reject();
+
+			// Else log it and send 500
 			} else {
-				return authResponse.headers[ 'user-id' ];
-			}
+				console.log(`AUTH_ERROR :: ${authEndpoint} :: ${JSON.stringify(headers)} :: ${authResponse.statusCode}`);
+				_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+				return Promise.reject();
+			}			
+
 		}, (httpError) => {
-			console.log( "ERROR_MESSAGE :: _getHackyAuth :: " + httpError.message );
-			_sendResponseToClient( request, response, httpError.statusCode, httpError.error );
+			console.log( "ERROR_MESSAGE :: _getAuth :: " + httpError.message );
+			_sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
 			return Promise.reject();
 		});
+
 	;
 
 }
