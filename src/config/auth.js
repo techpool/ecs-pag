@@ -428,6 +428,12 @@ module.exports = {
 		}
 	},
 	
+	'/social-connect/contacts/scrape_phone_contacts': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+	
 	'/social-connect/referred/by_invitation' : {
 		'POST': {
 			'params': [ 'resource', 'method' ]
