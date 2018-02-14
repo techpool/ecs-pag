@@ -1171,7 +1171,7 @@ app.listen( mainConfig.SERVICE_PORT, function(err) {
 function createUniqueRequestId( req ) {
     var realm = getRealm( req ) || 'pr';
     var client = getClient( req );
-    var uuid = getUuid();
+    var uuid = getUuid( 6 );
     var page = getPage( req ) || 'undefined';
     var requestId = realm + client + uuid + page;
     return requestId;
