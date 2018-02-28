@@ -89,7 +89,11 @@ module.exports = {
 			'params': [ 'resource', 'method', 'authorId', 'language' ]
 		}
 	},
-
+  '/user_pratilipi/v2.0/user_pratilipis': {
+    'POST': {
+      'params': [ 'resource', 'method', 'id' ]
+    }
+  },
 
 	// Author
 	'/authors/$primaryContentId': {
