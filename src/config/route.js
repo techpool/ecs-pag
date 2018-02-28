@@ -1065,10 +1065,6 @@ module.exports = {
         'POST': {
           'path': '/user_pratilipi/v2.0/user_pratilipis',
           'auth': true,
-          'primaryKey': 'pratilipiId',
-          'requiredFields': [
-            { 'pratilipiId': null }
-          ]
         }
       }
     }
