@@ -781,10 +781,34 @@ module.exports = {
 		}
 	},
 
+	'/truly-madly': {
+		'GET': {
+			'path': '/init/v1.0/truly-madly',
+			'auth': false
+		}
+	},
+
 	'/init/banner/list': {
 		'GET': {
 			'path': '/init/v1.0/banner',
 			'auth': false
+		}
+	},
+
+
+	// User_pratilipi
+	'/user_pratilipi/v2.0/user_pratilipis': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user_pratilipi/v2.0/user_pratilipis',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
 		}
 	},
 
@@ -1057,17 +1081,6 @@ module.exports = {
 				}
 			}
 		}
-	},
-
-  '/user_pratilipi/v2.0/user_pratilipis': {
-    'POST': {
-      'methods': {
-        'POST': {
-          'path': '/user_pratilipi/v2.0/user_pratilipis',
-          'auth': true,
-        }
-      }
-    }
-  }
+	}
 
 };
