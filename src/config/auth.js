@@ -377,6 +377,12 @@ module.exports = {
 		}
 	},
 
+	'/init/v2.0/init': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
 	// User_Pratilipi
 	'/user_pratilipi/v2.0/user_pratilipis': {
 		'POST': {

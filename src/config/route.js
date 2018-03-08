@@ -781,6 +781,13 @@ module.exports = {
 		}
 	},
 
+	'/init/v2.0/init': {
+		'GET': {
+			'path': '/init/v2.0/init',
+			'auth': true
+		}
+	},
+
 	'/truly-madly': {
 		'GET': {
 			'path': '/init/v1.0/truly-madly',
