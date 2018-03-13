@@ -200,7 +200,8 @@ module.exports = {
 	'/pratilipi': {
 		'GET': {
 			'path': '/oasis/v1.0/pratilipis/summary',
-			'auth': true
+			'auth': true,
+      'primaryKey': 'pratilipiId'
 		},
 		'POST': {
 			'methods': {
