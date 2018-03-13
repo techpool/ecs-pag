@@ -89,6 +89,11 @@ module.exports = {
 			'params': [ 'resource', 'method', 'authorId', 'language' ]
 		}
 	},
+  '/oasis/v1.0/pratilipis/summary': {
+    'GET': {
+      'params': [ 'resource', 'id', 'method', 'slug' ]
+    }
+  },
 
 	// Author
 	'/authors/$primaryContentId': {

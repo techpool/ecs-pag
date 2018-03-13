@@ -199,9 +199,8 @@ module.exports = {
 	// Pratilipi
 	'/pratilipi': {
 		'GET': {
-			'path': '/pratilipis/$primaryContentId',
-			'auth': true,
-			'primaryKey': 'pratilipiId'
+			'path': '/oasis/v1.0/pratilipis/summary',
+			'auth': true
 		},
 		'POST': {
 			'methods': {
@@ -233,7 +232,7 @@ module.exports = {
 
 	'/pratilipis': {
 		'GET': {
-			'path': '/pratilipis',
+			'path': '/oasis/v1.0/pratilipis/summary',
 			'auth': true
 		}
 	},
