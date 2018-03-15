@@ -797,7 +797,7 @@ module.exports = {
 
   '/recommendations/v2.0/pratilipis': {
     'GET': {
-      'path': '/recommentations/v2.0/pratilipis',
+      'path': '/recommendations/v2.0/pratilipis',
       'auth': true
     }
 	},
