@@ -795,7 +795,13 @@ module.exports = {
 		}
 	},
 
-	'/init/banner/list': {
+  '/recommentations/v2.0/pratilipis': {
+    'GET': {
+      'path': '/recommentations/v2.0/pratilipis',
+      'auth': true
+    },
+
+    '/init/banner/list': {
 		'GET': {
 			'path': '/init/v1.0/banner',
 			'auth': false
