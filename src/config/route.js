@@ -453,6 +453,7 @@ module.exports = {
 
 	'/user/login': {
 		'POST': {
+			'pipeToSgp': true,
 			'methods': {
 				'POST': {
 					'path': '/user/login',
@@ -487,7 +488,8 @@ module.exports = {
 	'/user/logout': {
 		'GET': {
 			'path': '/user/logout',
-			'auth': true
+			'auth': true,
+			'pipeToSgp': true
 		}
 	},
 
