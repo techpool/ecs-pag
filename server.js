@@ -19,6 +19,7 @@ const morgan = require( 'morgan' );
 const mainConfig = require( './src/config/main' )[ process.env.STAGE || 'local' ];
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
+const migrationRouter = require('./src/router/migration');
 
 const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
@@ -1098,6 +1099,9 @@ app.use( (request, response, next) => {
 	}
 	next();
 });
+
+// MIGRATION MIGRATION MIGRATION
+app.use( migrationRouter );
 
 app.use( (request, response, next) => {
 	resolveRegex( request, response, next );
