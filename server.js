@@ -1016,6 +1016,9 @@ function resolveRegex( request, response, next ) {
 
 const app = express();
 
+// MIGRATION MIGRATION MIGRATION
+app.use( migrationRouter );
+
 app.use( morgan('short') );
 app.use( cookieParser() );
 app.use( bodyParser.json({ limit: "50mb" }) );
@@ -1099,9 +1102,6 @@ app.use( (request, response, next) => {
 	}
 	next();
 });
-
-// MIGRATION MIGRATION MIGRATION
-app.use( migrationRouter );
 
 app.use( (request, response, next) => {
 	resolveRegex( request, response, next );

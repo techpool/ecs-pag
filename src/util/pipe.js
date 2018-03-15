@@ -10,13 +10,13 @@ const PipeUtil = function() {
             return process.env.SGP_LB_ENDPOINT;
         switch (stage) {
             case 'local':
-                return 'http://localhost:8081';
+                return 'http://prod-lb-pub-1761987772.ap-southeast-1.elb.amazonaws.com/api';
             case 'devo':
                 return '';
             case 'gamma':
-                return 'http://gamma-lb-pub-1256019773.ap-southeast-1.elb.amazonaws.com';
+                return 'http://gamma-lb-pub-1256019773.ap-southeast-1.elb.amazonaws.com/api';
             case 'prod':
-                return 'http://prod-lb-pub-1761987772.ap-southeast-1.elb.amazonaws.com';
+                return 'http://prod-lb-pub-1761987772.ap-southeast-1.elb.amazonaws.com/api';
         }
     },
 
@@ -27,32 +27,28 @@ const PipeUtil = function() {
             method = options.method || req.method,
             qs = Object.assign({}, req.query, options.query),
             headers = Object.assign({}, req.headers, options.headers),
-            body = req.body || undefined;
+            body = req.body;
 
         // Debugging
         console.log(`PIPE_REQUEST :: ${uri} :: ${method} :: ${JSON.stringify(qs)} :: ${JSON.stringify(headers)}`);
 
         return req.pipe(request({
-            uri: uri,
-            method: method,
-            qs: qs,
-            headers: headers,
-            body: body,
-            followAllRedirects: false,
-            followRedirect: false,
-            jar: true
-        }))
-        .on('response', (response) => {
-            console.log(`PIPE_RESPONSE :: ${uri} :: ${method} :: ${response.statusCode} :: ${JSON.stringify(response.headers)}`);
-            res.writeHead(response.statusCode, response.headers);
-        })
-        .pipe(res);
+                uri,
+                method,
+                qs,
+                headers,
+                body,
+                jar: false
+            })).on('response', (response) => {
+                console.log(`PIPE_RESPONSE :: ${uri} :: ${method} :: ${response.statusCode} :: ${JSON.stringify(response.headers)}`);
+                res.writeHead(response.statusCode, response.headers);
+            })
+            .pipe(res);
 
     };
 
-
     self.pipeToSgp = (req, res, options) =>
-        self.pipe(req, res, Object.assign({}, options, {'uri': self._getSGPEndpoint() + req.originalUrl}));
+        self.pipe(req, res, Object.assign({}, options, {'uri': self._getSGPEndpoint() + (req.originalUrl.startsWith('/api') ? req.originalUrl.substr(4) : req.originalUrl)}));
 
 };
 

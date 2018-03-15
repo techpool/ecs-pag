@@ -22,16 +22,22 @@ if (isSgp === undefined) {
 }
 
 
+// Setting res.locals[api]
+router.use((req, res, next) => {
+    res.locals['api'] = req.path.startsWith('/api') ? req.path.substr(4) : req.path;
+    return next();
+});
+
 // Sanity checks
 router.use((req, res, next) => {
 
     // Api Path not supported
-    if (!routeConfig[req.path]) {
+    if (!routeConfig[res.locals['api']]) {
         return next('router');
     }
 
     // Api Method not supported
-    if (!routeConfig[req.path][req.method]) {
+    if (!routeConfig[res.locals['api']][req.method]) {
         return next('router');
     }
 
@@ -43,7 +49,7 @@ router.use((req, res, next) => {
 router.use((req, res, next) => {
 
     // Stop traffic
-    if (routeConfig[req.path][req.method]['stopTraffic']) {
+    if (routeConfig[res.locals['api']][req.method]['stopTraffic']) {
         return res.status(503).json({
             message: 'Service Unavailable! Please try again later!'
         });
@@ -67,7 +73,7 @@ router.use((req, res, next) => {
     }
 
     // Api supported in Mumbai
-    if (!routeConfig[req.path][req.method]['pipeToSgp']) {
+    if (!routeConfig[res.locals['api']][req.method]['pipeToSgp']) {
         return next();
     }
 
