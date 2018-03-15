@@ -527,7 +527,8 @@ module.exports = {
 	'/user/accesstoken': {
 		'GET': {
 			'path': '/user/accesstoken',
-			'auth': false
+			'auth': false,
+			'pipeToSgp': true
 		}
 	},
 
