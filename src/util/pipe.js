@@ -5,6 +5,21 @@ const PipeUtil = function() {
 
     const self = this;
 
+    self._getSGPEndpoint = (stage = (process.env.STAGE || 'local')) => {
+        if (process.env.SGP_LB_ENDPOINT)
+            return process.env.SGP_LB_ENDPOINT;
+        switch (stage) {
+            case 'local':
+                return 'http://localhost:8081';
+            case 'devo':
+                return '';
+            case 'gamma':
+                return 'http://gamma-lb-pub-1256019773.ap-southeast-1.elb.amazonaws.com';
+            case 'prod':
+                return 'http://prod-lb-pub-1761987772.ap-southeast-1.elb.amazonaws.com';
+        }
+    },
+
     self.pipe = (req, res, options) => {
 
         const 
@@ -37,7 +52,7 @@ const PipeUtil = function() {
 
 
     self.pipeToSgp = (req, res, options) =>
-        self.pipe(req, res, Object.assign({}, options, {'uri': process.env.SGP_LB_ENDPOINT + req.originalUrl}));
+        self.pipe(req, res, Object.assign({}, options, {'uri': self._getSGPEndpoint() + req.originalUrl}));
 
 };
 
