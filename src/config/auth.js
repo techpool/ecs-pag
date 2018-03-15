@@ -67,6 +67,11 @@ module.exports = {
 		}
 	},
 
+  '/recommentations/v2.0/pratilipis': {
+    'GET': {
+      'params': [ 'resource', 'method' ]
+    }
+  },
 
 	// Pratilipi
 	'/pratilipis/$primaryContentId': {
