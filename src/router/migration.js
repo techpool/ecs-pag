@@ -5,7 +5,7 @@ const
 const
     stage = process.env.STAGE || 'local',
     routeConfig = require('./../config/route'),
-    isSgp = process.env.isSgp || true; // TODO: Remove true
+    isSgp = process.env.isSgp;
 
 const
     pipeUtil = require('./../util/pipe');
