@@ -5,7 +5,7 @@ const
 const
     stage = process.env.STAGE || 'local',
     routeConfig = require('./../config/route'),
-    mainConfig = require('./../config/main');
+    mainConfig = require('./../config/main')[stage];
 
 const
     pipeUtil = require('./../util/pipe');
