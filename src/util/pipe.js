@@ -10,9 +10,9 @@ const PipeUtil = function() {
         const 
             uri = options.uri || options.url,
             method = options.method || req.method,
-            qs = options.query || req.query || {},
-            headers = options.headers || req.headers || {},
-            body = options.body || req.body || {};
+            qs = Object.assign({}, req.query, options.query),
+            headers = Object.assign({}, req.headers, options.headers),
+            body = req.body || undefined;
 
         // Debugging
         console.log(`PIPE_REQUEST :: ${uri} :: ${method} :: ${JSON.stringify(qs)} :: ${JSON.stringify(headers)}`);
@@ -38,7 +38,6 @@ const PipeUtil = function() {
 
     self.pipeToSgp = (req, res, options) =>
         self.pipe(req, res, Object.assign({}, options, {'uri': process.env.SGP_LB_ENDPOINT + req.originalUrl}));
-
 
 };
 
