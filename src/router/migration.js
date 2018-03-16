@@ -11,15 +11,15 @@ const
     pipeUtil = require('./../util/pipe');
 
 
-let isSgp = process.env.isSgp;
+let isSgp = process.env.isSgp === "true";
 
 // Hack - Checking Internal Load Balancer Endpoint
-if (isSgp === undefined) {
-    if (mainConfig.API_END_POINT.includes(".ap-southeast-1.elb.amazonaws.com"))
-        isSgp = true;
-    else if (mainConfig.API_END_POINT.includes(".ap-south-1.elb.amazonaws.com"))
-        isSgp = false;
-}
+// if (isSgp === undefined) {
+//     if (mainConfig.API_END_POINT.includes(".ap-southeast-1.elb.amazonaws.com"))
+//         isSgp = true;
+//     else if (mainConfig.API_END_POINT.includes(".ap-south-1.elb.amazonaws.com"))
+//         isSgp = false;
+// }
 
 
 // Setting res.locals[api]
