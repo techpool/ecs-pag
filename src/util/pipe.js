@@ -14,8 +14,7 @@ const PipeUtil = function() {
             case 'devo':
                 return '';
             case 'gamma':
-                // return 'http://gamma-lb-pub-1256019773.ap-southeast-1.elb.amazonaws.com/api'; // TODO: Uncomment
-                return 'http://prod-lb-pub-1761987772.ap-southeast-1.elb.amazonaws.com/api'; // TODO: Remove
+                return 'http://gamma-lb-pub-1256019773.ap-southeast-1.elb.amazonaws.com/api';
             case 'prod':
                 return 'http://prod-lb-pub-1761987772.ap-southeast-1.elb.amazonaws.com/api';
         }
