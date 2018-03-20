@@ -798,14 +798,14 @@ module.exports = {
 		}
 	},
 
-  '/recommendations/v2.0/pratilipis': {
-    'GET': {
-      'path': '/recommendations/v2.0/pratilipis',
-      'auth': true
-    }
+	'/recommendations/v2.0/pratilipis': {
+		'GET': {
+			'path': '/recommendations/v2.0/pratilipis',
+			'auth': true
+		}
 	},
 
-    '/init/banner/list': {
+	'/init/banner/list': {
 		'GET': {
 			'path': '/init/v1.0/banner',
 			'auth': false
