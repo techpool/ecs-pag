@@ -269,8 +269,15 @@ function _getAuth( resource, method, primaryContentId, params, request, response
           return authResponse.headers[ 'user-id' ];
 
         // Else print log, send response and reject promise
-        console.log(`AUTHENTICATION_FAILED :: ${authEndpoint} :: ${JSON.stringify(headers)}`);
-        _sendResponseToClient( request, response, statusCode, ( statusCode == 401 || statusCode == 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+		console.log(`AUTHENTICATION_FAILED :: ${authEndpoint} :: ${JSON.stringify(headers)}`);
+
+		// TODO: Remove this logic asap. Hacky logic. GIRIDHAR. GIRIDHAR. GIRIDHAR.
+		// If id === 0 from auth, it is technically a 404. If id !== 0, the user is not allowed to access the resource.
+		if( authResponse.body.data[0].id === 0 ) {
+			_sendResponseToClient( request, response, 404, INVALID_ARGUMENT_EXCEPTION );
+		} else {
+			_sendResponseToClient( request, response, statusCode, ( statusCode == 401 || statusCode == 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+		}
         return Promise.reject();
 
       // Else if 400 or 401, backfill the message(if not sent)
@@ -349,8 +356,15 @@ function _getHackyAuth( resource, method, request, response ) {
           return authResponse.headers[ 'user-id' ];
 
         // Else print log, send response and reject promise
-        console.log(`AUTHENTICATION_FAILED :: ${authEndpoint} :: ${JSON.stringify(headers)}`);
-        _sendResponseToClient( request, response, statusCode, ( statusCode == 401 || statusCode == 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+		console.log(`AUTHENTICATION_FAILED :: ${authEndpoint} :: ${JSON.stringify(headers)}`);
+
+        // TODO: Remove this logic asap. Hacky logic. GIRIDHAR. GIRIDHAR. GIRIDHAR.
+		// If id === 0 from auth, it is technically a 404. If id !== 0, the user is not allowed to access the resource.
+		if( authResponse.body.data[0].id === 0 ) {
+			_sendResponseToClient( request, response, 404, INVALID_ARGUMENT_EXCEPTION );
+		} else {
+			_sendResponseToClient( request, response, statusCode, ( statusCode == 401 || statusCode == 403 ) ? INSUFFICIENT_ACCESS_EXCEPTION : INVALID_ARGUMENT_EXCEPTION );
+		}
         return Promise.reject();
 
       // Else if 400 or 401, backfill the message(if not sent)
