@@ -631,6 +631,18 @@ module.exports = {
 
 
 	// Content
+	'/web/reader/v1.0/readerChapter': {
+		'GET': {
+			'path': '/web/reader/v1.0/readerChapter',
+			'auth': true
+		}
+	},
+	'/web/reader/v1.0/readerBatch': {
+		'GET': {
+			'path': '/web/reader/v1.0/readerBatch',
+			'auth': true
+		}
+	},	
 	'/pratilipi/content/batch': {
 		'POST': {
 			'methods': {
