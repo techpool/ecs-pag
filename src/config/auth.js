@@ -99,6 +99,16 @@ module.exports = {
       'params': [ 'resource', 'id', 'method', 'slug' ]
     }
   },
+	'/web/reader/v1.0/readerChapter': {
+	    'GET': {
+	      'params': [ 'resource', 'method' ]
+	    }		
+	},
+	'/web/reader/v1.0/readerBatch': {
+	    'GET': {
+	      'params': [ 'resource', 'method' ]
+	    }		
+	},	
 
 	// Author
 	'/authors/$primaryContentId': {
