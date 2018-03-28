@@ -526,6 +526,7 @@ module.exports = {
 
 	'/user/accesstoken': {
 		'GET': {
+			'stopTraffic': true,
 			'path': '/user/accesstoken',
 			'auth': false
 		}
