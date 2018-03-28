@@ -1135,16 +1135,11 @@ app.get( ['/*'], (request, response, next) => {
 // post
 app.post( ['/*'], (request, response, next) => {
 
-  var stopAuthorCalls = false;
-  if( stopAuthorCalls ) {
-    if( request.path === '/user' ||
-      request.path.startsWith( '/user/' ) ||
-      request.path === '/author' ||
-      request.path.startsWith( '/author/' ) ||
-      request.path === '/pratilipi' ||
-      request.path.startsWith( '/pratilipi/' ) ) {
-      return response.status(500).json(UNEXPECTED_SERVER_EXCEPTION);
-    }
+  var stopAllPostCalls = true;
+  if( stopAllPostCalls ) {
+    return response.status(503).json({
+      message: 'Service Unavailable! Please try again later!'
+    });
   }
 
   resolvePOST( request, response, next );
