@@ -1007,6 +1007,12 @@ function _resolvePostPatchDelete( methodName, request, response, next ) {
 }
 
 function resolveRegex( request, response, next ) {
+    
+  if( request.method == 'POST' || request.method == 'PATCH' || request.method == 'DELETE' ) {
+    return response.status(503).json({
+      message: 'Service Unavailable! Please try again later!'
+    });
+  }
   if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library|notifications|oasis|init\/v2\.0\/videos).*$/.test(request.path) ) {
     var method;
     if( request.body["X-HTTP-Method-Override"] !== undefined ) {
