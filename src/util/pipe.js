@@ -6,8 +6,8 @@ const PipeUtil = function() {
     const self = this;
 
     self._getSGPEndpoint = (stage = (process.env.STAGE || 'local')) => {
-        if (process.env.SGP_LB_ENDPOINT)
-            return process.env.SGP_LB_ENDPOINT;
+        if (process.env.ECS_SGP_API_ENDPOINT)
+            return process.env.ECS_SGP_API_ENDPOINT;
         switch (stage) {
             case 'local':
                 return 'http://prod-lb-pub-1761987772.ap-southeast-1.elb.amazonaws.com/api';
