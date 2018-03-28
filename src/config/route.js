@@ -742,6 +742,18 @@ module.exports = {
 			'path': '/auth/isAuthorized'
 		}
 	},
+	
+	// Temporary Api until Growth is moved to Mumbai
+	'/auth/accessToken': {
+		'POST': {
+			'methods': {
+				'DELETE': {
+					'path': '/auth/accessToken',
+					'auth': false
+				}
+			}
+		}
+	},
 
 
 	// Notification
