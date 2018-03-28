@@ -82,4 +82,19 @@ router.use((req, res, next) => {
 
 });
 
+// Stopping POST PATCH DELETE calls in Singapore
+router.use((req, res, next) => {
+
+    let stopAllPostPatchDeleteCallsInSgp = true;
+
+    if (isSgp && stopAllPostPatchDeleteCallsInSgp && (req.method === 'POST' || req.method === 'PATCH' || req.method === 'DELETE' )) {
+        return response.status(503).json({
+            message: 'Service Unavailable! Please try again later!'
+        });
+    }
+
+    return next();
+
+});
+
 module.exports = router;
