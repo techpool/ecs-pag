@@ -538,6 +538,50 @@ module.exports = {
 		}
 	},
 
+	'/users/v2.0/identifiers/is-valid': {
+		'GET': {
+			'path': '/users/v2.0/identifiers/is-valid',
+			// TODO: auth true once auth handled
+			'auth': false
+		}
+	},
+
+	'/users/v2.0/sessions/login': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/users/v2.0/sessions/login',
+					// TODO: auth true once auth handled
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/users/v2.0/sessions/signup': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/users/v2.0/sessions/signup',
+					// TODO: auth true once auth handled
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/users/v2.0/sessions/logout': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/users/v2.0/sessions/logout',
+					// TODO: auth true once auth handled
+					'auth': false
+				}
+			}
+		}
+	},
+
 	'/users/v2.0/admins/users/delete': {
 		'POST': {
 			'methods': {

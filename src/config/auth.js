@@ -265,6 +265,30 @@ module.exports = {
 		}
 	},
 
+	'/users/v2.0/identifiers/is-valid': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/users/v2.0/sessions/login': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/users/v2.0/sessions/signup': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/users/v2.0/sessions/logout': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
 	'/users/v2.0/admins/users/$primaryContentId': {
 		'DELETE': {
 			'params': [ 'resource', 'method', 'id' ]
