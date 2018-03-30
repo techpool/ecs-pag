@@ -541,8 +541,7 @@ module.exports = {
 	'/users/v2.0/identifiers/is-valid': {
 		'GET': {
 			'path': '/users/v2.0/identifiers/is-valid',
-			// TODO: auth true once auth handled
-			'auth': false
+			'auth': true
 		}
 	},
 
@@ -551,8 +550,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/users/v2.0/sessions/login',
-					// TODO: auth true once auth handled
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -563,8 +561,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/users/v2.0/sessions/signup',
-					// TODO: auth true once auth handled
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -575,8 +572,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/users/v2.0/sessions/logout',
-					// TODO: auth true once auth handled
-					'auth': false
+					'auth': true
 				}
 			}
 		}
