@@ -567,6 +567,30 @@ module.exports = {
 		}
 	},
 
+	'/users/v2.0/passwords/forgot/intent': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/users/v2.0/passwords/forgot/intent',
+					// TODO: 'auth': true
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/users/v2.0/passwords/reset': {
+		'POST': {
+			'methods': {
+				'PATCH': {
+					'path': '/users/v2.0/passwords/reset',
+					// TODO: 'auth': true
+					'auth': false
+				}
+			}
+		}
+	},
+
 	'/users/v2.0/sessions/logout': {
 		'POST': {
 			'methods': {

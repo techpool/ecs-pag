@@ -283,6 +283,18 @@ module.exports = {
 		}
 	},
 
+	'/users/v2.0/passwords/forgot/intent': {
+		'POST': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
+	'/users/v2.0/passwords/reset': {
+		'PATCH': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
+
 	'/users/v2.0/sessions/logout': {
 		'POST': {
 			'params': [ 'resource', 'method' ]
