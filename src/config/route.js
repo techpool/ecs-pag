@@ -572,8 +572,7 @@ module.exports = {
 			'methods': {
 				'POST': {
 					'path': '/users/v2.0/passwords/forgot/intent',
-					// TODO: 'auth': true
-					'auth': false
+					'auth': true
 				}
 			}
 		}
@@ -584,8 +583,7 @@ module.exports = {
 			'methods': {
 				'PATCH': {
 					'path': '/users/v2.0/passwords/reset',
-					// TODO: 'auth': true
-					'auth': false
+					'auth': true
 				}
 			}
 		}
