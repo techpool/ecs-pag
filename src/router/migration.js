@@ -82,6 +82,7 @@ router.use((req, res, next) => {
 
 });
 
+/*
 // Stopping POST PATCH DELETE calls in Singapore
 router.use((req, res, next) => {
 
@@ -96,5 +97,6 @@ router.use((req, res, next) => {
     return next();
 
 });
+*/
 
 module.exports = router;
