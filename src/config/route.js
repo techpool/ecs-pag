@@ -892,6 +892,13 @@ module.exports = {
 		}
 	},
 
+	'/recommendations/v2.1/pratilipis': {
+		'GET': {
+			'path': '/recommendations/v2.1/pratilipis',
+			'auth': true
+		}
+	},
+
 	'/init/banner/list': {
 		'GET': {
 			'path': '/init/v1.0/banner',
