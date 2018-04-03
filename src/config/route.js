@@ -1080,7 +1080,6 @@ module.exports = {
 	'/growthjava/pratilipis/metadata': {
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'POST': {
 					'path': '/growthjava/pratilipis/metadata',
@@ -1094,7 +1093,6 @@ module.exports = {
 	'/template-engine/mobile/homescreen/widgets': {
 		'GET': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'auth': true,
 			'path': '/template-engine/mobile/homescreen/widgets'
 		}
