@@ -5,7 +5,8 @@ config.devo = {
     'GCP_PROJ_ID': process.env.GCP_PROJ_ID,
     'LOGGING_SERVICE_NAME': 'ecs-pag-devo',
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
-    'API_END_POINT': process.env.API_END_POINT || process.env.APIENDPOINT,
+    'API_END_POINT': process.env.API_END_POINT,
+    'API_END_POINT_GROWTH': process.env.API_END_POINT_GROWTH,
     'WEB_APPENGINE_ENDPOINT': 'https://devo-pratilipi.appspot.com/api',
     'ANDROID_APPENGINE_ENDPOINT': 'https://devo-pratilipi.appspot.com/api',
     'BIGQUERY_PROJECT': 'devo-pratilipi',
@@ -18,7 +19,8 @@ config.gamma = {
     'GCP_PROJ_ID': process.env.GCP_PROJ_ID,
     'LOGGING_SERVICE_NAME': 'ecs-pag-gamma',
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
-    'API_END_POINT': process.env.API_END_POINT || process.env.APIENDPOINT,
+    'API_END_POINT': process.env.API_END_POINT,
+    'API_END_POINT_GROWTH': process.env.API_END_POINT_GROWTH,
     'WEB_APPENGINE_ENDPOINT': 'https://gae-gamma.pratilipi.com/api',
     'ANDROID_APPENGINE_ENDPOINT': 'https://gae-android.pratilipi.com',
     'BIGQUERY_PROJECT': 'pratilipi-157910',
@@ -31,7 +33,8 @@ config.prod = {
     'GCP_PROJ_ID': process.env.GCP_PROJ_ID,
     'LOGGING_SERVICE_NAME': 'ecs-pag-prod',
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
-    'API_END_POINT': process.env.API_END_POINT || process.env.APIENDPOINT,
+    'API_END_POINT': process.env.API_END_POINT,
+    'API_END_POINT_GROWTH': process.env.API_END_POINT_GROWTH,
     'WEB_APPENGINE_ENDPOINT': 'https://api.pratilipi.com',
     'ANDROID_APPENGINE_ENDPOINT': 'https://gae-android.pratilipi.com',
     'BIGQUERY_PROJECT': 'pratilipi-157910',
@@ -44,7 +47,8 @@ config.local = {
     'GCP_PROJ_ID': 'devo-pratilipi',
     'LOGGING_SERVICE_NAME': 'ecs-pag-local',
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
-    'API_END_POINT': 'localhost',
+    'API_END_POINT': 'https://hindi-devo.ptlp.co/api',
+    'API_END_POINT_GROWTH': 'https://hindi-devo.ptlp.co/api',
     'WEB_APPENGINE_ENDPOINT': 'https://devo-pratilipi.appspot.com/api',
     'ANDROID_APPENGINE_ENDPOINT': 'https://devo-pratilipi.appspot.com/api',
     'BIGQUERY_PROJECT': 'devo-pratilipi',
@@ -52,4 +56,4 @@ config.local = {
     'LOGGING_TABLE':'PRATILIPI_LOGS'
 };
 
-module.exports = config;
+module.exports = config[ process.env.STAGE || 'local' ];

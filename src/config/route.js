@@ -959,6 +959,7 @@ module.exports = {
 	// SocialConnect
 	'/social-connect/contact/profile': {
 		'GET': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'path': '/image/contact/profile',
 			'auth': false,
@@ -968,11 +969,13 @@ module.exports = {
 
 	'/social-connect/access_token': {
 		'GET': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'path': '/social-connect/access_token',
 			'auth': true,
 		},
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'methods': {
 				'POST': {
@@ -984,10 +987,11 @@ module.exports = {
 
 	'/social-connect/access_token/unlink': { // TODO: Remove requiredFields
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
-			'auth': true,
 			'methods': {
 				'PATCH': {
+					'auth': true,
 					'path': '/social-connect/access_token/unlink',
 					'requiredFields': [
 						{ 'unlinkSocialAccount': "true" }
@@ -999,10 +1003,11 @@ module.exports = {
 
 	'/social-connect/access_token/remind_me_later': { // TODO: Remove requiredFields
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
-			'auth': true,
 			'methods': {
 				'PATCH': {
+					'auth': true,
 					'path': '/social-connect/access_token/remind_me_later',
 					'requiredFields': [
 						{ 'updateLastRemindMeLater': "true" }
@@ -1014,15 +1019,17 @@ module.exports = {
 
 	'/social-connect/contacts': {
 		'GET': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'path': '/social-connect/contacts',
-			'auth': true,
+			'auth': true
 		},
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
-			'auth': true,
 			'methods': {
 				'POST': {
+					'auth': true,
 					'path': '/social-connect/contacts',
 					'requiredFields': []
 				}
@@ -1030,25 +1037,26 @@ module.exports = {
 		}
 	},
 
-	'/social-connect/contacts/invite': { // TODO: Remove requiredFields
+	'/social-connect/contacts/invite': {
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
-			'auth': true,
 			'methods': {
 				'POST': {
-					'path': '/social-connect/contacts/invite',
-					'requiredFields': []
+					'auth': true,
+					'path': '/social-connect/contacts/invite'
 				}
 			}
 		}
 	},
 	
-	'/social-connect/contacts/scrape_phone_contacts': { // TODO: Remove requiredFields
+	'/social-connect/contacts/scrape_phone_contacts': {
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
-			'auth': true,
 			'methods': {
 				'POST': {
+					'auth': true,
 					'path': '/social-connect/contacts/scrape_phone_contacts'
 				}
 			}
@@ -1057,10 +1065,11 @@ module.exports = {
 	
 	'/social-connect/referred/by_invitation': {
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
-			'auth': true,
 			'methods': {
 				'POST': {
+					'auth': true,
 					'path': '/social-connect/referred/by_invitation'
 				}
 			}
@@ -1070,6 +1079,7 @@ module.exports = {
 	// Pratilipi Summary
 	'/growthjava/pratilipis/metadata': {
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'methods': {
 				'POST': {
@@ -1083,6 +1093,7 @@ module.exports = {
 	// Homepage Templating Engine
 	'/template-engine/mobile/homescreen/widgets': {
 		'GET': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'auth': true,
 			'path': '/template-engine/mobile/homescreen/widgets'
@@ -1091,6 +1102,7 @@ module.exports = {
 	
 	'/template-engine/callback/activities': {
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'methods': {
 				'POST': {
@@ -1104,6 +1116,7 @@ module.exports = {
 	// CoverImage
 	'/coverimage-recommendation/cover': {
 		'GET': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'auth': true,
 			'path': '/coverimage-recommendation/cover'
@@ -1112,6 +1125,7 @@ module.exports = {
 
 	'/coverimage-recommendation/cover/select': {
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'methods': {
 				'POST': {
@@ -1126,6 +1140,7 @@ module.exports = {
 	// BlogScrapper
 	'/blog-scraper/search': {
 		'GET': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'path': '/blog-scraper/search',
 			'auth': true
@@ -1134,6 +1149,7 @@ module.exports = {
 
 	'/blog-scraper': {
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'methods': {
 				'POST': {
@@ -1143,6 +1159,7 @@ module.exports = {
 			}
 		},
 		'GET': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'path': '/blog-scraper',
 			'auth': true
@@ -1151,6 +1168,7 @@ module.exports = {
 
 	'/blog-scraper/blogpost/list': { // TODO: Remove requiredFields
 		'GET': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'path': '/blog-scraper/$primaryContentId',
 			'auth': true,
@@ -1163,6 +1181,7 @@ module.exports = {
 
 	'/blog-scraper/blogpost/scrape': { // TODO: Remove requiredFields
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'methods': {
 				'POST': {
@@ -1179,6 +1198,7 @@ module.exports = {
 
 	'/blog-scraper/blogpost/publish': { // TODO: Remove requiredFields
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'methods': {
 				'POST': {
@@ -1195,6 +1215,7 @@ module.exports = {
 
 	'/blog-scraper/blogpost/create': { // TODO: Remove requiredFields
 		'POST': {
+			'isGrowth': true,
 			'pipeToSgp': true,
 			'methods': {
 				'POST': {

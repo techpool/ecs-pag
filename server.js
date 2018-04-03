@@ -16,7 +16,7 @@ var httpsAgent = new https.Agent({ keepAlive : true });
 
 const morgan = require( 'morgan' );
 // const logger = require( './lib/logger.js' );
-const mainConfig = require( './src/config/main' )[ process.env.STAGE || 'local' ];
+const mainConfig = require( './src/config/main' );
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
 const migrationRouter = require('./src/router/migration');
@@ -26,8 +26,9 @@ const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
 const INSUFFICIENT_ACCESS_EXCEPTION = { "message": "Insufficient privilege for this action." };
 const UNEXPECTED_SERVER_EXCEPTION = { "message": "Some exception occurred at server. Please try again." };
 
-const ECS_END_POINT = mainConfig.API_END_POINT.indexOf( "http" ) === 0 ? mainConfig.API_END_POINT : ( "http://" + mainConfig.API_END_POINT );
-// const ECS_END_POINT = "https://hindi-devo.ptlp.co/api";
+const ECS_END_POINT = mainConfig.API_END_POINT,
+      ECS_END_POINT_GROWTH = mainConfig.API_END_POINT_GROWTH;
+
 const ANDROID_ENDPOINTS = [ "temp.pratilipi.com", "android.pratilipi.com", "app.pratilipi.com", "android-gamma.pratilipi.com", "android-gamma-gr.pratilipi.com", "android-devo.ptlp.co" ];
 
 Array.prototype.contains = function (obj) {
@@ -440,8 +441,6 @@ function _getService( method, requestUrl, request, response ) {
   if( isGETRequest && routeConfig[api]["GET"].auth !== undefined ) isAuthRequired = routeConfig[api]["GET"].auth;
   if( ! isGETRequest && routeConfig[api]["POST"]["methods"][method].auth !== undefined ) isAuthRequired = routeConfig[api]["POST"]["methods"][method].auth;
 
-
-
   // TODO: Better implementation
   if( isGETRequest && routeConfig[api]["GET"][ "copyParam" ] ) {
     var copyParam = routeConfig[api]["GET"][ "copyParam" ];
@@ -463,7 +462,9 @@ function _getService( method, requestUrl, request, response ) {
   // Replacing $primaryContentId
   servicePath = servicePath.replace( "$primaryContentId", primaryContentId );
 
-  var serviceUrl = ECS_END_POINT + servicePath;
+  // Hitting the right load balancer
+  var isGrowth = routeConfig[api][method]['isGrowth'];
+  var serviceUrl = ( isGrowth ? ECS_END_POINT_GROWTH : ECS_END_POINT ) + servicePath;
   if( ! _isEmpty( urlQueryParams ) ) serviceUrl += '?' + _formatParams( urlQueryParams );
 
   return authPromise
@@ -518,7 +519,12 @@ function _getHackyService( method, request, response ) {
 
   var authPromise = _getHackyAuth( servicePath, method, request, response );
 
-  var serviceUrl = ECS_END_POINT + request.url;
+  // Hitting the right load balancer
+  var isGrowth = false;
+  if( request.path.includes( '/social-connect' ) )
+    isGrowth = true;
+
+  var serviceUrl = ( isGrowth ? ECS_END_POINT_GROWTH : ECS_END_POINT ) + request.url;
 
   return authPromise
     .then( (userId) => {
@@ -548,22 +554,6 @@ function _isGETApiSupported( url ) {
 }
 
 function resolveGET( request, response, next ) {
-
-  // TODO: Remove once everything is moved to ecs
-  // url: /follows/v2.0/authors/followers/all?referenceId=123456
-  if( request.path === '/follows/v2.0/authors/followers/all' ) {
-    _getHttpPromise( ECS_END_POINT + request.url, "GET", { 'User-Id': 0 } )
-      .then( res => {
-        response.json( res.body );
-        next();
-      })
-      .catch( err => {
-        console.log( "AUTHOR_FOLLOWERS_ALL_ERROR :: resolveGET :: " + err.message );
-        next();
-      })
-    ;
-    return;
-  }
 
   if( request.path === '/pratilipi/content' && response.locals[ "access-token" ] == null ) {
     response.status(400).send( INVALID_ARGUMENT_EXCEPTION );
@@ -604,7 +594,8 @@ function resolveGET( request, response, next ) {
       ? _getAuth( resource, "GET", primaryContentId, null, request, response )
       : new Promise( function( resolve, reject ) { resolve(-1); }); // userId = 0 for non-logged in users
 
-    var url = ECS_END_POINT + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '' );
+    var isGrowth = routeConfig[api].GET.isGrowth;
+    var url = ( isGrowth ? ECS_END_POINT_GROWTH : ECS_END_POINT ) + routeConfig[api].GET.path + ( request.url.split('?')[1] ? ('?' + request.url.split('?')[1]) : '' );
 
     authPromise
       .then( (userId) => {
@@ -924,7 +915,8 @@ function resolvePOST( request, response, next ) {
           request[ "headers" ][ "Access-Token" ] = response.locals[ "access-token" ];
           request[ "headers" ][ "calling-agent" ] = response.locals[ "calling-agent" ];
           request[ "headers" ][ "Request-Id" ] = response.locals[ "request-id" ];
-          var url = ECS_END_POINT + resource;
+          var isGrowth = routeConfig[api].POST.isGrowth;
+          var url = ( isGrowth ? ECS_END_POINT_GROWTH : ECS_END_POINT ) + resource;
           if( request.url.indexOf( "?" ) !== -1 ) url += "?" + request.url.split( "?" )[1];
           var startTimestamp = Date.now();
           request.pipe( requestModule.post( url, request.body ) )
