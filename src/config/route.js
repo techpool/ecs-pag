@@ -1108,7 +1108,6 @@ module.exports = {
 	'/template-engine/callback/activities': {
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'POST': {
 					'path': '/template-engine/callback/activities',
