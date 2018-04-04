@@ -463,7 +463,8 @@ function _getService( method, requestUrl, request, response ) {
   servicePath = servicePath.replace( "$primaryContentId", primaryContentId );
 
   // Hitting the right load balancer
-  var isGrowth = routeConfig[api][method]['isGrowth'];
+  // TODO: Revamp pag
+  var isGrowth = isGETRequest ? routeConfig[api]['GET']['isGrowth'] : routeConfig[api]['POST']['isGrowth'];
   var serviceUrl = ( isGrowth ? ECS_END_POINT_GROWTH : ECS_END_POINT ) + servicePath;
   if( ! _isEmpty( urlQueryParams ) ) serviceUrl += '?' + _formatParams( urlQueryParams );
 
