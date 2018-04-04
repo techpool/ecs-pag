@@ -967,7 +967,6 @@ module.exports = {
 	'/social-connect/contact/profile': {
 		'GET': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'path': '/image/contact/profile',
 			'auth': false,
 			'shouldPipe': true
@@ -977,13 +976,11 @@ module.exports = {
 	'/social-connect/access_token': {
 		'GET': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'path': '/social-connect/access_token',
 			'auth': true,
 		},
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'POST': {
 					'path': '/social-connect/access_token'
@@ -995,7 +992,6 @@ module.exports = {
 	'/social-connect/access_token/unlink': { // TODO: Remove requiredFields
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'PATCH': {
 					'auth': true,
@@ -1011,7 +1007,6 @@ module.exports = {
 	'/social-connect/access_token/remind_me_later': { // TODO: Remove requiredFields
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'PATCH': {
 					'auth': true,
@@ -1027,13 +1022,11 @@ module.exports = {
 	'/social-connect/contacts': {
 		'GET': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'path': '/social-connect/contacts',
 			'auth': true
 		},
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'POST': {
 					'auth': true,
@@ -1047,7 +1040,6 @@ module.exports = {
 	'/social-connect/contacts/invite': {
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'POST': {
 					'auth': true,
@@ -1060,7 +1052,6 @@ module.exports = {
 	'/social-connect/contacts/scrape_phone_contacts': {
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'POST': {
 					'auth': true,
@@ -1073,7 +1064,6 @@ module.exports = {
 	'/social-connect/referred/by_invitation': {
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
 			'methods': {
 				'POST': {
 					'auth': true,
