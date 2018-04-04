@@ -508,7 +508,7 @@ function _getHackyService( method, request, response ) {
     servicePath = "/notifications";
   } else if( request.path.includes( '/oasis' ) ) {
         servicePath = "/oasis";
-    } else if( request.path.includes( '/init/v2.0/videos' ) ) {
+    } else if( request.path.includes( '/init/v2.0/videos' ) || request.path.includes( '/init/v2.0/categories' ) ) {
         servicePath = "/init/v2.0/init";
     }
   if( request.path.includes( '/comments' ) ) {
@@ -1001,7 +1001,7 @@ function _resolvePostPatchDelete( methodName, request, response, next ) {
 
 function resolveRegex( request, response, next ) {
 
-  if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library|notifications|oasis|init\/v2\.0\/videos).*$/.test(request.path) ) {
+  if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library|notifications|oasis|init\/v2\.0\/videos|init\/v2\.0\/categories).*$/.test(request.path) ) {
     var method;
     if( request.body["X-HTTP-Method-Override"] !== undefined ) {
       method = request.method.toUpperCase() === 'POST' ? ( request.body["X-HTTP-Method-Override"] !== undefined ? request.body["X-HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
