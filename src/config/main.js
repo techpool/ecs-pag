@@ -21,8 +21,8 @@ config.gamma = {
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
     'API_END_POINT': process.env.API_END_POINT,
     'API_END_POINT_GROWTH': process.env.API_END_POINT_GROWTH,
-    'WEB_APPENGINE_ENDPOINT': 'https://gae-gamma.pratilipi.com/api',
-    'ANDROID_APPENGINE_ENDPOINT': 'https://gae-android.pratilipi.com',
+    'WEB_APPENGINE_ENDPOINT': 'http://gae-gamma.pratilipi.com/api',
+    'ANDROID_APPENGINE_ENDPOINT': 'http://gae-android.pratilipi.com',
     'BIGQUERY_PROJECT': 'pratilipi-157910',
     'BIGQUERY_DATASET': 'DEVO_LOGS',
     'LOGGING_TABLE':'PRATILIPI_LOGS'
@@ -35,8 +35,8 @@ config.prod = {
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
     'API_END_POINT': process.env.API_END_POINT,
     'API_END_POINT_GROWTH': process.env.API_END_POINT_GROWTH,
-    'WEB_APPENGINE_ENDPOINT': 'https://api.pratilipi.com',
-    'ANDROID_APPENGINE_ENDPOINT': 'https://gae-android.pratilipi.com',
+    'WEB_APPENGINE_ENDPOINT': 'http://api.pratilipi.com',
+    'ANDROID_APPENGINE_ENDPOINT': 'http://gae-android.pratilipi.com',
     'BIGQUERY_PROJECT': 'pratilipi-157910',
     'BIGQUERY_DATASET': 'DEVO_LOGS',
     'LOGGING_TABLE':'PRATILIPI_LOGS'
