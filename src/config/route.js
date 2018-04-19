@@ -968,6 +968,33 @@ module.exports = {
 		}
 	},
 
+	'/blogs/v1.0': {
+		'GET': {
+			'path':'/blogs',
+			'auth':false
+		}
+	},
+
+	'/blogs/v1.0/list': {
+		'GET': {
+			'path':'/blogs/list',
+			'auth': false
+		}
+	},
+
+	'/author-interviews/v1.0': {
+		'GET': {
+			'path':'/author-interviews',
+			'auth':false
+		}
+	},
+
+	'/author-interviews/v1.0/list': {
+		'GET': {
+			'path':'/author-interviews/list',
+			'auth':false
+		}
+	},
 
 	// Growth Experiments
 
