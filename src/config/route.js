@@ -976,28 +976,28 @@ module.exports = {
 	'/blogs/v1.0': {
 		'GET': {
 			'path':'/blogs/v1.0',
-			'auth':false
+			'auth': true
 		}
 	},
 
 	'/blogs/v1.0/list': {
 		'GET': {
 			'path':'/blogs/v1.0/list',
-			'auth': false
+			'auth': true
 		}
 	},
 
 	'/author-interviews/v1.0': {
 		'GET': {
 			'path':'/author-interviews/v1.0',
-			'auth':false
+			'auth': true
 		}
 	},
 
 	'/author-interviews/v1.0/list': {
 		'GET': {
 			'path':'/author-interviews/v1.0/list',
-			'auth':false
+			'auth': true
 		}
 	},
 
