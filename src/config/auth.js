@@ -447,7 +447,7 @@ module.exports = {
 
 	// User_Pratilipi
 	'/user_pratilipi/v2.0/user_pratilipis/read_history': {
-		'POST': {
+		'GET': {
 			'params': [ 'resource', 'method']
 		}
 	},
