@@ -917,7 +917,7 @@ module.exports = {
 	// User_pratilipi
 	'/user_pratilipi/v2.0/user_pratilipis/read_history': {
 		'GET': {
-			'path': '/user_pratilipi/v2.0/user_pratilipis/read_history',
+			'path': '/oasis/v1.0/user_pratilipis/read_history',
 			'auth': true,
 		}
 	},
