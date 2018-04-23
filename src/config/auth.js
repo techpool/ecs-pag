@@ -446,7 +446,7 @@ module.exports = {
 	},
 
 	// User_Pratilipi
-	'/user_pratilipi/v2.0/user_pratilipis/read_history': {
+	'/oasis/v1.0/user_pratilipis/read_history': {
 		'GET': {
 			'params': [ 'resource', 'method']
 		}
