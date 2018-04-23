@@ -446,6 +446,11 @@ module.exports = {
 	},
 
 	// User_Pratilipi
+	'/user_pratilipi/v2.0/user_pratilipis/read_history': {
+		'POST': {
+			'params': [ 'resource', 'method']
+		}
+	},
 	'/user_pratilipi/v2.0/user_pratilipis': {
 		'POST': {
 			'params': [ 'resource', 'method', 'id' ]

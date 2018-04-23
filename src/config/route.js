@@ -914,8 +914,14 @@ module.exports = {
 		}
 	},
 
-
 	// User_pratilipi
+	'/user_pratilipi/v2.0/user_pratilipis/read_history': {
+		'GET': {
+			'path': '/user_pratilipi/v2.0/user_pratilipis/read_history',
+			'auth': true,
+		}
+	},
+	
 	'/user_pratilipi/v2.0/user_pratilipis': {
 		'POST': {
 			'methods': {
@@ -930,8 +936,7 @@ module.exports = {
 			}
 		}
 	},
-
-
+	
 	// Hacks
 	'/temp/library': {
 		'GET': {
