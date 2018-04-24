@@ -472,24 +472,24 @@ module.exports = {
 	},
 
 	// Blog
-	'/blogs/v1.0': {
+	'/oasis/blogs/v1.0': {
 		'GET': {
 			'params': ['resource','method', 'slug']
 		}
 	},
-	'/blogs/v1.0/list': {
+	'/oasis/blogs/v1.0/list': {
 		'GET': {
 			'params': ['resource','method','language']
 		}
 	},
 
 	// Author-Interviews
-	'/author-interviews/v1.0': {
+	'/oasis/author-interviews/v1.0': {
 		'GET': {
 			'params': ['resource','method','slug']
 		}
 	},
-	'/author-interviews/v1.0/list': {
+	'/oasis/author-interviews/v1.0/list': {
 		'GET': {
 			'params': ['resource','method','language']
 		}

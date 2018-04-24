@@ -973,30 +973,32 @@ module.exports = {
 		}
 	},
 
+	// Blogs
 	'/blogs/v1.0': {
 		'GET': {
-			'path':'/blogs/v1.0',
+			'path':'/oasis/blogs/v1.0',
 			'auth': true
 		}
 	},
 
 	'/blogs/v1.0/list': {
 		'GET': {
-			'path':'/blogs/v1.0/list',
+			'path':'/oasis/blogs/v1.0/list',
 			'auth': true
 		}
 	},
 
+	// Author-Interviews
 	'/author-interviews/v1.0': {
 		'GET': {
-			'path':'/author-interviews/v1.0',
+			'path':'/oasis/author-interviews/v1.0',
 			'auth': true
 		}
 	},
 
 	'/author-interviews/v1.0/list': {
 		'GET': {
-			'path':'/author-interviews/v1.0/list',
+			'path':'/oasis/author-interviews/v1.0/list',
 			'auth': true
 		}
 	},
