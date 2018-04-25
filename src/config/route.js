@@ -922,6 +922,21 @@ module.exports = {
 		}
 	},
 	
+	'/user_pratilipi/v2.0/user_pratilipis/remove_from_history': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/user_pratilipi/v2.0/user_pratilipis/remove_from_history',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
+		}
+	},
+	
 	'/user_pratilipi/v2.0/user_pratilipis': {
 		'POST': {
 			'methods': {

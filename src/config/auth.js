@@ -451,6 +451,13 @@ module.exports = {
 			'params': [ 'resource', 'method']
 		}
 	},
+	
+	'/user_pratilipi/v2.0/user_pratilipis/remove_from_history': {
+		'POST': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+	
 	'/user_pratilipi/v2.0/user_pratilipis': {
 		'POST': {
 			'params': [ 'resource', 'method', 'id' ]
