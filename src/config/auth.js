@@ -446,14 +446,14 @@ module.exports = {
 	},
 
 	// User_Pratilipi
-	'/oasis/v1.0/user_pratilipis/read_history': {
+	'/oasis/v1.0/user_pratilipis/history': {
 		'GET': {
 			'params': [ 'resource', 'method']
 		}
 	},
 	
-	'/user_pratilipi/v2.0/user_pratilipis/remove_from_history': {
-		'POST': {
+	'/user_pratilipi/v2.0/user_pratilipis/history': {
+		'DELETE': {
 			'params': [ 'resource', 'method', 'id' ]
 		}
 	},

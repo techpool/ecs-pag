@@ -915,18 +915,18 @@ module.exports = {
 	},
 
 	// User_pratilipi
-	'/user_pratilipi/v2.0/user_pratilipis/read_history': {
+	'/user_pratilipi/v2.0/user_pratilipis/history': {
 		'GET': {
-			'path': '/oasis/v1.0/user_pratilipis/read_history',
+			'path': '/oasis/v1.0/user_pratilipis/history',
 			'auth': true,
 		}
 	},
 	
-	'/user_pratilipi/v2.0/user_pratilipis/remove_from_history': {
+	'/user_pratilipi/v2.0/user_pratilipis/history/remove': {
 		'POST': {
 			'methods': {
-				'POST': {
-					'path': '/user_pratilipi/v2.0/user_pratilipis/remove_from_history',
+				'DELETE': {
+					'path': '/user_pratilipi/v2.0/user_pratilipis/history',
 					'auth': true,
 					'primaryKey': 'pratilipiId',
 					'requiredFields': [
