@@ -919,14 +919,11 @@ module.exports = {
 		'GET': {
 			'path': '/oasis/v1.0/user_pratilipis/history',
 			'auth': true,
-		}
-	},
-	
-	'/user_pratilipi/v2.0/user_pratilipis/history/remove': {
+		},
 		'POST': {
 			'methods': {
 				'DELETE': {
-					'path': '/user_pratilipi/v2.0/user_pratilipis/history',
+					'path': '/user_pratilipi/v2.0/user_pratilipis/history/$primaryContentId',
 					'auth': true,
 					'primaryKey': 'pratilipiId',
 					'requiredFields': [

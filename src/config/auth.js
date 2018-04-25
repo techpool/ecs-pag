@@ -452,7 +452,7 @@ module.exports = {
 		}
 	},
 	
-	'/user_pratilipi/v2.0/user_pratilipis/history': {
+	'/user_pratilipi/v2.0/user_pratilipis/history/$primaryContentId': {
 		'DELETE': {
 			'params': [ 'resource', 'method', 'id' ]
 		}
