@@ -397,6 +397,12 @@ module.exports = {
 		}
 	},
 
+	'/content/v1.0/contents/clipped': {
+		'GET': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
 
 	// Notification
 	'/notification/list': {

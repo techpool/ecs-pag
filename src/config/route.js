@@ -805,6 +805,13 @@ module.exports = {
 		}
 	},
 
+	'/content/v1.0/contents/clipped': {
+		'GET': {
+			'path': '/content/v1.0/contents/clipped',
+			'auth': true
+		}
+	},
+
 
 	// Auth
 	'/auth/isAuthorized': {
