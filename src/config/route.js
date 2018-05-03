@@ -186,14 +186,6 @@ module.exports = {
 		}
 	},
 
-	// Test on gamma. Remove asap
-	'/recommendation/v1.0/pratilipis/newsletter': {
-		'GET': {
-			'path': '/recommendation/v1.0/pratilipis/newsletter',
-			'auth': false
-		}
-	},
-
 
 	// Page
 	'/page': {
