@@ -285,8 +285,9 @@ module.exports = {
 	// Author
 	'/author': {
 		'GET': {
-			'path': '/oasis/v1.0/authors',
+			'path': '/authors/$primaryContentId',
 			'auth': true,
+			'primaryKey': 'authorId'
 		},
 		'POST': {
 			'methods': {
@@ -308,7 +309,7 @@ module.exports = {
 
 	'/authors': {
 		'GET': {
-			'path': '/oasis/v1.0/authors',
+			'path': '/authors',
 			'auth': true
 		}
 	},
