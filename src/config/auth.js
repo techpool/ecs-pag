@@ -126,9 +126,9 @@ module.exports = {
 		}
 	},
 
-	'/authors': {
+	'/oasis/v1.0/authors': {
 		'GET': {
-			'params': [ 'resource', 'method', 'slug' ]
+			'params': [ 'resource', 'authorId', 'method', 'slug' ]
 		},
 		'POST': {
 			'params': [ 'resource', 'method', 'language' ]
