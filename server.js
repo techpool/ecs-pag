@@ -1027,6 +1027,11 @@ function resolveRegex( request, response, next ) {
 
 const app = express();
 
+app.use( morgan('short') );
+app.use( cookieParser() );
+app.use( bodyParser.json({ limit: "50mb" }) );
+app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
+
 app.use( (request, response, next) => {
   var accessToken = null;
   if( request.headers.accesstoken )
@@ -1047,11 +1052,6 @@ app.use( (request, response, next) => {
 
 // MIGRATION MIGRATION MIGRATION
 app.use( migrationRouter );
-
-app.use( morgan('short') );
-app.use( cookieParser() );
-app.use( bodyParser.json({ limit: "50mb" }) );
-app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
 
 //CORS middleware
 app.enable( 'trust proxy' );
