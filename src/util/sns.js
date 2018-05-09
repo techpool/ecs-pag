@@ -11,12 +11,12 @@ function SNS() {
 
 }
 
-SNS.prototype.push = function( accessToken, method, headers, query, url, path, client ) {
+SNS.prototype.push = function( accessToken, method, headers, queryParams, url, path, client ) {
 	if( topic == null ) {
 		return;
 	}
 
-	var data = {accessToken, method, headers, query, url, path, client};
+	var data = {accessToken, method, headers, queryParams, url, path, client};
 
   var params = {
     Message: JSON.stringify(data),

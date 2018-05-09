@@ -1035,13 +1035,13 @@ app.use( (request, response, next) => {
     accessToken = request.cookies[ "access_token" ];
   else if( _getUrlParameter( request.url, "accessToken" ) )
     accessToken = _getUrlParameter( request.url, "accessToken" );
-  var clientType = ANDROID_ENDPOINTS.contains( request.headers.host ) ? "ANDROID" : "WEB";
+  var client = ANDROID_ENDPOINTS.contains( request.headers.host ) ? "ANDROID" : "WEB";
   var headers = request.headers;
   var path = request.path;
   var url = request.url;
   var method = request.method;
-  var query = request.query;
-  snsUtil.push(accessToken, method, headers, query, url, path, client );
+  var queryParams = request.query;
+  snsUtil.push(accessToken, method, headers, queryParams, url, path, client );
   next();
 });
 
