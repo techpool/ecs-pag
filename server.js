@@ -1040,7 +1040,7 @@ app.use( (request, response, next) => {
   var path = request.path;
   var url = request.url;
   var method = request.method;
-  var queryParams = request.query;
+  var query = request.query;
   snsUtil.push(accessToken, method, headers, query, url, path, client );
   next();
 });
