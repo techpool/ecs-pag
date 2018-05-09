@@ -20,6 +20,7 @@ const mainConfig = require( './src/config/main' );
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
 const migrationRouter = require('./src/router/migration');
+const snsUtil = require('./src/util/sns');
 
 const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
@@ -1025,6 +1026,24 @@ function resolveRegex( request, response, next ) {
 }
 
 const app = express();
+
+app.use( (request, response, next) => {
+  var accessToken = null;
+  if( request.headers.accesstoken )
+    accessToken = request.headers.accesstoken;
+  else if( request.cookies[ "access_token" ] )
+    accessToken = request.cookies[ "access_token" ];
+  else if( _getUrlParameter( request.url, "accessToken" ) )
+    accessToken = _getUrlParameter( request.url, "accessToken" );
+  var clientType = ANDROID_ENDPOINTS.contains( request.headers.host ) ? "ANDROID" : "WEB";
+  var headers = request.headers;
+  var path = request.path;
+  var url = request.url;
+  var method = request.method;
+  var queryParams = request.query;
+  snsUtil.push(accessToken, method, headers, query, url, path, client );
+  next();
+});
 
 // MIGRATION MIGRATION MIGRATION
 app.use( migrationRouter );
