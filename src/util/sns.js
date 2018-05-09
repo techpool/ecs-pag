@@ -33,11 +33,11 @@ SNS.prototype.push = function( accessToken, method, headers, queryParams, url, p
     }      
   };
 
-  sns.publish(params, function (err, data) {
+  sns.publish(params, function (err, data1) {
     if (err) {
-      console.error(err);
+      console.error("SNS_EVENT_FAILED" + err);
     } else {
-      console.log(data);
+      console.log("SNS_EVENT_PUSHED" + JSON.stringify(data1));
     }
   });
 };
