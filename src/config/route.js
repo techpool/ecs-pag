@@ -833,13 +833,6 @@ module.exports = {
 		}
 	},
 
-	'/web-push/test': {
-		'GET': {
-			'auth': false,
-			'path': '/web-push/test'
-		}
-	},
-
 	// Temporary Api until Growth is moved to Mumbai
 	'/auth/accessToken': {
 		'POST': {
