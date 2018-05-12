@@ -820,7 +820,26 @@ module.exports = {
 			'path': '/auth/isAuthorized'
 		}
 	},
-	
+
+	// WebPush
+	'/web-push/fcmToken': { // TODO: Auth true
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/web-push/fcmToken',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/web-push/test': {
+		'GET': {
+			'auth': false,
+			'path': '/web-push/test'
+		}
+	},
+
 	// Temporary Api until Growth is moved to Mumbai
 	'/auth/accessToken': {
 		'POST': {
