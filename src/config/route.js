@@ -1179,9 +1179,10 @@ module.exports = {
 			}
 		}
 	},
-	
+
 	'/event-participate/images': {
 		'POST': {
+			'path': '/event-participate/images',
 			'isGrowth': true,
 			'auth': true,
 			'shouldPipe': true
@@ -1191,11 +1192,17 @@ module.exports = {
 	'/event-participate/metadata': {
 		'POST': {
 			'isGrowth': true,
-			'auth': true
+			'methods': {
+				'POST': {
+					'path': '/event-participate/metadata',
+					'auth': true
+				}
+			}
 		},
 		'GET': {
 			'isGrowth': true,
-			'auth': true		
+			'auth': true,
+			'path': '/event-participate/metadata'
 		}
 	},
 
