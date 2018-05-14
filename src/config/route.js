@@ -1179,6 +1179,25 @@ module.exports = {
 			}
 		}
 	},
+	
+	'/event-participate/images': {
+		'POST': {
+			'isGrowth': true,
+			'auth': true,
+			'shouldPipe': true
+		}
+	},
+
+	'/event-participate/metadata': {
+		'POST': {
+			'isGrowth': true,
+			'auth': true
+		},
+		'GET': {
+			'isGrowth': true,
+			'auth': true		
+		}
+	},
 
 	// CoverImage
 	'/coverimage-recommendation/cover': {
