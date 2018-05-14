@@ -570,6 +570,21 @@ module.exports = {
 			'params': [ 'resource', 'method' ]
 		}
 	},
+	
+	'/event-participate/metadata': {
+		'POST': {
+			'params': ['resource', 'method']
+		},
+		'GET': {
+			'params': ['resource', 'method']
+		}
+	},
+	
+	'/event-participate/images': {
+		'POST': {
+			'params': ['resource', 'method']
+		}
+	},
 		
 	// CoverImage
 	'/coverimage-recommendation/cover': {
