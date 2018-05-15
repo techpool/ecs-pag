@@ -1185,7 +1185,12 @@ module.exports = {
 			'path': '/event-participate/images',
 			'isGrowth': true,
 			'auth': true,
-			'shouldPipe': true
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'eventId'
+				}
+			}
 		}
 	},
 
