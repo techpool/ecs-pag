@@ -573,19 +573,19 @@ module.exports = {
 	
 	'/event-participate/metadata/$primaryContentId': {
 		'POST': {
-			'params': ['resource', 'method']
+			'params': ['resource', 'id', 'method']
 		},
 		'GET': {
-			'params': ['resource', 'method']
+			'params': ['resource', 'id', 'method']
 		}
 	},
 	
 	'/event-participate/content/$primaryContentId': {
 		'POST': {
-			'params': ['resource', 'method']
+			'params': ['resource', 'id', 'method']
 		},
 		'GET': {
-			'params': ['resource', 'method']
+			'params': ['resource', 'id', 'method']
 		}
 	},
 	
