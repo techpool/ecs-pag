@@ -1180,6 +1180,8 @@ module.exports = {
 		}
 	},
 
+	
+	// Event Participate
 	'/event-participate/images': {
 		'POST': {
 			'path': '/event-participate/images',
@@ -1193,24 +1195,62 @@ module.exports = {
 			}
 		}
 	},
+	
+	'/event-participate/list': {
+		'GET': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/list'
+		}
+	},
 
 	'/event-participate/metadata': {
+		'GET': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/metadata/$primaryContentId',
+			'primaryKey': 'eventPratilipiId'
+		},
 		'POST': {
 			'isGrowth': true,
 			'methods': {
+				'PATCH': {
+					'path': '/event-participate/metadata/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'eventPratilipiId',
+					'requiredFields': [
+						{'eventPratilipiId': null}
+					]
+				},
 				'POST': {
 					'path': '/event-participate/metadata',
 					'auth': true
 				}
 			}
+		}
+	},
+	
+	'event-participate/content': {
+		'POST': {
+			'isGrowth': true,
+			'path': '/event-participate/content/$primaryContentId',
+			'auth': true,
+			'primaryKey': 'eventPratilipiId',
+			'methods': {
+				'POST': {
+					'primaryKey': 'eventPratilipiId'
+				}
+			}
 		},
 		'GET': {
 			'isGrowth': true,
+			'path': '/event-participate/content/$primaryContentId',
 			'auth': true,
-			'path': '/event-participate/metadata'
+			'primaryKey': 'eventPratilipiId'
 		}
 	},
-
+	
+	
 	// CoverImage
 	'/coverimage-recommendation/cover': {
 		'GET': {
