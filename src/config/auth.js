@@ -571,10 +571,13 @@ module.exports = {
 		}
 	},
 	
-	'/event-participate/metadata/$primaryContentId': {
+	'/event-participate/metadata': {
 		'POST': {
-			'params': ['resource', 'id', 'method']
-		},
+			'params': ['resource', 'method']
+		}
+	},
+	
+	'/event-participate/metadata/$primaryContentId': {
 		'PATCH': {
 			'params': ['resource', 'id', 'method']
 		},
