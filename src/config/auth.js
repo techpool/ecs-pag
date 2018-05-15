@@ -575,6 +575,9 @@ module.exports = {
 		'POST': {
 			'params': ['resource', 'id', 'method']
 		},
+		'PATCH': {
+			'params': ['resource', 'id', 'method']
+		},
 		'GET': {
 			'params': ['resource', 'id', 'method']
 		}
