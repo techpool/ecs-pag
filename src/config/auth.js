@@ -571,10 +571,25 @@ module.exports = {
 		}
 	},
 	
-	'/event-participate/metadata': {
+	'/event-participate/metadata/$primaryContentId': {
 		'POST': {
 			'params': ['resource', 'method']
 		},
+		'GET': {
+			'params': ['resource', 'method']
+		}
+	},
+	
+	'/event-participate/content/$primaryContentId': {
+		'POST': {
+			'params': ['resource', 'method']
+		},
+		'GET': {
+			'params': ['resource', 'method']
+		}
+	},
+	
+	'/event-participate/list': {
 		'GET': {
 			'params': ['resource', 'method']
 		}
