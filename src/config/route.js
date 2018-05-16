@@ -1238,7 +1238,12 @@ module.exports = {
 			'primaryKey': 'eventPratilipiId',
 			'methods': {
 				'POST': {
-					'primaryKey': 'eventPratilipiId'
+					'primaryKey': 'eventPratilipiId',
+					'path': '/event-participate/content/$primaryContentId',
+					'requiredFields': [
+						{'eventPratilipiId': null}
+					],
+					'auth': true
 				}
 			}
 		},
