@@ -1230,7 +1230,7 @@ module.exports = {
 		}
 	},
 	
-	'event-participate/content': {
+	'/event-participate/content': {
 		'POST': {
 			'isGrowth': true,
 			'path': '/event-participate/content/$primaryContentId',
