@@ -811,7 +811,13 @@ module.exports = {
 			'auth': true
 		}
 	},
-
+	
+	'/content/dummy': {
+		'GET': {
+			'path': '/content/dummy',
+			'auth': false
+		}	
+	},
 
 	// Auth
 	'/auth/isAuthorized': {
