@@ -1040,6 +1040,14 @@ module.exports = {
 		}
 	},
 
+	// Image-Manager Recommendation
+	'/image_manager/recommendation': {
+		'GET': {
+			'path':'/image_manager/recommendation',
+			'auth': true
+		}
+	},
+
 	// Growth Experiments
 
 	// SocialConnect

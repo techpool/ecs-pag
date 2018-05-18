@@ -508,6 +508,13 @@ module.exports = {
 		}
 	},
 
+	// Image-Manager Recommendation
+	'/image_manager/recommendation': {
+		'GET': {
+			'params': ['resource','method']
+		}
+	},
+
 	// Growth
 
 	// SocialConnect
