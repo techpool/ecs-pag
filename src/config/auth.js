@@ -608,6 +608,12 @@ module.exports = {
 		}
 	},
 	
+	'/event-participate/admin/list': {
+		'GET': {
+			'params': ['resource', 'method']
+		}
+	},
+	
 	'/event-participate/images': {
 		'POST': {
 			'params': ['resource', 'method']
