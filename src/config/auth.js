@@ -614,6 +614,12 @@ module.exports = {
 		}
 	},
 	
+	'/event-participate/admin/publish': {
+		'POST': {
+			'params': ['resource', 'method']
+		}
+	},
+	
 	'/event-participate/images': {
 		'POST': {
 			'params': ['resource', 'method']
