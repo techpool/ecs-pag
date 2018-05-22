@@ -1217,6 +1217,20 @@ module.exports = {
 			'path': '/event-participate/admin/list'
 		}
 	},
+	
+	'/event-participate/admin/publish': {
+		'POST': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/admin/publish',
+			'methods': {
+				'POST': {
+					'path': '/event-participate/admin/publish',
+					'auth': true
+				}
+			}
+		}
+	},
 
 	
 	'/event-participate/list': {
