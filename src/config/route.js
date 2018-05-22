@@ -1210,6 +1210,15 @@ module.exports = {
 		}
 	},
 	
+	'/event-participate/admin/list': {
+		'GET': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/admin/list'
+		}
+	},
+
+	
 	'/event-participate/list': {
 		'GET': {
 			'isGrowth': true,
