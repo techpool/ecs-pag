@@ -614,6 +614,15 @@ module.exports = {
 		}
 	},
 	
+	'/event-participate/admin/metadata/$primaryContentId': {
+		'GET': {
+			'params': ['resource', 'id', 'method']
+		},
+		'PATCH': {
+			'params': ['resource', 'id', 'method']
+		}
+	},
+	
 	'/event-participate/admin/publish': {
 		'POST': {
 			'params': ['resource', 'method']
