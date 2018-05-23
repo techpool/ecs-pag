@@ -1221,12 +1221,33 @@ module.exports = {
 	'/event-participate/admin/publish': {
 		'POST': {
 			'isGrowth': true,
-			'auth': true,
-			'path': '/event-participate/admin/publish',
 			'methods': {
 				'POST': {
 					'path': '/event-participate/admin/publish',
 					'auth': true
+				}
+			}
+		}
+	},
+	
+	
+	'/event-participate/admin/metadata': {
+		'GET': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/admin/metadata/$primaryContentId',
+			'primaryKey': 'eventPratilipiId'
+		},
+		'POST': {
+			'isGrowth': true,
+			'methods': {
+				'PATCH': {
+					'path': '/event-participate/admin/metadata/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'eventPratilipiId',
+					'requiredFields': [
+						{'eventPratilipiId': null}
+					]
 				}
 			}
 		}
