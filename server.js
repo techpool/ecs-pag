@@ -1046,7 +1046,9 @@ app.use( (request, response, next) => {
   var url = request.url;
   var method = request.method;
   var queryParams = request.query;
-  snsUtil.push(accessToken, method, headers, queryParams, url, path, client );
+  var body = request.body;
+  var userId = headers["User-Id"];
+  snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
   next();
 });
 
