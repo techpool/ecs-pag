@@ -21,6 +21,7 @@ const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
 const migrationRouter = require('./src/router/migration');
 const snsUtil = require('./src/util/sns');
+const dynamoDbUtil = require('./src/util/dynamoDb');
 
 const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
@@ -1049,6 +1050,7 @@ app.use( (request, response, next) => {
   var body = request.body;
   var userId = headers["User-Id"];
   snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
+  dynamoDbUtil.put( "hindi",accessToken,userId );
   next();
 });
 
