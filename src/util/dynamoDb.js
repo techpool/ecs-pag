@@ -29,14 +29,14 @@ DynamoDb.prototype.put = function(language, access_token, user_id) {
             "ts": ts,
             "access_token": access_token,
             "version":"1.0",
-            "user_id": user_id
+            "user_id": user_id || 0
         }
     };
 
     console.log("Adding a new item...");
     docClient.put(params, function(err, data) {
         if (err) {
-            console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2));
+            console.error("Unable to add item. Error JSON:", JSON.stringify(err, null, 2),JSON.stringify(params, null, 2));
         } else {
             console.log("Added item:", JSON.stringify(params, null, 2));
         }
