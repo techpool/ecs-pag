@@ -832,7 +832,7 @@ module.exports = {
 		'POST': {
 			'methods': {
 				'POST': {
-					'path': '/web-push/fcmToken',
+					'path': '/devices/web',
 					'auth': false
 				}
 			}
