@@ -10,6 +10,7 @@
   "dependencies": {
     "@google-cloud/bigquery": "^0.9.6",
     "@google-cloud/trace-agent": "1.0.3",
+    "aws-sdk": "~2",
     "bluebird": "^3.5.1",
     "body-parser": "1.17.2",
     "co": "^4.6.0",
@@ -23,6 +24,7 @@
     "lodash": "4.17.4",
     "moment-timezone": "^0.5.14",
     "morgan": "1.8.2",
+    "nano-time": "1.0.0",
     "on-finished": "^2.3.0",
     "on-headers": "^1.0.1",
     "querystring": "^0.2.0",

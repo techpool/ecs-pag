@@ -402,6 +402,12 @@ module.exports = {
 		}
 	},
 
+	'/content/v1.0/contents/clipped': {
+		'GET': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+
 
 	// Notification
 	'/notification/list': {
@@ -451,11 +457,18 @@ module.exports = {
 	},
 
 	// User_Pratilipi
-	'/oasis/v1.0/user_pratilipis/read_history': {
+	'/oasis/v1.0/user_pratilipis/history': {
 		'GET': {
 			'params': [ 'resource', 'method']
 		}
 	},
+	
+	'/user_pratilipi/v2.0/user_pratilipis/history/$primaryContentId': {
+		'DELETE': {
+			'params': [ 'resource', 'method', 'id' ]
+		}
+	},
+	
 	'/user_pratilipi/v2.0/user_pratilipis': {
 		'POST': {
 			'params': [ 'resource', 'method', 'id' ]
@@ -497,6 +510,13 @@ module.exports = {
 	'/oasis/author-interviews/v1.0/list': {
 		'GET': {
 			'params': ['resource','method','language']
+		}
+	},
+
+	// Image-Manager Recommendation
+	'/image_manager/recommendation': {
+		'GET': {
+			'params': ['resource','method']
 		}
 	},
 
@@ -560,6 +580,63 @@ module.exports = {
 	'/template-engine/callback/activities': {
 		'POST': {
 			'params': [ 'resource', 'method' ]
+		}
+	},
+	
+	'/event-participate/metadata': {
+		'POST': {
+			'params': ['resource', 'method']
+		}
+	},
+	
+	'/event-participate/metadata/$primaryContentId': {
+		'PATCH': {
+			'params': ['resource', 'id', 'method']
+		},
+		'GET': {
+			'params': ['resource', 'id', 'method']
+		}
+	},
+	
+	'/event-participate/content/$primaryContentId': {
+		'POST': {
+			'params': ['resource', 'id', 'method']
+		},
+		'GET': {
+			'params': ['resource', 'id', 'method']
+		}
+	},
+	
+	'/event-participate/list': {
+		'GET': {
+			'params': ['resource', 'method']
+		}
+	},
+	
+	'/event-participate/admin/list': {
+		'GET': {
+			'params': ['resource', 'method']
+		}
+	},
+	
+	'/event-participate/admin/metadata/$primaryContentId': {
+		'GET': {
+			'params': ['resource', 'id', 'method']
+		},
+		'PATCH': {
+			'params': ['resource', 'id', 'method']
+		}
+	},
+	
+	'/event-participate/admin/publish': {
+		'POST': {
+			'params': ['resource', 'method']
+		}
+	},
+	
+	'/event-participate/images': {
+		'POST': {
+			'params': ['resource', 'method']
 		}
 	},
 		

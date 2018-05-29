@@ -20,6 +20,8 @@ const mainConfig = require( './src/config/main' );
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
 const migrationRouter = require('./src/router/migration');
+const snsUtil = require('./src/util/sns');
+const dynamoDbUtil = require('./src/util/dynamoDb');
 
 const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
@@ -1026,13 +1028,45 @@ function resolveRegex( request, response, next ) {
 
 const app = express();
 
-// MIGRATION MIGRATION MIGRATION
-app.use( migrationRouter );
-
 app.use( morgan('short') );
 app.use( cookieParser() );
 app.use( bodyParser.json({ limit: "50mb" }) );
 app.use( bodyParser.urlencoded({ extended: true, limit: "50mb" }) );
+
+app.use( (request, response, next) => {
+  var accessToken = null;
+  if( request.headers.accesstoken )
+    accessToken = request.headers.accesstoken;
+  else if( request.cookies[ "access_token" ] )
+    accessToken = request.cookies[ "access_token" ];
+  else if( _getUrlParameter( request.url, "accessToken" ) )
+    accessToken = _getUrlParameter( request.url, "accessToken" );
+  var client = ANDROID_ENDPOINTS.contains( request.headers.host ) ? "ANDROID" : "WEB";
+  var headers = request.headers;
+  var path = request.path;
+  var url = request.url;
+  var method = request.method;
+  var queryParams = request.query;
+  var body = request.body;
+  var _hideSensitiveFields = function( obj ) {
+    if( ! obj ) return {};
+    var copyObj = JSON.parse( JSON.stringify( obj ) );
+    var sensitiveFields = [ "password", "verificationToken", "googleIdToken", "fbUserAccessToken" ];
+    for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
+    return copyObj;
+  };
+  body = _hideSensitiveFields(body);
+  var userId = headers["User-Id"];
+  var language = headers["language"];
+  snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
+  if( process.env.STAGE === "devo" ) {
+    dynamoDbUtil.put( language,accessToken,userId )
+  };
+  next();
+});
+
+// MIGRATION MIGRATION MIGRATION
+app.use( migrationRouter );
 
 //CORS middleware
 app.enable( 'trust proxy' );

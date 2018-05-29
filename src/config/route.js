@@ -192,7 +192,7 @@ module.exports = {
 			'auth': true
 		}
 	},
-
+	
 	// Test on gamma. Remove asap
 	'/recommendation/v1.0/pratilipis/newsletter': {
 		'GET': {
@@ -812,6 +812,19 @@ module.exports = {
 		}
 	},
 
+	'/content/v1.0/contents/clipped': {
+		'GET': {
+			'path': '/content/v1.0/contents/clipped',
+			'auth': true
+		}
+	},
+	
+	'/content/dummy': {
+		'GET': {
+			'path': '/content/dummy',
+			'auth': false
+		}	
+	},
 
 	// Auth
 	'/auth/isAuthorized': {
@@ -820,7 +833,19 @@ module.exports = {
 			'path': '/auth/isAuthorized'
 		}
 	},
-	
+
+	// WebPush
+	'/web-push/fcmToken': { // TODO: Auth true
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/devices/web',
+					'auth': false
+				}
+			}
+		}
+	},
+
 	// Temporary Api until Growth is moved to Mumbai
 	'/auth/accessToken': {
 		'POST': {
@@ -922,10 +947,22 @@ module.exports = {
 	},
 
 	// User_pratilipi
-	'/user_pratilipi/v2.0/user_pratilipis/read_history': {
+	'/user_pratilipi/v2.0/user_pratilipis/history': {
 		'GET': {
-			'path': '/oasis/v1.0/user_pratilipis/read_history',
+			'path': '/oasis/v1.0/user_pratilipis/history',
 			'auth': true,
+		},
+		'POST': {
+			'methods': {
+				'DELETE': {
+					'path': '/user_pratilipi/v2.0/user_pratilipis/history/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'pratilipiId',
+					'requiredFields': [
+						{ 'pratilipiId': null }
+					]
+				}
+			}
 		}
 	},
 	
@@ -1006,6 +1043,14 @@ module.exports = {
 	'/author-interviews/v1.0/list': {
 		'GET': {
 			'path':'/oasis/author-interviews/v1.0/list',
+			'auth': true
+		}
+	},
+
+	// Image-Manager Recommendation
+	'/image_manager/recommendation': {
+		'GET': {
+			'path':'/image_manager/recommendation',
 			'auth': true
 		}
 	},
@@ -1156,6 +1201,126 @@ module.exports = {
 		}
 	},
 
+	
+	// Event Participate
+	'/event-participate/images': {
+		'POST': {
+			'path': '/event-participate/images',
+			'isGrowth': true,
+			'auth': true,
+			'shouldPipe': true,
+			'methods': {
+				'POST': {
+					'primaryKey': 'eventId'
+				}
+			}
+		}
+	},
+	
+	'/event-participate/admin/list': {
+		'GET': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/admin/list'
+		}
+	},
+	
+	'/event-participate/admin/publish': {
+		'POST': {
+			'isGrowth': true,
+			'methods': {
+				'POST': {
+					'path': '/event-participate/admin/publish',
+					'auth': true
+				}
+			}
+		}
+	},
+	
+	
+	'/event-participate/admin/metadata': {
+		'GET': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/admin/metadata/$primaryContentId',
+			'primaryKey': 'eventPratilipiId'
+		},
+		'POST': {
+			'isGrowth': true,
+			'methods': {
+				'PATCH': {
+					'path': '/event-participate/admin/metadata/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'eventPratilipiId',
+					'requiredFields': [
+						{'eventPratilipiId': null}
+					]
+				}
+			}
+		}
+	},
+
+	
+	'/event-participate/list': {
+		'GET': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/list'
+		}
+	},
+
+	'/event-participate/metadata': {
+		'GET': {
+			'isGrowth': true,
+			'auth': true,
+			'path': '/event-participate/metadata/$primaryContentId',
+			'primaryKey': 'eventPratilipiId'
+		},
+		'POST': {
+			'isGrowth': true,
+			'methods': {
+				'PATCH': {
+					'path': '/event-participate/metadata/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'eventPratilipiId',
+					'requiredFields': [
+						{'eventPratilipiId': null}
+					]
+				},
+				'POST': {
+					'path': '/event-participate/metadata',
+					'auth': true
+				}
+			}
+		}
+	},
+	
+	'/event-participate/content': {
+		'POST': {
+			'isGrowth': true,
+			'path': '/event-participate/content/$primaryContentId',
+			'auth': true,
+			'primaryKey': 'eventPratilipiId',
+			'methods': {
+				'POST': {
+					'primaryKey': 'eventPratilipiId',
+					'path': '/event-participate/content/$primaryContentId',
+					'requiredFields': [
+						{'eventPratilipiId': null}
+					],
+					'auth': true
+				}
+			}
+		},
+		'GET': {
+			'isGrowth': true,
+			'path': '/event-participate/content/$primaryContentId',
+			'auth': true,
+			'primaryKey': 'eventPratilipiId'
+		}
+	},
+	
+	
 	// CoverImage
 	'/coverimage-recommendation/cover': {
 		'GET': {
