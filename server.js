@@ -1057,9 +1057,10 @@ app.use( (request, response, next) => {
   };
   body = _hideSensitiveFields(body);
   var userId = headers["User-Id"];
+  var language = headers["language"];
   snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
   if( process.env.STAGE === "devo" ) {
-    dynamoDbUtil.put( "hindi",accessToken,userId )
+    dynamoDbUtil.put( language,accessToken,userId )
   };
   next();
 });
