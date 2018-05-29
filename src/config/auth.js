@@ -58,6 +58,11 @@ module.exports = {
 			'params': [ 'resource', 'method' ]
 		}
 	},
+	'/search/v2.0/search': {
+		'GET': {
+			'params': [ 'resource', 'method' ]
+		}
+	},
 
 
 	// Recommendation

@@ -176,6 +176,13 @@ module.exports = {
 			'auth': false
 		}
 	},
+	
+	'/search/v2.0/search': {
+		'GET': {
+			'path': '/search/v2.0/search',
+			'auth': true
+		}
+	},
 
 
 	// Recommendation
