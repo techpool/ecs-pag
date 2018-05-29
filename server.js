@@ -1048,9 +1048,19 @@ app.use( (request, response, next) => {
   var method = request.method;
   var queryParams = request.query;
   var body = request.body;
+  var _hideSensitiveFields = function( obj ) {
+    if( ! obj ) return {};
+    var copyObj = JSON.parse( JSON.stringify( obj ) );
+    var sensitiveFields = [ "password", "verificationToken", "googleIdToken", "fbUserAccessToken" ];
+    for( var i = 0; i < sensitiveFields.length; i++ ) if( copyObj[sensitiveFields[i]] ) copyObj[sensitiveFields[i]] = "******";
+    return copyObj;
+  };
+  body = _hideSensitiveFields(body);
   var userId = headers["User-Id"];
   snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
-  dynamoDbUtil.put( "hindi",accessToken,userId );
+  if( process.env.STAGE === "devo" ) {
+    dynamoDbUtil.put( "hindi",accessToken,userId )
+  };
   next();
 });
 
