@@ -184,6 +184,13 @@ module.exports = {
 		}
 	},
 
+	'/search/v2.0/trending_search': {
+                'GET': {
+                        'path': '/search/v2.0/trending_search',
+                        'auth': false
+                }    
+        },
+
 
 	// Recommendation
 	'/recommendation/pratilipis': {
