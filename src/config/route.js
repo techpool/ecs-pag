@@ -954,7 +954,7 @@ module.exports = {
 	},
 
 	// User_pratilipi
-	'/user_pratilipi/v2.0/user_pratilipis/history': {
+	'/user_pratilipi/v2.1/user_pratilipis/history': {
 		'GET': {
 			'path': '/oasis/v1.0/user_pratilipis/history',
 			'auth': true,
@@ -962,7 +962,7 @@ module.exports = {
 		'POST': {
 			'methods': {
 				'DELETE': {
-					'path': '/user_pratilipi/v2.0/user_pratilipis/history/$primaryContentId',
+					'path': '/user_pratilipi/v2.1/user_pratilipis/history/$primaryContentId',
 					'auth': true,
 					'primaryKey': 'pratilipiId',
 					'requiredFields': [
@@ -972,7 +972,18 @@ module.exports = {
 			}
 		}
 	},
-	
+
+  '/user_pratilipi/v2.0/user_pratilipis/history/clear': {
+    'POST': {
+      'methods': {
+        'DELETE': {
+          'path': '/user_pratilipi/v2.0/user_pratilipis/history/clear',
+          'auth': true
+        }
+      }
+    }
+  },
+
 	'/user_pratilipi/v2.0/user_pratilipis': {
 		'POST': {
 			'methods': {
@@ -987,6 +998,21 @@ module.exports = {
 			}
 		}
 	},
+
+  '/user_pratilipi/v2.1/user_pratilipis': {
+    'POST': {
+      'methods': {
+        'POST': {
+          'path': '/user_pratilipi/v2.1/user_pratilipis',
+          'auth': true,
+          'primaryKey': 'pratilipiId',
+          'requiredFields': [
+            { 'pratilipiId': null }
+          ]
+        }
+      }
+    }
+  },
 	
 	// Hacks
 	'/temp/library': {
