@@ -973,11 +973,11 @@ module.exports = {
 		}
 	},
 
-  '/user_pratilipi/v2.0/user_pratilipis/history/clear': {
+  '/user_pratilipi/v2.1/user_pratilipis/history/clear': {
     'POST': {
       'methods': {
         'DELETE': {
-          'path': '/user_pratilipi/v2.0/user_pratilipis/history/clear',
+          'path': '/user_pratilipi/v2.1/user_pratilipis/history/clear',
           'auth': true
         }
       }
