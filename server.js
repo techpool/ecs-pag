@@ -20,7 +20,7 @@ const mainConfig = require( './src/config/main' );
 const routeConfig = require( './src/config/route' );
 const authConfig = require( './src/config/auth' );
 const migrationRouter = require('./src/router/migration');
-const snsUtil = require('./src/util/sns');
+// const snsUtil = require('./src/util/sns');
 const dynamoDbUtil = require('./src/util/dynamoDb');
 
 const SUCCESS_MESSAGE = { "message": "OK" };
@@ -1058,7 +1058,7 @@ app.use( (request, response, next) => {
   body = _hideSensitiveFields(body);
   var userId = headers["User-Id"];
   var language = headers["language"];
-  snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
+  // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
   if( process.env.STAGE === "devo" ) {
     dynamoDbUtil.put( language,accessToken,userId )
   };

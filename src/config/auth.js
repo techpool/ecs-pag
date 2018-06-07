@@ -463,11 +463,23 @@ module.exports = {
 		}
 	},
 	
-	'/user_pratilipi/v2.0/user_pratilipis/history/$primaryContentId': {
+	'/user_pratilipi/v2.1/user_pratilipis/history/$primaryContentId': {
 		'DELETE': {
 			'params': [ 'resource', 'method', 'id' ]
 		}
 	},
+
+  '/user_pratilipi/v2.1/user_pratilipis/history/clear': {
+    'DELETE': {
+      'params': [ 'resource', 'method', 'id' ]
+    }
+  },
+
+  '/user_pratilipi/v2.1/user_pratilipis': {
+    'POST': {
+      'params': [ 'resource', 'method', 'id' ]
+    }
+  },
 	
 	'/user_pratilipi/v2.0/user_pratilipis': {
 		'POST': {
