@@ -1089,6 +1089,17 @@ module.exports = {
 		}
 	},
 
+	'/image_manager/link_image_to_pratilipi': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/image_manager/link_image_to_pratilipi',
+					'auth': false
+				}
+			}
+		}
+	},
+
 	// Image-Manager Recommendation
 	'/image_manager/recommendation': {
 		'GET': {
