@@ -44,6 +44,15 @@ module.exports = {
 		}
 	},
 
+	// Image
+	'/image/pratilipi/cover_recommendation': {
+		'GET': {
+			'path': '/image/pratilipi/cover_recommendation',
+			'auth': false,
+			'shouldPipe': true
+		}
+	},
+
 	'/pratilipi/content/image': {
 		'GET': {
 			'path': '/image/pratilipi/content',
