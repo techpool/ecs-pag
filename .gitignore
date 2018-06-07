@@ -2,8 +2,8 @@
 node_modules
 *.pem
 keyfile*.json
-build_run.sh
 ecs-pag.iml
+build_run.sh
 
 
 #
