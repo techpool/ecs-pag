@@ -7,8 +7,8 @@ config.devo = {
     'AUTHENTICATION_ENDPOINT': '/auth/isAuthorized',
     'API_END_POINT': process.env.API_END_POINT,
     'API_END_POINT_GROWTH': process.env.API_END_POINT_GROWTH,
-    'WEB_APPENGINE_ENDPOINT': 'https://devo-pratilipi.appspot.com/api',
-    'ANDROID_APPENGINE_ENDPOINT': 'https://devo-pratilipi.appspot.com/api',
+    'WEB_APPENGINE_ENDPOINT': 'http://devo-pratilipi.appspot.com/api',
+    'ANDROID_APPENGINE_ENDPOINT': 'http://devo-pratilipi.appspot.com/api',
     'BIGQUERY_PROJECT': 'devo-pratilipi',
     'BIGQUERY_DATASET': 'DEVO_LOGS',
     'LOGGING_TABLE':'PRATILIPI_LOGS'
