@@ -167,14 +167,16 @@ module.exports = {
 	// Search
 	'/search': {
 		'GET': {
-			'path': '/search/v2.0/search',
+			// 'path': '/search/v2.0/search',
+			'path': '/search/search',
 			'auth': true
 		}
 	},
 
 	'/search/search': {
 		'GET': {
-			'path': '/search/v2.0/search',
+			// 'path': '/search/v2.0/search',
+			'path': '/search/search',
 			'auth': true
 		}
 	},
@@ -187,16 +189,24 @@ module.exports = {
 		}
 	},
 
-	'/search/test/new': {
+	'/search/test/trending': {
 		'GET': {
 			'path': '/search/trending_search',
 			'auth': false
 		}
 	},
 
+	'/search/test': {
+		'GET': {
+			'path': '/search/search',
+			'auth': true
+		}
+	},
+
 	'/search/v2.0/search': {
 		'GET': {
-			'path': '/search/v2.0/search',
+			// 'path': '/search/v2.0/search',
+			'path': '/search/search',
 			'auth': true
 		}
 	},
