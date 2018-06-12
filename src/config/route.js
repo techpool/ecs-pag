@@ -183,23 +183,9 @@ module.exports = {
 
 	'/search/trending_search': {
 		'GET': {
-			'path': '/search/v2.0/trending_search',
-			// 'path': '/search/trending_search',
-			'auth': false
-		}
-	},
-
-	'/search/test/trending': {
-		'GET': {
+			// 'path': '/search/v2.0/trending_search',
 			'path': '/search/trending_search',
 			'auth': false
-		}
-	},
-
-	'/search/test': {
-		'GET': {
-			'path': '/search/search',
-			'auth': true
 		}
 	},
 
@@ -213,8 +199,8 @@ module.exports = {
 
 	'/search/v2.0/trending_search': {
 			'GET': {
-				'path': '/search/v2.0/trending_search',
-				// 'path': '/search/trending_search',
+				// 'path': '/search/v2.0/trending_search',
+				'path': '/search/trending_search',
 				'auth': false
 			}    
 	},
