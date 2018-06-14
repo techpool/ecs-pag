@@ -1113,7 +1113,7 @@ module.exports = {
 		}
 	},
 
-	'/marketing/v1.0/newsletter/unsubscribe': 
+	'/marketing/v1.0/newsletter/unsubscribe': {
 		'POST': {
 			'methods': {
 				'POST': {
