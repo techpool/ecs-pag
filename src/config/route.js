@@ -167,40 +167,40 @@ module.exports = {
 	// Search
 	'/search': {
 		'GET': {
-			// 'path': '/search/v2.0/search',
-			'path': '/search/search',
+			'path': '/search/v2.0/search',
+			// 'path': '/search/search',
 			'auth': true
 		}
 	},
 
 	'/search/search': {
 		'GET': {
-			// 'path': '/search/v2.0/search',
-			'path': '/search/search',
+			'path': '/search/v2.0/search',
+			// 'path': '/search/search',
 			'auth': true
 		}
 	},
 
 	'/search/trending_search': {
 		'GET': {
-			// 'path': '/search/v2.0/trending_search',
-			'path': '/search/trending_search',
+			'path': '/search/v2.0/trending_search',
+			// 'path': '/search/trending_search',
 			'auth': false
 		}
 	},
 
 	'/search/v2.0/search': {
 		'GET': {
-			// 'path': '/search/v2.0/search',
-			'path': '/search/search',
+			'path': '/search/v2.0/search',
+			// 'path': '/search/search',
 			'auth': true
 		}
 	},
 
 	'/search/v2.0/trending_search': {
 			'GET': {
-				// 'path': '/search/v2.0/trending_search',
-				'path': '/search/trending_search',
+				'path': '/search/v2.0/trending_search',
+				// 'path': '/search/trending_search',
 				'auth': false
 			}    
 	},
