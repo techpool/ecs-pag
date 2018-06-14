@@ -1113,6 +1113,22 @@ module.exports = {
 		}
 	},
 
+	'/marketing/v1.0/newsletter/unsubscribe': 
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/marketing/v1.0/newsletter/unsubscribe',
+					'auth': false,
+					'requiredFields': [
+						{'uuid': null},
+						{'newsletterUnsubscribeReason': null},
+						{'newsletterFrequency': null}
+					]
+				}
+			}
+		}
+	},
+
 	// Growth Experiments
 
 	// SocialConnect
