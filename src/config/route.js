@@ -727,16 +727,16 @@ module.exports = {
 
 	// Content
 	/*
-	'/web/reader/v1.0/readerChapter': {
+	'/web/v1.0/reader/readerChapter': {
 		'GET': {
-			'path': '/web/reader/v1.0/readerChapter',
+			'path': '/web/v1.0/reader/readerChapter',
 			'auth': true
 		}
 	},
 
-	'/web/reader/v1.0/readerBatch': {
+	'/web/v1.0/reader/readerBatch': {
 		'GET': {
-			'path': '/web/reader/v1.0/readerBatch',
+			'path': '/web/v1.0/reader/readerBatch',
 			'auth': true
 		}
 	},
