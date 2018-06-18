@@ -1060,7 +1060,7 @@ app.use( (request, response, next) => {
   var language = headers["language"];
   // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
   if( process.env.STAGE === "devo" || process.env.STAGE === "gamma" ) {
-    dynamoDbUtil.put( language,accessToken,userId )
+    dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
   };
   next();
 });

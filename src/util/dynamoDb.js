@@ -9,7 +9,7 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 
 var table = "sot";
 
-DynamoDb.prototype.put = function(language, access_token, user_id) {
+DynamoDb.prototype.put = function(language, access_token, user_id, client, method, path, url, headers, queryParams) {
     // body...
 
     language = language || "notavailable";
@@ -24,7 +24,8 @@ DynamoDb.prototype.put = function(language, access_token, user_id) {
         "malayalam":"ml",
         "notavailable":"na"
     }
-    let ts = now().slice(-5)
+    // let ts = now().slice(-5);
+    let ts = Date.now();
     var params = {
         TableName:table,
         Item:{
@@ -33,7 +34,13 @@ DynamoDb.prototype.put = function(language, access_token, user_id) {
             "access_token": access_token,
             "version":"1.0",
             "language":language,
-            "user_id": user_id || 0
+            "user_id": user_id || 0,
+            "client": client,
+            "method": method,
+            "path": path,
+            "url": url,
+            "headers": headers,
+            "queryParams": queryParams
         }
     };
 
