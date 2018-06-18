@@ -24,13 +24,13 @@ DynamoDb.prototype.put = function(language, access_token, user_id, client, metho
         "malayalam":"ml",
         "notavailable":"na"
     }
-    // let ts = now().slice(-5);
-    let ts = Date.now();
+    let tsns = now().slice(-5);
+    let tsms = Date.now();
     var params = {
         TableName:table,
         Item:{
-            "sot_id":`${shortlanguage[language.toLowerCase()]}.${access_token}.${user_id||0}.${ts}`,
-            "ts": ts,
+            "sot_id":`${shortlanguage[language.toLowerCase()]}.${access_token}.${user_id||0}.${tsns}`,
+            "ts": tsms,
             "access_token": access_token,
             "version":"1.0",
             "language":language,
