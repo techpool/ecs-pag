@@ -110,12 +110,12 @@ module.exports = {
       'params': [ 'resource', 'id', 'method', 'slug' ]
     }
   },
-	'/web/reader/v1.0/readerChapter': {
+	'/web/v1.0/reader/readerChapter': {
 	    'GET': {
 	      'params': [ 'resource', 'method' ]
 	    }		
 	},
-	'/web/reader/v1.0/readerBatch': {
+	'/web/v1.0/reader/readerBatch': {
 	    'GET': {
 	      'params': [ 'resource', 'method' ]
 	    }		

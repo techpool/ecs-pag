@@ -167,40 +167,40 @@ module.exports = {
 	// Search
 	'/search': {
 		'GET': {
-			// 'path': '/search/v2.0/search',
-			'path': '/search/search',
+			'path': '/search/v2.0/search',
+			// 'path': '/search/search',
 			'auth': true
 		}
 	},
 
 	'/search/search': {
 		'GET': {
-			// 'path': '/search/v2.0/search',
-			'path': '/search/search',
+			'path': '/search/v2.0/search',
+			// 'path': '/search/search',
 			'auth': true
 		}
 	},
 
 	'/search/trending_search': {
 		'GET': {
-			// 'path': '/search/v2.0/trending_search',
-			'path': '/search/trending_search',
+			'path': '/search/v2.0/trending_search',
+			// 'path': '/search/trending_search',
 			'auth': false
 		}
 	},
 
 	'/search/v2.0/search': {
 		'GET': {
-			// 'path': '/search/v2.0/search',
-			'path': '/search/search',
+			'path': '/search/v2.0/search',
+			// 'path': '/search/search',
 			'auth': true
 		}
 	},
 
 	'/search/v2.0/trending_search': {
 			'GET': {
-				// 'path': '/search/v2.0/trending_search',
-				'path': '/search/trending_search',
+				'path': '/search/v2.0/trending_search',
+				// 'path': '/search/trending_search',
 				'auth': false
 			}    
 	},
@@ -727,16 +727,16 @@ module.exports = {
 
 	// Content
 	/*
-	'/web/reader/v1.0/readerChapter': {
+	'/web/v1.0/reader/readerChapter': {
 		'GET': {
-			'path': '/web/reader/v1.0/readerChapter',
+			'path': '/web/v1.0/reader/readerChapter',
 			'auth': true
 		}
 	},
 
-	'/web/reader/v1.0/readerBatch': {
+	'/web/v1.0/reader/readerBatch': {
 		'GET': {
-			'path': '/web/reader/v1.0/readerBatch',
+			'path': '/web/v1.0/reader/readerBatch',
 			'auth': true
 		}
 	},
@@ -1110,6 +1110,22 @@ module.exports = {
 		'GET': {
 			'path':'/image_manager/recommendation',
 			'auth': true
+		}
+	},
+
+	'/marketing/v1.0/newsletter/unsubscribe': {
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/marketing/v1.0/newsletter/unsubscribe',
+					'auth': false,
+					'requiredFields': [
+						{'uuid': null},
+						{'newsletterUnsubscribeReason': null},
+						{'newsletterFrequency': null}
+					]
+				}
+			}
 		}
 	},
 
