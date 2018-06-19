@@ -856,7 +856,19 @@ module.exports = {
 	},
 
 	// WebPush
+	// TODO: Remove asap
 	'/web-push/fcmToken': { // TODO: Auth true
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/devices/web',
+					'auth': false
+				}
+			}
+		}
+	},
+
+	'/devices/web': { // TODO: Auth true
 		'POST': {
 			'methods': {
 				'POST': {
