@@ -717,7 +717,7 @@ function resolveGETBatch( request, response, next ) {
     requestArray[1]["api"] === "/auth/isAuthorized" &&
     requestArray[2]["api"].startsWith( "/social/v2.0/pratilipis/" ) ) || (requestArray.length === 2 &&
     requestArray[0]["api"] === "/author" &&
-    requestArray[1]["api"] === "/follow/v2.0/isFollowing" ) ) {
+    requestArray[1]["api"] === "/follows/v2.0/isFollowing" ) ) {
 
 
     hackyGetBatch(request, response, next, requestArray);
