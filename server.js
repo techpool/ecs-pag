@@ -716,7 +716,7 @@ function resolveGETBatch( request, response, next ) {
     requestArray[0]["api"].startsWith( "/library/v1.0/pratilipis/" ) &&
     requestArray[1]["api"] === "/auth/isAuthorized" &&
     requestArray[2]["api"].startsWith( "/social/v2.0/pratilipis/" ) ) || (requestArray.length === 2 &&
-    requestArray[0]["api"].startsWith( "/author" ) &&
+    requestArray[0]["api"] === "/author" &&
     requestArray[1]["api"] === "/follow/v2.0/isFollowing" ) ) {
 
 
