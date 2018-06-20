@@ -508,6 +508,8 @@ function _getHackyService( method, request, response ) {
     servicePath = "/library";
   } else if( request.path.includes( '/notifications' ) ) {
     servicePath = "/notifications";
+  } else if( request.path.includes( '/marketing' ) ) {
+    servicePath = "/marketing";
   } else if( request.path.includes( '/oasis' ) ) {
         servicePath = "/oasis";
     } else if( request.path.includes( '/init/v2.0/videos' ) || request.path.includes( '/init/v2.0/categories' ) ) {
@@ -520,8 +522,13 @@ function _getHackyService( method, request, response ) {
     servicePath = "/votes";
   }
 
-  var authPromise = _getHackyAuth( servicePath, method, request, response );
+  var authPromise;
 
+  if(servicePath !== "/marketing") {
+    authPromise = _getHackyAuth( servicePath, method, request, response );
+  } else {
+    return _getHttpPromise( serviceUrl, method, headers, body );
+  }
   // Hitting the right load balancer
   var isGrowth = false;
   if( request.path.includes( '/social-connect' ) )
@@ -1071,7 +1078,7 @@ function _resolvePostPatchDelete( methodName, request, response, next ) {
 
 function resolveRegex( request, response, next ) {
 
-  if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library|notifications|oasis|init\/v2\.0\/videos|init\/v2\.0\/categories).*$/.test(request.path) ) {
+  if( /^(\/v\d+.*)?\/(devices|follows|social-connect|social|library|notifications|oasis|init\/v2\.0\/videos|marketing\/v1\.0).*$/.test(request.path) ) {
     var method;
     if( request.body["X-HTTP-Method-Override"] !== undefined ) {
       method = request.method.toUpperCase() === 'POST' ? ( request.body["X-HTTP-Method-Override"] !== undefined ? request.body["X-HTTP-Method-Override"].toUpperCase() : request.method.toUpperCase() ) : request.method.toUpperCase();
