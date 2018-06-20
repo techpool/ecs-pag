@@ -643,28 +643,91 @@ function resolveGET( request, response, next ) {
 }
 
 function hackyGetBatch( request, response, next, requestArray ) {
-  var promiseArray = [];
-      requestArray.forEach( (req) => {
-        promiseArray.push( 
-        _getHttpPromise( `http://localhost:${mainConfig.SERVICE_PORT}` + req.url, "GET", request.headers ) );
-      });
 
-      // Pretty simple with Promise.all, isn't it?
-      Promise.all( promiseArray )
-        .then( (responseArray) => { // responseArray will be in order
-          var returnResponse = {}; // To be sent to client
-          for( var i = 0; i < responseArray.length; i++ )
-            returnResponse[ requestArray[i].name ] = { "status": responseArray[i].statusCode, "response": responseArray[i].body };
-          _sendResponseToClient( request, response, 200, returnResponse );
-          next();
-        }).catch( (error) => {
-          console.log( "ERROR_CAUSE :: Promise.all" );
-          console.log( "ERROR_STATUS :: hackyGetBatch :: " + error.statusCode );
-          console.log( "ERROR_MESSAGE :: hackyGetBatch :: " + error.message );
-          _sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
-          next();
+  if((requestArray.length === 3 &&
+    requestArray[0]["api"] === "/page" &&
+    requestArray[1]["api"] === "/author" &&
+    requestArray[2]["api"] === "/follows/v2.0/isFollowing" )) {
+
+    function recursiveGETHacky( reqArray, responseObject ) {
+
+      if( reqArray.length === 0 )
+        return new Promise( function( resolve, reject ) { resolve( responseObject ) } );
+
+      if( ! responseObject )
+        responseObject = {}; // Initialising
+
+      // Current request Object
+      var req = reqArray[0];
+      var promise;
+      promise = _getHttpPromise( `http://localhost:${mainConfig.SERVICE_PORT}` + req.url, "GET", request.headers );
+
+      function _onResHacky( status, body ) {
+        if( typeof(body) === 'object' ) {
+          // Modifying other requests of the reqArray
+          reqArray.forEach( (aReq) => {
+            for( var key in body ) {
+              var find = "$" + req.name + "." + key;
+              if( aReq.url.indexOf( find ) !== -1 ) {
+                aReq.url = aReq.url.replace( find, body[key] );
+              }
+            }
+          });
+        }
+        responseObject[ req.name ] = { "status": status, "response": body }; // Populating the responseObject
+        reqArray.shift();
+      }
+
+      return promise
+        .then( (res) => {
+          _onResHacky( res.statusCode, res.body );
+          return recursiveGETHacky( reqArray, responseObject );
+        })
+        .catch( (err) => {
+          if( err ) {
+            console.log( "ERROR_STATUS :: resolveGETBatch" + req.url + err.statusCode );
+            console.log( "ERROR_MESSAGE :: resolveGETBatch"+ req.url + err.message );
+            _onResHacky( err.statusCode, err.error );
+            return recursiveGETHacky( reqArray, responseObject );
+          } else {
+            _sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+            next();
+          }
         })
       ;
+    }
+
+    recursiveGETHacky( JSON.parse( JSON.stringify( requestArray ) ) ) // Cloning requestArray
+      .then( (res) => {
+        _sendResponseToClient( request, response, 200, res );
+        next();
+      })
+    ;
+    return;
+  }
+
+  var promiseArray = [];
+  requestArray.forEach( (req) => {
+    promiseArray.push( 
+    _getHttpPromise( `http://localhost:${mainConfig.SERVICE_PORT}` + req.url, "GET", request.headers ) );
+  });
+
+  // Pretty simple with Promise.all, isn't it?
+  Promise.all( promiseArray )
+    .then( (responseArray) => { // responseArray will be in order
+      var returnResponse = {}; // To be sent to client
+      for( var i = 0; i < responseArray.length; i++ )
+        returnResponse[ requestArray[i].name ] = { "status": responseArray[i].statusCode, "response": responseArray[i].body };
+      _sendResponseToClient( request, response, 200, returnResponse );
+      next();
+    }).catch( (error) => {
+      console.log( "ERROR_CAUSE :: Promise.all" );
+      console.log( "ERROR_STATUS :: hackyGetBatch :: " + error.statusCode );
+      console.log( "ERROR_MESSAGE :: hackyGetBatch :: " + error.message );
+      _sendResponseToClient( request, response, 500, UNEXPECTED_SERVER_EXCEPTION );
+      next();
+    })
+  ;
 }
 
 function resolveGETBatch( request, response, next ) {
