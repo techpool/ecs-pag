@@ -524,11 +524,6 @@ function _getHackyService( method, request, response ) {
 
   var authPromise;
 
-  if(servicePath !== "/marketing") {
-    authPromise = _getHackyAuth( servicePath, method, request, response );
-  } else {
-    return _getHttpPromise( serviceUrl, method, headers, body );
-  }
   // Hitting the right load balancer
   var isGrowth = false;
   if( request.path.includes( '/social-connect' ) )
@@ -536,6 +531,13 @@ function _getHackyService( method, request, response ) {
 
   var serviceUrl = ( isGrowth ? ECS_END_POINT_GROWTH : ECS_END_POINT ) + request.url;
 
+
+  if(servicePath !== "/marketing") {
+    authPromise = _getHackyAuth( servicePath, method, request, response );
+  } else {
+    return _getHttpPromise( serviceUrl, method, headers, body );
+  }
+  
   return authPromise
     .then( (userId) => {
       if( userId !== -1 ) headers[ "User-Id" ] = userId;
