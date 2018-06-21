@@ -511,10 +511,11 @@ function _getHackyService( method, request, response ) {
   } else if( request.path.includes( '/marketing' ) ) {
     servicePath = "/marketing";
   } else if( request.path.includes( '/oasis' ) ) {
-        servicePath = "/oasis";
-    } else if( request.path.includes( '/init/v2.0/videos' ) || request.path.includes( '/init/v2.0/categories' ) ) {
-        servicePath = "/init/v2.0/init";
-    }
+    servicePath = "/oasis";
+  } else if( request.path.includes( '/init/v2.0/videos' ) || request.path.includes( '/init/v2.0/categories' ) ) {
+    servicePath = "/init/v2.0/init";
+  }
+  
   if( request.path.includes( '/comments' ) ) {
     servicePath = "/comments";
   }

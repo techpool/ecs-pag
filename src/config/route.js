@@ -1081,6 +1081,28 @@ module.exports = {
 		'GET': {
 			'path':'/oasis/blogs/v1.0',
 			'auth': true
+		},
+		'POST': {
+			'methods': {
+				'DELETE': {
+					'path':'/blogs/v1.0/$primaryContentId',
+					'auth': true,
+					'primaryKey': 'blogPostId',
+                                        'requiredFields': [
+                                                {'blogPostId': null},
+                                                {'state': 'DELETED'}
+                                        ]
+				},
+				'PATCH': {
+                                        'path':'/blogs/v1.0/$primaryContentId',
+                                        'auth': true,
+					'primaryKey':'blogPostId'
+                                },
+				'POST': {
+                                        'path':'/blogs/v1.0',
+                                        'auth': true
+                                }
+			}
 		}
 	},
 
@@ -1096,6 +1118,28 @@ module.exports = {
 		'GET': {
 			'path':'/oasis/author-interviews/v1.0',
 			'auth': true
+		},
+		'POST': {
+			'methods': {
+				'POST': {
+					'path': '/author-interviews/v1.0',
+					'auth': true,
+                                        'primaryKey': 'blogPostId',
+                                        'requiredFields': [
+                                                {'blogPostId': null},
+                                                {'state': 'DELETED'}
+                                        ]
+				},
+				'PATCH': {
+					'path': '/author-interviews/v1.0/$primaryContentId',
+					'auth': true,
+                                        'primaryKey':'blogPostId'
+				},
+				'DELETE': {
+					'path': '/author-interviews/v1.0/$primaryContentId',
+					'auth': true
+				}
+			}
 		}
 	},
 

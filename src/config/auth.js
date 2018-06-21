@@ -507,6 +507,18 @@ module.exports = {
 			'params': ['resource','method', 'slug']
 		}
 	},
+	'/blogs/v1.0/$primaryContentId': {
+		'POST': {
+                        'params': ['resource','method']
+                },  
+                'PATCH': {
+                        'params': ['resource','method']
+                },  
+                'DELETE': {
+                        'params': ['resource','method']
+                }  
+		
+	},
 	'/oasis/blogs/v1.0/list': {
 		'GET': {
 			'params': ['resource','method','language']
@@ -519,6 +531,18 @@ module.exports = {
 			'params': ['resource','method','slug']
 		}
 	},
+	'/author-interviews/v1.0/$primaryContentId': {
+                'POST': {
+                        'params': ['resource','method']
+                },
+                'PATCH': {
+                        'params': ['resource','method']
+                },
+                'DELETE': {
+                        'params': ['resource','method']
+                }  
+    
+        },
 	'/oasis/author-interviews/v1.0/list': {
 		'GET': {
 			'params': ['resource','method','language']
