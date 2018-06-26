@@ -181,7 +181,7 @@ function _forwardToGae( method, request, response, next ) {
   }
 }
 
-function _getHttpPromise( uri, method, headers, body, langauge, userId ) {
+function _getHttpPromise( uri, method, headers, body, language, userId ) {
   var escapeUri = function( uri ) {
     var params = _getUrlParameters( uri );
     for( var key in params ) params[key] = qs.escape( params[key] );
