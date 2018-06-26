@@ -215,7 +215,7 @@ function _getHttpPromise( uri, method, headers, body, langauge, userId ) {
   var url = genericReqOptions.uri;
   var queryParams = _getUrlParameters( uri );
   // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
-  if( method === "PATCH" && genericReqOptions.uri.contains("/author") && (process.env.STAGE === "devo" || process.env.STAGE === "gamma")  ) {
+  if( method === "PATCH" && genericReqOptions.uri.includes("/author") && (process.env.STAGE === "devo" || process.env.STAGE === "gamma")  ) {
     dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
   };
   var startTimestamp = Date.now();
