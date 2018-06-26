@@ -34,7 +34,7 @@ DynamoDb.prototype.put = function(language, access_token, user_id, client, metho
             "access_token": access_token,
             "version":"1.0",
             "language":language,
-            "user_id": user_id || 0,
+            "user_id": Number(user_id) || 0,
             "client": client,
             "method": method,
             "path": path,
