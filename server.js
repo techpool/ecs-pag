@@ -167,7 +167,7 @@ function _forwardToGae( method, request, response, next ) {
       })
     ;
   } else {
-    _getHttpPromise( appengineUrl, method, request.headers, request.body )
+    _getHttpPromise( appengineUrl, method, request.headers, request.body, response.locals["language"], response.locals["headerUserId"] )
       .then( res => {
         _sendResponseToClient( request, response, res.statusCode, res.body );
         next();
@@ -181,7 +181,7 @@ function _forwardToGae( method, request, response, next ) {
   }
 }
 
-function _getHttpPromise( uri, method, headers, body ) {
+function _getHttpPromise( uri, method, headers, body, langauge, userId ) {
   var escapeUri = function( uri ) {
     var params = _getUrlParameters( uri );
     for( var key in params ) params[key] = qs.escape( params[key] );
@@ -214,10 +214,8 @@ function _getHttpPromise( uri, method, headers, body ) {
   var path = genericReqOptions.uri.split("?")[0];
   var url = genericReqOptions.uri;
   var queryParams = _getUrlParameters( uri );
-  var userId = headers["User-Id"];
-  var language = headers["language"];
   // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
-  if( process.env.STAGE === "devo" || process.env.STAGE === "gamma" ) {
+  if( method === "POST" && genericReqOptions.uri.contains("/author") && (process.env.STAGE === "devo" || process.env.STAGE === "gamma")  ) {
     dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
   };
   var startTimestamp = Date.now();
@@ -263,7 +261,7 @@ function _getAuth( resource, method, primaryContentId, params, request, response
 
   var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ], 'Request-Id': response.locals[ "request-id" ] };
 
-  return _getHttpPromise( authEndpoint, "GET", headers )
+  return _getHttpPromise( authEndpoint, "GET", headers, undefined, response.locals["language"], response.locals["headerUserId"] )
     .then( authResponse => {
 
       // If response not got, or 5xx, send server exception
@@ -350,7 +348,7 @@ function _getHackyAuth( resource, method, request, response ) {
 
   var headers = { 'Access-Token': response.locals[ "access-token" ], 'calling-agent': response.locals[ "calling-agent" ], 'Request-Id': response.locals[ "request-id" ] };
 
-  return _getHttpPromise( authEndpoint, "GET", headers )
+  return _getHttpPromise( authEndpoint, "GET", headers, undefined, response.locals["language"], response.locals["headerUserId"] )
     .then( authResponse => {
 
       // If response not got, or 5xx, send server exception
@@ -484,7 +482,7 @@ function _getService( method, requestUrl, request, response ) {
   return authPromise
     .then( (userId) => {
       if( userId !== -1 ) headers[ "User-Id" ] = userId;
-      return _getHttpPromise( serviceUrl, method, headers, body );
+      return _getHttpPromise( serviceUrl, method, headers, body, response.locals["language"], response.locals["headerUserId"] );
     })
   ;
 
@@ -547,13 +545,13 @@ function _getHackyService( method, request, response ) {
   if(servicePath !== "/marketing") {
     authPromise = _getHackyAuth( servicePath, method, request, response );
   } else {
-    return _getHttpPromise( serviceUrl, method, headers, body );
+    return _getHttpPromise( serviceUrl, method, headers, body, response.locals["language"], response.locals["headerUserId"] );
   }
   
   return authPromise
     .then( (userId) => {
       if( userId !== -1 ) headers[ "User-Id" ] = userId;
-      return _getHttpPromise( serviceUrl, method, headers, body );
+      return _getHttpPromise( serviceUrl, method, headers, body, response.locals["language"], response.locals["headerUserId"] );
     })
   ;
 
@@ -681,7 +679,7 @@ function hackyGetBatch( request, response, next, requestArray ) {
       // Current request Object
       var req = reqArray[0];
       var promise;
-      promise = _getHttpPromise( `http://localhost:${mainConfig.SERVICE_PORT}` + req.url, "GET", request.headers );
+      promise = _getHttpPromise( `http://localhost:${mainConfig.SERVICE_PORT}` + req.url, "GET", request.headers, undefined, response.locals["language"], response.locals["headerUserId"] );
 
       function _onResHacky( status, body ) {
         if( typeof(body) === 'object' ) {
@@ -730,7 +728,7 @@ function hackyGetBatch( request, response, next, requestArray ) {
   var promiseArray = [];
   requestArray.forEach( (req) => {
     promiseArray.push( 
-    _getHttpPromise( `http://localhost:${mainConfig.SERVICE_PORT}` + req.url, "GET", request.headers ) );
+    _getHttpPromise( `http://localhost:${mainConfig.SERVICE_PORT}` + req.url, "GET", request.headers, undefined, response.locals["language"], response.locals["headerUserId"] ) );
   });
 
   // Pretty simple with Promise.all, isn't it?
@@ -831,7 +829,7 @@ function resolveGETBatch( request, response, next ) {
     if( pageUri.startsWith( "/user/" ) || pageUri.startsWith( "/author/" ) || ( pageUri.startsWith( "/" ) && pageUri.count( "/" ) == 1 ) || ( pageUri.startsWith( "/event/" ) && pageUri.count( "/" ) == 2 ) ) {
       // get page response and send 500 for next response
       var pageServiceUrl = ECS_END_POINT + routeConfig["/page"]["GET"]["path"] + "?uri=" + pageUri;
-      _getHttpPromise( pageServiceUrl, "GET" )
+      _getHttpPromise( pageServiceUrl, "GET", undefined, undefined, response.locals["language"], response.locals["headerUserId"] )
         .then( (res) => {
           var hackyResponseBody = { "req1": { "status": res.statusCode, "response": res.body }, "req2": { "status": 500, "response": UNEXPECTED_SERVER_EXCEPTION } };
           response.status(200).json( hackyResponseBody );
@@ -875,7 +873,7 @@ function resolveGETBatch( request, response, next ) {
         } else {
           var uri = _getAppengineEndpoint( request ) + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
           var headers = { "ECS-HostName": request.headers.host };
-          promiseArray.push( _getHttpPromise( uri, "GET", headers ) );
+          promiseArray.push( _getHttpPromise( uri, "GET", headers, undefined, response.locals["language"], response.locals["headerUserId"] ) );
         }
       });
 
@@ -921,7 +919,7 @@ function resolveGETBatch( request, response, next ) {
         } else {
           var appengineUrl = _getAppengineEndpoint( request ) + req.url + ( req.url.indexOf( '?' ) === -1 ? '?' : '&' ) + 'accessToken=' + response.locals[ "access-token" ];
           var headers = { "ECS-HostName": request.headers.host };
-          promise = _getHttpPromise( appengineUrl, "GET", headers );
+          promise = _getHttpPromise( appengineUrl, "GET", headers, undefined, response.locals["language"], response.locals["headerUserId"] );
         }
 
         function _onRes( status, body ) {
@@ -1145,8 +1143,10 @@ app.use( (request, response, next) => {
     return copyObj;
   };
   body = _hideSensitiveFields(body);
-  var userId = headers["User-Id"];
+  var userId = headers["user-id"];
   var language = headers["language"];
+  response.locals[ "language" ] = language;
+  response.locals[ "headerUserId" ] = userId;
   // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
   if( process.env.STAGE === "devo" || process.env.STAGE === "gamma" ) {
     // dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
@@ -1260,7 +1260,7 @@ app.post( ['/*'], (request, response, next) => {
 // patch
 app.patch( ['/*'], (request, response, next) => {
   if( request.path.startsWith( '/pratilipis/' ) && request.path.endsWith( '/stats' ) ) {
-    _getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body )
+    _getHttpPromise( ECS_END_POINT + request.path, "PATCH", request.headers, request.body, response.locals["language"], response.locals["headerUserId"] )
       .then( res => {
         response.json( res.body );
         next();
