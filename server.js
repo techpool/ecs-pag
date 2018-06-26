@@ -209,6 +209,17 @@ function _getHttpPromise( uri, method, headers, body ) {
     return copyObj;
   };
   console.log( `HTTP_REQUEST :: ${ method } :: ${ genericReqOptions.uri } :: ${ JSON.stringify( genericReqOptions.headers ) } :: ${ JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) }` );
+  var accessToken = headers["Access-Token"];
+  var client = genericReqOptions.headers["Client-Type"];
+  var path = genericReqOptions.uri.split("?")[0];
+  var url = genericReqOptions.uri;
+  var queryParams = _getUrlParameters( uri );
+  var userId = headers["User-Id"];
+  var language = headers["language"];
+  // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
+  if( process.env.STAGE === "devo" || process.env.STAGE === "gamma" ) {
+    dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
+  };
   var startTimestamp = Date.now();
   return httpPromise( genericReqOptions )
     .then( response => {
@@ -1138,7 +1149,7 @@ app.use( (request, response, next) => {
   var language = headers["language"];
   // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
   if( process.env.STAGE === "devo" || process.env.STAGE === "gamma" ) {
-    dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
+    // dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
   };
   next();
 });
