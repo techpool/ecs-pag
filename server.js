@@ -22,6 +22,7 @@ const authConfig = require( './src/config/auth' );
 const migrationRouter = require('./src/router/migration');
 // const snsUtil = require('./src/util/sns');
 const dynamoDbUtil = require('./src/util/dynamoDb');
+const lambdaUtil = require('./src/util/lambda');
 
 const SUCCESS_MESSAGE = { "message": "OK" };
 const INVALID_ARGUMENT_EXCEPTION = { "message": "Invalid Arguments." };
@@ -215,6 +216,9 @@ function _getHttpPromise( uri, method, headers, body, language, userId ) {
   var url = genericReqOptions.uri;
   var queryParams = _getUrlParameters( uri );
   // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
+  if(genericReqOptions.uri.includes("/devices") && body && body.fcmToken && headers && Number(headers["User-Id"]) !== 0  && (process.env.STAGE === "devo" || process.env.STAGE === "gamma") ) {
+    lambdaUtil.fcmToken(headers["User-Id"],body.fcmToken);
+  }
   if( method === "PATCH" && genericReqOptions.uri.includes("/author") && (process.env.STAGE === "devo" || process.env.STAGE === "gamma")  ) {
     dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
   };
