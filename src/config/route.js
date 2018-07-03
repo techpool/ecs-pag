@@ -958,6 +958,13 @@ module.exports = {
 		}
 	},
 
+	'/init/v2.0/vapsi': {
+		'GET': {
+			'path': '/init/v2.0/vapsi',
+			'auth': false
+		}
+	},
+
 	'/recommendations/v2.0/pratilipis': {
 		'GET': {
 			'path': '/recommendations/v2.0/pratilipis',
