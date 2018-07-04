@@ -219,7 +219,7 @@ function _getHttpPromise( uri, method, headers, body, language, userId ) {
   if(genericReqOptions.uri.includes("/devices") && body && body.fcmToken && headers && Number(headers["User-Id"]) !== 0  && (process.env.STAGE === "devo" || process.env.STAGE === "gamma") ) {
     lambdaUtil.fcmToken(headers["User-Id"],body.fcmToken);
   }
-  if( method === "PATCH" && genericReqOptions.uri.includes("/author") && (process.env.STAGE === "devo" || process.env.STAGE === "gamma")  ) {
+  if( genericReqOptions.uri.includes("/author") && (process.env.STAGE === "devo" || process.env.STAGE === "gamma")  ) {
     dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
   };
   var startTimestamp = Date.now();
