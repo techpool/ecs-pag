@@ -1462,7 +1462,7 @@ module.exports = {
 	'/coverimage-recommendation/cover': {
 		'GET': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'auth': true,
 			'path': '/coverimage-recommendation/cover'
 		}
@@ -1471,7 +1471,7 @@ module.exports = {
 	'/coverimage-recommendation/cover/select': {
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'methods': {
 				'POST': {
 					'path': '/coverimage-recommendation/cover/select',
@@ -1486,7 +1486,7 @@ module.exports = {
 	'/blog-scraper/search': {
 		'GET': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'path': '/blog-scraper/search',
 			'auth': true
 		}
@@ -1495,7 +1495,7 @@ module.exports = {
 	'/blog-scraper': {
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'methods': {
 				'POST': {
 					'path': '/blog-scraper',
@@ -1505,7 +1505,7 @@ module.exports = {
 		},
 		'GET': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'path': '/blog-scraper',
 			'auth': true
 		}
@@ -1514,7 +1514,7 @@ module.exports = {
 	'/blog-scraper/blogpost/list': { // TODO: Remove requiredFields
 		'GET': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'path': '/blog-scraper/$primaryContentId',
 			'auth': true,
 			'primaryKey': 'blogId',
@@ -1527,7 +1527,7 @@ module.exports = {
 	'/blog-scraper/blogpost/scrape': { // TODO: Remove requiredFields
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'methods': {
 				'POST': {
 					'path': '/blog-scraper/$primaryContentId/scrape',
@@ -1544,7 +1544,7 @@ module.exports = {
 	'/blog-scraper/blogpost/publish': { // TODO: Remove requiredFields
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'methods': {
 				'POST': {
 					'path': '/blog-scraper/$primaryContentId/publish',
@@ -1561,7 +1561,7 @@ module.exports = {
 	'/blog-scraper/blogpost/create': { // TODO: Remove requiredFields
 		'POST': {
 			'isGrowth': true,
-			'pipeToSgp': true,
+			'pipeToSgp': false,
 			'methods': {
 				'POST': {
 					'path': '/blog-scraper/$primaryContentId/create',

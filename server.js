@@ -1159,7 +1159,7 @@ app.use( (request, response, next) => {
 });
 
 // MIGRATION MIGRATION MIGRATION
-app.use( migrationRouter );
+// app.use( migrationRouter );
 
 //CORS middleware
 app.enable( 'trust proxy' );
