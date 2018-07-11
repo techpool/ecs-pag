@@ -212,15 +212,16 @@ function _getHttpPromise( uri, method, headers, body, language, userId ) {
   console.log( `HTTP_REQUEST :: ${ method } :: ${ genericReqOptions.uri } :: ${ JSON.stringify( genericReqOptions.headers ) } :: ${ JSON.stringify( _hideSensitiveFields( genericReqOptions.form ) ) }` );
   var accessToken = headers["Access-Token"];
   var client = genericReqOptions.headers["Client-Type"];
+  var clientVersion = genericReqOptions.headers["Client-Version"];
   var path = genericReqOptions.uri.split("?")[0];
   var url = genericReqOptions.uri;
   var queryParams = _getUrlParameters( uri );
   // snsUtil.push(accessToken, method, headers, queryParams, url, path, client, body, userId );
-  if(genericReqOptions.uri.includes("/devices") && body && body.fcmToken && headers && Number(headers["User-Id"]) !== 0  && (process.env.STAGE === "devo" || process.env.STAGE === "gamma") ) {
-    lambdaUtil.fcmToken(headers["User-Id"],body.fcmToken);
+  if(genericReqOptions.uri.includes("/devices") && body && body.fcmToken && body.appVersion && headers && Number(headers["User-Id"]) !== 0  && (process.env.STAGE === "devo" || process.env.STAGE === "gamma") ) {
+    lambdaUtil.fcmToken(headers["User-Id"],body.fcmToken, body.appVersion);
   }
   if( genericReqOptions.uri.includes("/author") && (process.env.STAGE === "devo" || process.env.STAGE === "gamma")  ) {
-    dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams  )
+    dynamoDbUtil.put( language,accessToken,userId, client, method, path, url, headers, queryParams, clientVersion  )
   };
   var startTimestamp = Date.now();
   return httpPromise( genericReqOptions )

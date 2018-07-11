@@ -4,13 +4,13 @@ AWS.config.update({
 });
 const lambda = new AWS.Lambda();
 
-LambdaUtil.prototype.fcmToken = function(userId, fcmToken) {
+LambdaUtil.prototype.fcmToken = function(userId, fcmToken, appVersion) {
 	// body...
 	let params = {
 		FunctionName:'put_fcm_token',
 	    InvocationType:'RequestResponse',
 	    LogType:'Tail',
-	    Payload:JSON.stringify({"user_id":Number(userId), "token": fcmToken})
+	    Payload:JSON.stringify({"user_id":Number(userId), "token": fcmToken, "appVersion": appVersion})
 	}
 
 	lambda.invoke(params, function(err, data) {

@@ -9,7 +9,7 @@ var docClient = new AWS.DynamoDB.DocumentClient();
 
 var table = "sot";
 
-DynamoDb.prototype.put = function(language, access_token, user_id, client, method, path, url, headers, queryParams) {
+DynamoDb.prototype.put = function(language, access_token, user_id, client, method, path, url, headers, queryParams, clientVersion) {
     // body...
 
     language = language || "notavailable";
@@ -36,6 +36,7 @@ DynamoDb.prototype.put = function(language, access_token, user_id, client, metho
             "language":language,
             "user_id": Number(user_id) || 0,
             "client": client,
+            "clientVersion": clientVersion,
             "method": method,
             "path": path,
             "url": url,
