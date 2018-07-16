@@ -1326,6 +1326,14 @@ module.exports = {
 		}
 	},
 	
+	'/template-engine/web/homescreen/widgets': {
+		'GET': {
+			'isGrowth': true,
+			'auth': false,
+			'path': '/template-engine/web/homescreen/widgets'
+		}
+	},
+	
 	'/template-engine/callback/activities': {
 		'POST': {
 			'isGrowth': true,
